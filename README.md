@@ -1,0 +1,2 @@
+# LengendaryOfJourneyWebSite
+这是旅途传说官方网站的源文件内容
