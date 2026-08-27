@@ -1,4 +1,4 @@
-<img width="1080" height="589" alt="image" src="https://github.com/user-attachments/assets/5da725f9-685f-497e-923a-76ba3bdbbe74" /># LengendaryOfJourneyWebSite
+# LengendaryOfJourneyWebSite
 以下是《旅途传说》官网项目多语言介绍文案。网站唯一官方原生语言：全版本内容、结构、功能介绍完全统一，可适配官网展示与开源仓库使用。目前完整收录翻译语种：English（英语）、日本語（日语）、Русский（俄语）、Español（西班牙语）、Deutsch（德语）、Français（法语）。
 
 # Legend of the Journey Official Website
@@ -49,6 +49,33 @@ Packed with risks and thrills, we welcome all players to give it a try :D
 
 <img width="1080" height="589" alt="image" src="https://github.com/user-attachments/assets/6a27d122-d9a6-4cf6-9fcb-2c0f23faeedc" />
 
+<img width="1080" height="589" alt="image" src="https://github.com/user-attachments/assets/3e3c5306-f932-4ec7-b503-9c3bf55f789e" />
+
+<img width="1080" height="589" alt="image" src="https://github.com/user-attachments/assets/3a0d935c-8edf-4852-a5e6-8a3cbc3c915c" />
+
+<img width="1080" height="589" alt="image" src="https://github.com/user-attachments/assets/7d5c754d-fd4a-46c6-a6f0-1d757c77c9b0" />
+
+<img width="1080" height="589" alt="image" src="https://github.com/user-attachments/assets/c4595b04-0139-4b59-9d41-147074861789" />
+
+<img width="1080" height="508" alt="image" src="https://github.com/user-attachments/assets/bb325016-27b5-4c30-86d1-883147cf192e" />
+
+<img width="1080" height="535" alt="image" src="https://github.com/user-attachments/assets/882f7cd6-2b50-4f9f-aa43-f9cc4a58c689" />
+
+<img width="1080" height="589" alt="image" src="https://github.com/user-attachments/assets/e5631a76-10fd-4518-b1fc-388205e880a7" />
+
+<img width="1080" height="497" alt="image" src="https://github.com/user-attachments/assets/14a3ab47-11a5-4c10-9ce8-fb562b78bcb9" />
+
+<img width="1080" height="589" alt="image" src="https://github.com/user-attachments/assets/53cc1693-8810-4a84-8a46-5a78f203b95e" />
+
+<img width="1080" height="589" alt="image" src="https://github.com/user-attachments/assets/46344298-4b78-4abf-a1d0-1441f558cded" />
+
+<img width="1080" height="589" alt="image" src="https://github.com/user-attachments/assets/36569cdc-7318-4a0e-9544-11d22aef0881" />
+
+<img width="1080" height="589" alt="image" src="https://github.com/user-attachments/assets/3147a8aa-b021-4d0f-a2a8-f2b408b7759f" />
+
+<img width="1080" height="589" alt="image" src="https://github.com/user-attachments/assets/01baef14-2bcd-4063-a2b8-fe5bdd0691d0" />
+
+<img width="1080" height="589" alt="image" src="https://github.com/user-attachments/assets/1470c31b-c302-4ecd-81ce-821b75c90afa" />
 
 中文版本：
 
