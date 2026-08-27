@@ -1,4 +1,4 @@
-# LengendaryOfJourneyWebSite
+<img width="1080" height="589" alt="image" src="https://github.com/user-attachments/assets/5da725f9-685f-497e-923a-76ba3bdbbe74" /># LengendaryOfJourneyWebSite
 以下是《旅途传说》官网项目多语言介绍文案。网站唯一官方原生语言：全版本内容、结构、功能介绍完全统一，可适配官网展示与开源仓库使用。目前完整收录翻译语种：English（英语）、日本語（日语）、Русский（俄语）、Español（西班牙语）、Deutsch（德语）、Français（法语）。
 
 # Legend of the Journey Official Website
@@ -46,6 +46,9 @@ This is a full-stack community platform that combines frontend, backend and in-g
 Blending roguelite mechanics with loot-and-extraction gameplay, *Dark Dungeon* allows players to carry dungeon loot back to the Main Town, or pre-select gear from the Main Town to bring into runs. However, death within the dungeon will result in the loss of all carried Wing Coins and inventory items.
 
 Packed with risks and thrills, we welcome all players to give it a try :D
+
+<img width="1080" height="589" alt="image" src="https://github.com/user-attachments/assets/6a27d122-d9a6-4cf6-9fcb-2c0f23faeedc" />
+
 
 中文版本：
 
