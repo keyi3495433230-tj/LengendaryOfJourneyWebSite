@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0b0c0c">
+    <title>无尽遗迹 · 玩法Demo</title>
+    <style>
+        :root {
+            --ink: #0b0c0c;
+            --panel: #141513;
+            --panel-2: #1b1b18;
+            --paper: #e8dfcc;
+            --muted: #918b7e;
+            --gold: #c49a53;
+            --gold-bright: #efd19a;
+            --blood: #9f3a32;
+            --moss: #55705a;
+            --line: rgba(232, 223, 204, .13);
+            --shadow: 0 30px 80px rgba(0, 0, 0, .55);
+        }
+
+        * { box-sizing: border-box; }
+        html { min-width: 320px; background: var(--ink); }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            color: var(--paper);
+            background:
+                radial-gradient(circle at 72% 8%, rgba(196,154,83,.12), transparent 24%),
+                radial-gradient(circle at 10% 90%, rgba(85,112,90,.1), transparent 28%),
+                linear-gradient(135deg, #090a0a, #10110f 52%, #080909);
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        }
+
+        button { color: inherit; font: inherit; }
+        button:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 3px; }
+        .noise {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            opacity: .12;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.38'/%3E%3C/svg%3E");
+        }
+
+        .shell { width: min(1320px, calc(100% - 34px)); margin: auto; padding: 26px 0 42px; }
+        .topbar { min-height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid var(--line); }
+        .brand { display: flex; align-items: center; gap: 14px; }
+        .sigil { width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid rgba(196,154,83,.5); rotate: 45deg; color: var(--gold-bright); background: #11120f; }
+        .sigil span { rotate: -45deg; font: 700 18px Georgia, serif; }
+        .brand small, .eyebrow { color: var(--gold); font: 700 10px Georgia, serif; letter-spacing: .2em; text-transform: uppercase; }
+        .brand strong { display: block; margin-top: 3px; font-family: "STKaiti", "KaiTi", serif; font-size: 21px; letter-spacing: .12em; }
+        .demo-tag { padding: 8px 12px; border: 1px solid var(--line); color: var(--muted); font-size: 11px; letter-spacing: .1em; }
+
+        .layout { display: grid; grid-template-columns: 250px minmax(0, 1fr) 280px; gap: 14px; margin-top: 18px; }
+        .panel { border: 1px solid var(--line); background: linear-gradient(155deg, rgba(27,27,24,.97), rgba(15,16,14,.97)); box-shadow: var(--shadow); }
+        .side { min-height: 720px; padding: 22px; }
+        .side-title { margin-bottom: 22px; color: var(--muted); font-size: 10px; font-weight: 900; letter-spacing: .18em; }
+        .portrait { position: relative; height: 190px; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--line); background: radial-gradient(circle, rgba(196,154,83,.17), transparent 50%), #10110f; }
+        .portrait:before, .portrait:after { content: ""; position: absolute; width: 120px; height: 120px; border: 1px solid rgba(196,154,83,.17); rotate: 45deg; }
+        .portrait:after { width: 72px; height: 72px; border-style: dashed; animation: turn 18s linear infinite; }
+        .wanderer { position: relative; z-index: 1; font-size: 62px; filter: grayscale(1) sepia(.3); }
+        .level-badge { position: absolute; right: 9px; bottom: 9px; z-index: 2; padding: 6px 8px; color: #17130d; background: var(--gold); font: 900 10px Georgia, serif; }
+        .name { margin: 18px 0 4px; font: 900 25px "STKaiti", "KaiTi", serif; }
+        .role { color: var(--gold); font-size: 11px; letter-spacing: .15em; }
+        .meter { margin-top: 20px; }
+        .meter-head { display: flex; justify-content: space-between; margin-bottom: 8px; color: var(--muted); font-size: 11px; }
+        .track { height: 8px; overflow: hidden; background: #090a09; border: 1px solid rgba(255,255,255,.05); }
+        .track i { display: block; width: 100%; height: 100%; background: linear-gradient(90deg, #71302c, #bd5148); transition: width .35s ease; }
+        .stats { margin-top: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .stat { padding: 12px; border: 1px solid var(--line); background: rgba(255,255,255,.025); }
+        .stat span { display: block; color: var(--muted); font-size: 9px; letter-spacing: .12em; }
+        .stat strong { display: block; margin-top: 5px; color: var(--gold-bright); font: 700 19px Georgia, serif; }
+
+        .main { position: relative; min-height: 720px; overflow: hidden; }
+        .main:before { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, transparent 49.8%, rgba(255,255,255,.025) 50%, transparent 50.2%); }
+        .scene-head { position: relative; z-index: 1; display: flex; justify-content: space-between; gap: 18px; padding: 26px 28px 20px; border-bottom: 1px solid var(--line); }
+        .scene-head h1 { margin: 8px 0 0; font: 900 clamp(30px, 4vw, 52px)/1 "STKaiti", "KaiTi", serif; letter-spacing: -.03em; }
+        .floor { align-self: center; color: var(--muted); text-align: right; font-size: 11px; }
+        .floor strong { display: block; color: var(--gold-bright); font: 700 28px Georgia, serif; }
+        .content { position: relative; z-index: 1; padding: 28px; }
+        .story { max-width: 700px; margin: 0; color: #aaa396; font-size: 13px; line-height: 1.9; }
+
+        .routes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 28px; }
+        .route { position: relative; min-height: 280px; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; padding: 22px; border: 1px solid var(--line); color: var(--paper); background: linear-gradient(155deg, rgba(255,255,255,.055), rgba(255,255,255,.014)); cursor: pointer; text-align: left; transition: .22s ease; }
+        .route:hover { translate: 0 -5px; border-color: rgba(196,154,83,.55); background: linear-gradient(155deg, rgba(196,154,83,.11), rgba(255,255,255,.018)); }
+        .route:before { content: attr(data-mark); position: absolute; right: -12px; top: -28px; color: rgba(232,223,204,.045); font: 900 132px Georgia, serif; }
+        .route-index { color: var(--gold); font: 700 10px Georgia, serif; letter-spacing: .17em; }
+        .route-icon { position: relative; z-index: 1; margin: 18px 0; font-size: 40px; }
+        .route h2 { position: relative; z-index: 1; margin: 0 0 8px; font: 900 25px "STKaiti", "KaiTi", serif; }
+        .route p { position: relative; z-index: 1; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
+        .risk { position: relative; z-index: 1; display: flex; align-items: center; gap: 7px; margin-top: 18px; color: #b8aa91; font-size: 10px; }
+        .risk i { width: 7px; height: 7px; border-radius: 50%; background: var(--blood); box-shadow: 0 0 12px rgba(159,58,50,.7); }
+
+        .combat { display: none; margin-top: 24px; }
+        .combat.show { display: block; animation: rise .35s ease both; }
+        .enemy-stage { min-height: 278px; display: grid; grid-template-columns: 1fr 180px; align-items: center; gap: 24px; padding: 28px; border: 1px solid var(--line); background: radial-gradient(circle at 76% 42%, rgba(159,58,50,.16), transparent 24%), #10110f; }
+        .enemy-stage h2 { margin: 8px 0; font: 900 34px "STKaiti", "KaiTi", serif; }
+        .enemy-stage p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.8; }
+        .enemy-art { text-align: center; font-size: 84px; filter: drop-shadow(0 16px 24px rgba(0,0,0,.5)); animation: breathe 2.4s ease-in-out infinite; }
+        .enemy-hp { margin-top: 20px; max-width: 420px; }
+        .enemy-hp .track i { background: linear-gradient(90deg, #5d2522, #a43e37); }
+        .intent { display: inline-flex; margin-top: 16px; padding: 8px 10px; border: 1px solid rgba(159,58,50,.38); color: #dc8e84; background: rgba(159,58,50,.08); font-size: 11px; }
+        .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+        .action, .continue-btn { min-height: 52px; padding: 10px 12px; border: 1px solid var(--line); color: var(--paper); background: #1b1c18; cursor: pointer; font-size: 12px; font-weight: 900; transition: .18s; }
+        .action:hover, .continue-btn:hover { border-color: var(--gold); color: var(--gold-bright); }
+        .action:disabled { cursor: not-allowed; opacity: .38; }
+        .action span { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; font-weight: 400; }
+        .result-actions { display: none; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 12px; }
+        .result-actions.show { display: grid; }
+        .continue-btn.extract { color: #17130d; border-color: var(--gold); background: var(--gold); }
+
+        .supplies { display: grid; gap: 9px; }
+        .supply { display: grid; grid-template-columns: 42px 1fr auto; align-items: center; gap: 11px; padding: 10px; border: 1px solid var(--line); background: rgba(255,255,255,.022); }
+        .supply-icon { width: 42px; height: 42px; display: grid; place-items: center; color: var(--gold-bright); background: #0e0f0d; font-size: 21px; }
+        .supply strong { display: block; font-size: 11px; }
+        .supply small { color: var(--muted); font-size: 9px; }
+        .count { color: var(--gold); font: 700 16px Georgia, serif; }
+        .loot-title { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line); }
+        .loot-list { min-height: 142px; display: grid; align-content: start; gap: 7px; }
+        .loot { display: flex; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px dashed rgba(232,223,204,.09); font-size: 11px; }
+        .loot span:last-child { color: var(--gold); }
+        .empty { color: #69675f; font-size: 11px; line-height: 1.7; }
+        .log { max-height: 190px; overflow: auto; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--line); scrollbar-width: thin; }
+        .log p { margin: 0 0 9px; color: var(--muted); font-size: 10px; line-height: 1.55; }
+        .log b { color: #c4b9a4; }
+
+        .modal { position: fixed; inset: 0; z-index: 20; display: none; place-items: center; padding: 20px; background: rgba(4,5,4,.84); backdrop-filter: blur(10px); }
+        .modal.show { display: grid; animation: fade .25s ease both; }
+        .modal-card { width: min(510px, 100%); padding: 34px; border: 1px solid rgba(196,154,83,.45); background: linear-gradient(145deg, #1d1c18, #10110f); box-shadow: 0 40px 120px rgba(0,0,0,.7); text-align: center; }
+        .modal-card .seal { width: 70px; height: 70px; display: grid; place-items: center; margin: 0 auto 22px; border: 1px solid var(--gold); border-radius: 50%; color: var(--gold-bright); font: 700 27px Georgia, serif; }
+        .modal-card h2 { margin: 0; font: 900 38px "STKaiti", "KaiTi", serif; }
+        .modal-card p { color: var(--muted); font-size: 12px; line-height: 1.8; }
+        .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 24px 0; }
+        .summary div { padding: 13px 8px; border: 1px solid var(--line); }
+        .summary span { display: block; color: var(--muted); font-size: 9px; }
+        .summary strong { display: block; margin-top: 6px; color: var(--gold-bright); font: 700 20px Georgia, serif; }
+        .restart { width: 100%; min-height: 52px; border: 1px solid var(--gold); color: #17130d; background: var(--gold); cursor: pointer; font-weight: 900; }
+
+        @keyframes rise { from { opacity: 0; translate: 0 14px; } }
+        @keyframes fade { from { opacity: 0; } }
+        @keyframes turn { to { rotate: 405deg; } }
+        @keyframes breathe { 50% { translate: 0 -7px; scale: 1.04; } }
+
+        @media (max-width: 1050px) {
+            .layout { grid-template-columns: 220px minmax(0,1fr); }
+            .side.right { grid-column: 1 / -1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+            .right .side-title, .right .loot-title { margin: 0; padding: 0; border: 0; }
+            .right .log { margin: 0; padding: 0; border: 0; max-height: 160px; }
+        }
+
+        @media (max-width: 720px) {
+            .shell { width: min(100% - 20px, 580px); padding-top: 10px; }
+            .topbar { min-height: 60px; }
+            .demo-tag { display: none; }
+            .layout { grid-template-columns: 1fr; }
+            .side.left { min-height: 0; display: grid; grid-template-columns: 92px 1fr; gap: 14px; padding: 14px; }
+            .left .side-title { display: none; }
+            .portrait { height: 112px; }
+            .wanderer { font-size: 43px; }
+            .identity { min-width: 0; }
+            .name { margin-top: 0; font-size: 20px; }
+            .meter { margin-top: 12px; }
+            .stats { grid-column: 1 / -1; margin-top: 0; grid-template-columns: repeat(4,1fr); }
+            .stat { padding: 9px; }
+            .stat strong { font-size: 15px; }
+            .main { min-height: 620px; }
+            .scene-head, .content { padding: 20px; }
+            .routes { grid-template-columns: 1fr; }
+            .route { min-height: 155px; }
+            .route-icon { margin: 9px 0; font-size: 28px; }
+            .enemy-stage { grid-template-columns: 1fr 90px; min-height: 230px; padding: 20px; }
+            .enemy-stage h2 { font-size: 27px; }
+            .enemy-art { font-size: 58px; }
+            .actions { grid-template-columns: 1fr 1fr; }
+            .side.right { grid-column: auto; grid-template-columns: 1fr; min-height: 0; padding: 18px; }
+            .right .loot-title { margin-top: 8px; padding-top: 16px; border-top: 1px solid var(--line); }
+            .right .log { margin-top: 8px; padding-top: 16px; border-top: 1px solid var(--line); }
+        }
+    </style>
+</head>
+<body>
+    <div class="noise"></div>
+    <div class="shell">
+        <header class="topbar">
+            <div class="brand"><div class="sigil"><span>∞</span></div><div><small>Journey Archive No. 07</small><strong>无尽遗迹</strong></div></div>
+            <span class="demo-tag">独立玩法演示 · 不保存数据</span>
+        </header>
+
+        <main class="layout">
+            <aside class="panel side left">
+                <div class="side-title">EXPLORER / 探索者</div>
+                <div class="portrait"><span class="wanderer">♟</span><span class="level-badge">Lv.1</span></div>
+                <div class="identity">
+                    <div class="name">无名旅人</div>
+                    <div class="role">遗迹勘探员</div>
+                    <div class="meter"><div class="meter-head"><span>生命</span><span id="hpText">100 / 100</span></div><div class="track"><i id="hpBar"></i></div></div>
+                </div>
+                <div class="stats">
+                    <div class="stat"><span>攻击</span><strong id="attackStat">14</strong></div>
+                    <div class="stat"><span>防御</span><strong id="defenseStat">2</strong></div>
+                    <div class="stat"><span>深度</span><strong id="depthStat">1</strong></div>
+                    <div class="stat"><span>金币</span><strong id="goldStat">0</strong></div>
+                </div>
+            </aside>
+
+            <section class="panel main">
+                <header class="scene-head">
+                    <div><span class="eyebrow">Choose your descent</span><h1 id="sceneTitle">三扇门之后</h1></div>
+                    <div class="floor"><span>当前层数</span><strong id="floorText">01</strong></div>
+                </header>
+                <div class="content">
+                    <p class="story" id="story">潮湿的石壁间传来齿轮转动声。你只能选择一条路，门后的东西会记住每一次贪心。</p>
+                    <div class="routes" id="routes"></div>
+
+                    <div class="combat" id="combat">
+                        <div class="enemy-stage">
+                            <div>
+                                <span class="eyebrow" id="enemyType">遗迹生物</span>
+                                <h2 id="enemyName">裂纹守卫</h2>
+                                <p id="enemyDesc">它的盔甲里没有身体，只有不断重复的脚步声。</p>
+                                <div class="enemy-hp"><div class="meter-head"><span>敌人生命</span><span id="enemyHpText">46 / 46</span></div><div class="track"><i id="enemyHpBar"></i></div></div>
+                                <span class="intent" id="intent">下一步：挥砍 · 8伤害</span>
+                            </div>
+                            <div class="enemy-art" id="enemyArt">♜</div>
+                        </div>
+                        <div class="actions" id="combatActions">
+                            <button class="action" data-action="attack">攻击<span>造成基础伤害</span></button>
+                            <button class="action" data-action="guard">防御<span>本回合减伤</span></button>
+                            <button class="action" data-action="potion">使用药剂<span id="potionHint">剩余 2</span></button>
+                            <button class="action" data-action="flee">紧急逃离<span>本局战利品减半</span></button>
+                        </div>
+                        <div class="result-actions" id="resultActions">
+                            <button class="continue-btn" id="continueBtn">继续深入</button>
+                            <button class="continue-btn extract" id="extractBtn">带着战利品撤离</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="panel side right">
+                <section>
+                    <div class="side-title">SUPPLIES / 随身物资</div>
+                    <div class="supplies">
+                        <div class="supply"><span class="supply-icon">✚</span><div><strong>旧制药剂</strong><small>恢复 30 生命</small></div><span class="count" id="potionCount">2</span></div>
+                        <div class="supply"><span class="supply-icon">⌘</span><div><strong>黄铜钥匙</strong><small>打开上锁宝箱</small></div><span class="count" id="keyCount">1</span></div>
+                        <div class="supply"><span class="supply-icon">↟</span><div><strong>逃生绳</strong><small>保住部分战利品</small></div><span class="count" id="ropeCount">1</span></div>
+                    </div>
+                </section>
+                <section>
+                    <div class="side-title loot-title">RUN LOOT / 本局战利品</div>
+                    <div class="loot-list" id="lootList"><p class="empty">还没有获得战利品。越深入，奖励越好，但撤离也会更困难。</p></div>
+                </section>
+                <section class="log" id="log"><p><b>遗迹记录：</b>探索开始，入口已经在身后闭合。</p></section>
+            </aside>
+        </main>
+    </div>
+
+    <div class="modal" id="summaryModal">
+        <div class="modal-card">
+            <div class="seal" id="summarySeal">✓</div>
+            <h2 id="summaryTitle">成功撤离</h2>
+            <p id="summaryCopy">你把找到的东西带回了旅途营地。</p>
+            <div class="summary">
+                <div><span>到达层数</span><strong id="summaryFloor">1</strong></div>
+                <div><span>获得金币</span><strong id="summaryGold">0</strong></div>
+                <div><span>带回物品</span><strong id="summaryItems">0</strong></div>
+            </div>
+            <button class="restart" id="restartBtn">再探索一次</button>
+        </div>
+    </div>
+
+    <script>
+        const roomPool = [
+            { type:'combat', icon:'♜', mark:'I', name:'守卫回廊', desc:'铁器拖过地面，门后有东西正在等待。', risk:'危险 · 可能获得装备' },
+            { type:'chest', icon:'◇', mark:'II', name:'封存库房', desc:'空气里有旧木头和金币的味道。', risk:'未知 · 可能需要钥匙' },
+            { type:'shrine', icon:'♢', mark:'III', name:'无名祭坛', desc:'可以献出生命，换取一次永久强化。', risk:'交易 · 代价不可撤回' },
+            { type:'camp', icon:'♨', mark:'IV', name:'熄灭营火', desc:'前人留下了尚未变质的补给。', risk:'安全 · 恢复少量生命' },
+            { type:'combat', icon:'☷', mark:'V', name:'沉降阶梯', desc:'越往下走，呼吸声越不像是自己的。', risk:'高危 · 奖励提高' }
+        ];
+
+        const enemies = [
+            { name:'裂纹守卫', type:'遗迹生物', art:'♜', desc:'它的盔甲里没有身体，只有不断重复的脚步声。', hp:42, attack:8 },
+            { name:'食灯兽', type:'黑暗生物', art:'☗', desc:'它吞食光亮，也吞食试图靠近光亮的人。', hp:36, attack:10 },
+            { name:'失名勘探员', type:'迷失旅人', art:'♟', desc:'头盔下写着与你相同的名字。', hp:50, attack:9 },
+            { name:'铜钟看守', type:'精英守卫', art:'♛', desc:'每一次钟声都会让墙壁向内收紧。', hp:62, attack:12 }
+        ];
+
+        const lootPool = [
+            { name:'褪色齿轮', quality:'白', value:3 },
+            { name:'干燥药草', quality:'白', value:4 },
+            { name:'完整玻璃瓶', quality:'绿', value:9 },
+            { name:'守卫的铜片', quality:'绿', value:12 },
+            { name:'回声短刃', quality:'蓝', value:28 },
+            { name:'黑暗结晶', quality:'蓝', value:32 },
+            { name:'无名者指环', quality:'紫', value:75 }
+        ];
+
+        const state = {
+            hp:100, maxHp:100, attack:14, defense:2, floor:1, gold:0,
+            potions:2, keys:1, ropes:1, loot:[], enemy:null, guarding:false, finished:false
+        };
+
+        const $ = id => document.getElementById(id);
+        const random = list => list[Math.floor(Math.random() * list.length)];
+        const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+        function addLog(message) {
+            const line = document.createElement('p');
+            line.innerHTML = `<b>第 ${state.floor} 层：</b>${message}`;
+            $('log').prepend(line);
+        }
+
+        function updateUi() {
+            $('hpText').textContent = `${state.hp} / ${state.maxHp}`;
+            $('hpBar').style.width = `${clamp(state.hp / state.maxHp * 100, 0, 100)}%`;
+            $('attackStat').textContent = state.attack;
+            $('defenseStat').textContent = state.defense;
+            $('depthStat').textContent = state.floor;
+            $('goldStat').textContent = state.gold;
+            $('floorText').textContent = String(state.floor).padStart(2, '0');
+            $('potionCount').textContent = state.potions;
+            $('keyCount').textContent = state.keys;
+            $('ropeCount').textContent = state.ropes;
+            $('potionHint').textContent = `剩余 ${state.potions}`;
+            renderLoot();
+        }
+
+        function renderLoot() {
+            const box = $('lootList');
+            if (!state.loot.length) {
+                box.innerHTML = '<p class="empty">还没有获得战利品。越深入，奖励越好，但撤离也会更困难。</p>';
+                return;
+            }
+            box.innerHTML = state.loot.slice().reverse().map(item => `<div class="loot"><span>${item.quality} · ${item.name}</span><span>${item.value} 金币</span></div>`).join('');
+        }
+
+        function chooseRooms() {
+            state.enemy = null;
+            state.finished = false;
+            $('combat').classList.remove('show');
+            $('resultActions').classList.remove('show');
+            $('routes').style.display = 'grid';
+            $('sceneTitle').textContent = state.floor % 5 === 0 ? '首领的门扉' : '三扇门之后';
+            $('story').textContent = state.floor % 5 === 0
+                ? '这一层没有回头路。门后的看守者掌握着更深处的钥匙。'
+                : '潮湿的石壁间传来齿轮转动声。你只能选择一条路，门后的东西会记住每一次贪心。';
+
+            const choices = state.floor % 5 === 0
+                ? [roomPool[0], roomPool[4], roomPool[2]]
+                : [...roomPool].sort(() => Math.random() - .5).slice(0, 3);
+            $('routes').innerHTML = choices.map((room, index) => `
+                <button class="route" data-room="${room.type}" data-mark="${room.mark}">
+                    <span class="route-index">ROUTE 0${index + 1}</span>
+                    <span class="route-icon">${room.icon}</span>
+                    <span><h2>${room.name}</h2><p>${room.desc}</p><span class="risk"><i></i>${room.risk}</span></span>
+                </button>`).join('');
+            $('routes').querySelectorAll('.route').forEach(button => button.addEventListener('click', () => enterRoom(button.dataset.room)));
+            updateUi();
+        }
+
+        function enterRoom(type) {
+            $('routes').style.display = 'none';
+            if (type === 'combat') return startCombat();
+            if (type === 'chest') return openChest();
+            if (type === 'shrine') return useShrine();
+            restAtCamp();
+        }
+
+        function startCombat() {
+            const base = random(enemies);
+            const scale = 1 + (state.floor - 1) * .09;
+            state.enemy = { ...base, maxHp:Math.round(base.hp * scale), hp:Math.round(base.hp * scale), attack:Math.round(base.attack * scale), intent:'attack' };
+            if (state.floor % 5 === 0) {
+                state.enemy.name = `深层看守 · ${base.name}`;
+                state.enemy.maxHp = Math.round(state.enemy.maxHp * 1.45);
+                state.enemy.hp = state.enemy.maxHp;
+                state.enemy.attack += 3;
+            }
+            $('combat').classList.add('show');
+            $('sceneTitle').textContent = '遭遇敌人';
+            $('story').textContent = '门在身后落锁。观察它的下一步行动，再决定如何活下来。';
+            renderEnemy();
+            setActionsEnabled(true);
+            addLog(`遭遇了「${state.enemy.name}」。`);
+        }
+
+        function renderEnemy() {
+            const enemy = state.enemy;
+            if (!enemy) return;
+            $('enemyType').textContent = enemy.type;
+            $('enemyName').textContent = enemy.name;
+            $('enemyDesc').textContent = enemy.desc;
+            $('enemyArt').textContent = enemy.art;
+            $('enemyHpText').textContent = `${Math.max(0, enemy.hp)} / ${enemy.maxHp}`;
+            $('enemyHpBar').style.width = `${clamp(enemy.hp / enemy.maxHp * 100, 0, 100)}%`;
+            $('intent').textContent = enemy.intent === 'heavy' ? `下一步：蓄力重击 · ${enemy.attack + 5}伤害` : `下一步：攻击 · ${enemy.attack}伤害`;
+        }
+
+        function setActionsEnabled(enabled) {
+            $('combatActions').querySelectorAll('button').forEach(button => button.disabled = !enabled || (button.dataset.action === 'potion' && state.potions < 1));
+        }
+
+        function combatAction(action) {
+            if (!state.enemy || state.finished) return;
+            if (action === 'attack') {
+                const damage = Math.max(1, state.attack + Math.floor(Math.random() * 7) - 3);
+                state.enemy.hp -= damage;
+                addLog(`你造成了 ${damage} 点伤害。`);
+            } else if (action === 'guard') {
+                state.guarding = true;
+                addLog('你架起武器，准备承受攻击。');
+            } else if (action === 'potion') {
+                if (state.potions < 1) return;
+                state.potions--;
+                const healed = Math.min(30, state.maxHp - state.hp);
+                state.hp += healed;
+                addLog(`使用药剂，恢复了 ${healed} 点生命。`);
+            } else if (action === 'flee') {
+                emergencyExit();
+                return;
+            }
+
+            if (state.enemy.hp <= 0) {
+                winCombat();
+                return;
+            }
+            enemyTurn();
+        }
+
+        function enemyTurn() {
+            const enemy = state.enemy;
+            let damage = enemy.attack + (enemy.intent === 'heavy' ? 5 : 0) - state.defense;
+            if (state.guarding) damage = Math.floor(damage * .35);
+            damage = Math.max(1, damage);
+            state.hp -= damage;
+            addLog(`${enemy.name}造成了 ${damage} 点伤害${state.guarding ? '，大部分被防御抵消' : ''}。`);
+            state.guarding = false;
+            enemy.intent = Math.random() < .28 ? 'heavy' : 'attack';
+            updateUi();
+            renderEnemy();
+            if (state.hp <= 0) endRun(false, false);
+        }
+
+        function winCombat() {
+            state.finished = true;
+            state.enemy.hp = 0;
+            const gold = 5 + Math.floor(Math.random() * 7) + state.floor * 2;
+            state.gold += gold;
+            const item = rollLoot(state.floor % 5 === 0 ? 2 : 0);
+            state.loot.push(item);
+            addLog(`击败敌人，找到 ${gold} 金币和「${item.name}」。`);
+            $('sceneTitle').textContent = '道路暂时安静';
+            $('story').textContent = '你听见更深处传来新的声响。现在撤离可以保住一切，继续则可能找到更珍贵的东西。';
+            $('intent').textContent = '敌人已被击败';
+            $('resultActions').classList.add('show');
+            setActionsEnabled(false);
+            renderEnemy();
+            updateUi();
+        }
+
+        function rollLoot(bonus = 0) {
+            const max = Math.min(lootPool.length - 1, 2 + Math.floor(state.floor / 3) + bonus);
+            return { ...lootPool[Math.floor(Math.random() * (max + 1))] };
+        }
+
+        function openChest() {
+            const locked = Math.random() < .55;
+            if (locked && state.keys > 0) {
+                state.keys--;
+                addLog('消耗一把黄铜钥匙，打开了封存库房。');
+            } else if (locked) {
+                addLog('宝箱已经上锁。你只能从缝隙里摸出少量金币。');
+                state.gold += 3 + state.floor;
+                return finishPeacefulRoom('上锁的宝箱', '没有钥匙时，很多机会只能从指缝中溜走。');
+            }
+            const item = rollLoot(1);
+            const gold = 8 + Math.floor(Math.random() * 10) + state.floor;
+            state.loot.push(item);
+            state.gold += gold;
+            addLog(`从宝箱中获得「${item.name}」和 ${gold} 金币。`);
+            finishPeacefulRoom('封存的收获', '箱底还刻着一句警告：带得越多，越难舍得离开。');
+        }
+
+        function useShrine() {
+            if (state.hp > 35) {
+                state.hp -= 18;
+                if (Math.random() < .5) {
+                    state.attack += 3;
+                    addLog('祭坛取走18点生命，你的攻击永久提高3点。');
+                } else {
+                    state.maxHp += 12;
+                    state.hp += 12;
+                    addLog('祭坛取走鲜血，你的生命上限永久提高12点。');
+                }
+            } else {
+                state.potions++;
+                addLog('祭坛拒绝继续取走生命，吐出了一瓶旧制药剂。');
+            }
+            finishPeacefulRoom('无名者的交易', '石像低下头，仿佛刚刚记住了你的脸。');
+        }
+
+        function restAtCamp() {
+            const healed = Math.min(24, state.maxHp - state.hp);
+            state.hp += healed;
+            if (Math.random() < .35) state.potions++;
+            addLog(`在营火旁恢复 ${healed} 点生命${state.potions > 2 ? '，并找到一瓶药剂' : ''}。`);
+            finishPeacefulRoom('前人的营火', '短暂休息不会让遗迹停止变化，但至少让手不再发抖。');
+        }
+
+        function finishPeacefulRoom(title, copy) {
+            $('combat').classList.add('show');
+            $('sceneTitle').textContent = title;
+            $('story').textContent = copy;
+            $('enemyType').textContent = '房间事件';
+            $('enemyName').textContent = '道路已经开启';
+            $('enemyDesc').textContent = '你可以继续深入，也可以带着目前的收获安全离开。';
+            $('enemyArt').textContent = '◇';
+            $('enemyHpText').textContent = '没有敌人';
+            $('enemyHpBar').style.width = '0%';
+            $('intent').textContent = '当前安全';
+            $('resultActions').classList.add('show');
+            setActionsEnabled(false);
+            updateUi();
+        }
+
+        function nextFloor() {
+            state.floor++;
+            chooseRooms();
+        }
+
+        function emergencyExit() {
+            if (state.ropes > 0) state.ropes--;
+            const lostCount = Math.floor(state.loot.length / 2);
+            if (lostCount > 0) state.loot.splice(0, lostCount);
+            state.gold = Math.floor(state.gold / 2);
+            addLog('你割断逃生绳撤离，只保住了一半战利品。');
+            endRun(true, true);
+        }
+
+        function endRun(success, emergency) {
+            state.finished = true;
+            const modal = $('summaryModal');
+            $('summarySeal').textContent = success ? '✓' : '×';
+            $('summaryTitle').textContent = success ? (emergency ? '紧急撤离' : '成功撤离') : '探索失败';
+            $('summaryCopy').textContent = success
+                ? (emergency ? '你活着回来了，但有些东西永远留在了下面。' : '本局物品在正式版本中会保存到云端背包。')
+                : '你失去了本局尚未撤离的战利品，但可以立即再次进入。';
+            $('summaryFloor').textContent = state.floor;
+            $('summaryGold').textContent = success ? state.gold : 0;
+            $('summaryItems').textContent = success ? state.loot.length : 0;
+            window.setTimeout(() => modal.classList.add('show'), 180);
+        }
+
+        function resetRun() {
+            Object.assign(state, { hp:100, maxHp:100, attack:14, defense:2, floor:1, gold:0, potions:2, keys:1, ropes:1, loot:[], enemy:null, guarding:false, finished:false });
+            $('summaryModal').classList.remove('show');
+            $('log').innerHTML = '<p><b>遗迹记录：</b>新的探索开始，入口再次在身后闭合。</p>';
+            chooseRooms();
+        }
+
+        $('combatActions').addEventListener('click', event => {
+            const button = event.target.closest('[data-action]');
+            if (button) combatAction(button.dataset.action);
+        });
+        $('continueBtn').addEventListener('click', nextFloor);
+        $('extractBtn').addEventListener('click', () => endRun(true, false));
+        $('restartBtn').addEventListener('click', resetRun);
+        chooseRooms();
+    </script>
+</body>
+</html>

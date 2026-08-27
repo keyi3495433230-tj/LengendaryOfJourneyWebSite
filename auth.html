@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#09111a">
+    <title>旅人通行证 · 旅途传说</title>
+<script src="device-ui.js?v=16"></script>
+<link rel="stylesheet" href="device-ui.css?v=16">
+    <style>
+        :root{color-scheme:dark;--bg:#09111a;--paper:#ece4d7;--soft:rgba(236,228,215,.65);--gold:#efc477;--line:rgba(236,228,215,.16);--danger:#ff9f95;--ok:#8fd3a7}
+        *{box-sizing:border-box}body{min-height:100svh;margin:0;color:var(--paper);background:#09111a;font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif}a{color:inherit}.page{min-height:100svh;display:grid;grid-template-columns:minmax(360px,.92fr) minmax(480px,1.08fr)}
+        .story{position:relative;isolation:isolate;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;padding:clamp(26px,4vw,58px);background:#0d1721}.story:before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(180deg,rgba(7,13,20,.18),rgba(7,13,20,.92)),url("assets/journey-hero-960.webp") 59% center/cover}.story:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,transparent,rgba(9,17,26,.38));pointer-events:none}.brand{display:flex;align-items:center;gap:12px;width:fit-content;text-decoration:none;font-weight:900;letter-spacing:.08em}.brand img{width:42px;height:42px;border-radius:11px}.story-copy{max-width:620px;margin:90px 0 30px}.eyebrow{color:var(--gold);font:700 11px Georgia,serif;letter-spacing:.2em}.story h1{margin:20px 0 0;font:900 clamp(50px,7vw,96px)/.98 "STKaiti","KaiTi",serif;letter-spacing:-.06em}.story p{max-width:520px;margin:22px 0 0;color:var(--soft);line-height:1.9}.story-foot{display:flex;gap:22px;color:rgba(236,228,215,.5);font-size:11px}
+        .auth{display:grid;place-items:center;padding:clamp(24px,5vw,70px);background:radial-gradient(circle at 90% 0,rgba(239,196,119,.1),transparent 30%),linear-gradient(145deg,#0c1620,#071018)}.card{width:min(100%,520px)}.tabs{display:flex;gap:5px;width:fit-content;padding:4px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.035)}.tab{min-height:40px;padding:0 18px;border:0;border-radius:999px!important;color:var(--soft);background:transparent;font-weight:800;cursor:pointer}.tab.active{color:#151b21;background:var(--paper)}.panel{display:none;margin-top:42px}.panel.active{display:block}.panel h2{margin:0;font:900 clamp(36px,5vw,58px)/1.05 "STKaiti","KaiTi",serif}.sub{margin:12px 0 32px;color:var(--soft);line-height:1.7}.field{display:grid;gap:9px;margin-top:18px}.field label{font-size:12px;font-weight:800;color:rgba(236,228,215,.78)}.field input{width:100%;height:52px;padding:0 15px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.05);color:var(--paper);font:inherit;transition:.2s}.field input:focus{outline:none;border-color:rgba(239,196,119,.62);box-shadow:0 0 0 4px rgba(239,196,119,.09);background:rgba(255,255,255,.075)}.field input::placeholder{color:rgba(236,228,215,.3)}.password-row{position:relative}.password-row input{padding-right:72px}.show{position:absolute;right:8px;top:8px;height:36px;padding:0 10px;border:0;border-radius:8px!important;color:var(--soft);background:transparent;cursor:pointer}.show:hover{background:rgba(255,255,255,.06)}.rules{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;color:rgba(236,228,215,.48);font-size:11px}.rule:before{content:"○";margin-right:6px}.rule.ok{color:var(--ok)}.rule.ok:before{content:"●"}.submit{width:100%;min-height:54px;margin-top:26px;border:0;border-radius:999px!important;color:#151b21;background:var(--gold);font-weight:900;cursor:pointer;box-shadow:0 18px 40px rgba(239,196,119,.12)}.submit:disabled{opacity:.55;cursor:wait}.message{min-height:22px;margin-top:15px;color:var(--soft);font-size:13px;line-height:1.6}.message.error{color:var(--danger)}.message.success{color:var(--ok)}.meta{display:flex;justify-content:space-between;gap:16px;margin-top:28px;padding-top:22px;border-top:1px solid var(--line);color:rgba(236,228,215,.46);font-size:11px;line-height:1.7}.meta a{color:var(--soft)}.honeypot{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;opacity:0!important}
+        @media(max-width:900px){.page{grid-template-columns:1fr}.story{min-height:330px;padding:24px}.story-copy{margin:72px 0 20px}.story h1{font-size:clamp(46px,13vw,74px)}.story p{display:none}.auth{padding:46px 20px 70px}.panel{margin-top:34px}}
+        @media(max-width:480px){.story{min-height:280px}.story-foot{display:none}.rules{grid-template-columns:1fr}.meta{flex-direction:column}.tab{padding:0 14px}}
+    </style>
+</head>
+<body>
+    <main class="page">
+        <section class="story" aria-label="旅途传说">
+            <a class="brand" href="index.html"><img src="logo.png" alt="" width="42" height="42"><span>旅途传说</span></a>
+            <div class="story-copy"><span class="eyebrow">TRAVELER PASSPORT</span><h1>先成为旅人，<br>再写下传说。</h1><p>账号由服务器会话保护。论坛、背包、抽奖与玩家资料都会绑定到同一张旅人通行证。</p></div>
+            <div class="story-foot"><span>服务器端身份验证</span><span>密码安全哈希</span><span>异常注册拦截</span></div>
+        </section>
+        <section class="auth" aria-label="账号登录与注册">
+            <div class="card">
+                <div class="tabs" role="tablist"><button class="tab active" id="loginTab" role="tab" aria-selected="true" aria-controls="loginPanel">登录</button><button class="tab" id="registerTab" role="tab" aria-selected="false" aria-controls="registerPanel">创建账号</button></div>
+                <form class="panel active" id="loginPanel" autocomplete="on">
+                    <h2>欢迎回来</h2><p class="sub">继续上一次未完的旅途。</p>
+                    <div class="field"><label for="loginName">用户名或邮箱</label><input id="loginName" name="name" maxlength="64" autocomplete="username" placeholder="输入你的用户名" required></div>
+                    <div class="field"><label for="loginPassword">密码</label><div class="password-row"><input id="loginPassword" name="pwd" type="password" maxlength="128" autocomplete="current-password" placeholder="输入密码" required><button class="show" type="button" data-for="loginPassword">显示</button></div></div>
+                    <button class="submit" type="submit">进入玩家世界</button><p class="message" id="loginMessage" role="status" aria-live="polite"></p>
+                    <div class="meta"><span>忘记密码？请联系管理员在管理后台重置。</span><a href="index.html">返回首页 →</a></div>
+                </form>
+                <form class="panel" id="registerPanel" autocomplete="on">
+                    <h2>领取通行证</h2><p class="sub">同一网络与设备最多创建 3 个账号。</p>
+                    <div class="field"><label for="registerName">用户名</label><input id="registerName" name="name" minlength="2" maxlength="24" autocomplete="username" placeholder="2–24 个字符" required></div>
+                    <div class="field"><label for="registerPassword">密码</label><div class="password-row"><input id="registerPassword" name="pwd" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="至少 8 位" required><button class="show" type="button" data-for="registerPassword">显示</button></div></div>
+                    <div class="field"><label for="registerConfirm">确认密码</label><input id="registerConfirm" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="再输入一次" required></div>
+                    <label class="honeypot" for="website">请勿填写</label><input class="honeypot" id="website" name="website" tabindex="-1" autocomplete="off">
+                    <div class="rules"><span class="rule" id="lengthRule">至少 8 位</span><span class="rule" id="mixRule">包含字母和数字</span></div>
+                    <button class="submit" type="submit">创建旅人账号</button><p class="message" id="registerMessage" role="status" aria-live="polite"></p>
+                    <div class="meta"><span>注册即表示你同意遵守社区规则。</span><button class="tab" type="button" id="backToLogin">已有账号，去登录</button></div>
+                </form>
+            </div>
+        </section>
+    </main>
+    <script>
+        const loginTab=document.getElementById('loginTab'),registerTab=document.getElementById('registerTab'),loginPanel=document.getElementById('loginPanel'),registerPanel=document.getElementById('registerPanel');
+        function switchPanel(name){const login=name==='login';loginTab.classList.toggle('active',login);registerTab.classList.toggle('active',!login);loginPanel.classList.toggle('active',login);registerPanel.classList.toggle('active',!login);loginTab.setAttribute('aria-selected',String(login));registerTab.setAttribute('aria-selected',String(!login));(login?document.getElementById('loginName'):document.getElementById('registerName')).focus()}
+        loginTab.onclick=()=>switchPanel('login');registerTab.onclick=()=>switchPanel('register');document.getElementById('backToLogin').onclick=()=>switchPanel('login');
+        document.querySelectorAll('.show').forEach(button=>button.onclick=()=>{const input=document.getElementById(button.dataset.for);const show=input.type==='password';input.type=show?'text':'password';button.textContent=show?'隐藏':'显示'});
+        const pwd=document.getElementById('registerPassword');pwd.addEventListener('input',()=>{document.getElementById('lengthRule').classList.toggle('ok',pwd.value.length>=8);document.getElementById('mixRule').classList.toggle('ok',/[A-Za-z]/.test(pwd.value)&&/\d/.test(pwd.value))});
+        function destination(){const value=new URLSearchParams(location.search).get('next')||'profile.html';return /^[a-zA-Z0-9_-]+\.html(?:\?.*)?$/.test(value)?value:'profile.html'}
+        async function request(body){const response=await fetch('board.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:new URLSearchParams(body)});const text=await response.text();let data;try{data=JSON.parse(text)}catch(error){data={code:text.trim()}}return{response,data}}
+        loginPanel.addEventListener('submit',async event=>{event.preventDefault();const button=loginPanel.querySelector('.submit'),message=document.getElementById('loginMessage');button.disabled=true;message.className='message';message.textContent='正在验证通行证…';try{const{response,data}=await request({action:'login',name:document.getElementById('loginName').value.trim(),pwd:document.getElementById('loginPassword').value});if(response.ok&&(data.code===0||data.code==='ok')){localStorage.setItem('forum_user',JSON.stringify({userId:data.userId,username:data.user}));message.className='message success';message.textContent='验证成功，正在进入…';location.href=destination();return}message.className='message error';message.textContent=data.code==='locked'?'尝试次数过多，请稍后再试。':'用户名或密码不正确。'}catch(error){message.className='message error';message.textContent='暂时无法连接服务器，请稍后重试。'}button.disabled=false});
+        registerPanel.addEventListener('submit',async event=>{event.preventDefault();const button=registerPanel.querySelector('.submit'),message=document.getElementById('registerMessage'),name=document.getElementById('registerName').value.trim(),password=pwd.value,confirm=document.getElementById('registerConfirm').value;if(password!==confirm){message.className='message error';message.textContent='两次输入的密码不一致。';return}if(password.length<8||!/[A-Za-z]/.test(password)||!/\d/.test(password)){message.className='message error';message.textContent='密码至少 8 位，并同时包含字母和数字。';return}button.disabled=true;message.className='message';message.textContent='正在创建旅人档案…';try{const{response,data}=await request({action:'reg',name,pwd:password,website:document.getElementById('website').value});if(response.ok&&(data.code==='ok'||data.code==='created')){message.className='message success';message.textContent='账号创建成功，请登录。';document.getElementById('loginName').value=name;setTimeout(()=>switchPanel('login'),700)}else{const messages={exist:'用户名已经被使用。',registration_limit:'该网络或设备已达到 3 个账号上限。',rate_limited:'操作太频繁，请稍后再试。',invalid_name:'用户名格式不符合要求。',weak_password:'密码强度不足。'};message.className='message error';message.textContent=messages[data.code]||'创建失败，请检查输入后重试。'}}catch(error){message.className='message error';message.textContent='暂时无法连接服务器，请稍后重试。'}button.disabled=false});
+        JourneyAuth.ready.then(data=>{if(data&&data.authenticated){const message=document.getElementById('loginMessage');message.className='message success';message.innerHTML='你已经登录。<a href="profile.html">进入玩家中心 →</a>'}});
+    </script>
+</body>
+</html>

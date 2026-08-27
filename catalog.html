@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="device-ui.js?v=16"></script>
+<link rel="stylesheet" href="device-ui.css?v=16">
+    <title>旅途传说 - 道具图鉴</title>
+    <style>
+        :root { --ink:#fffaf2; --muted:rgba(255,250,242,.62); --line:rgba(255,230,200,.16); --brand:#8f2730; --gold:#c79a55; --panel:rgba(255,246,232,.075); }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { min-height:100vh; padding:22px; color:var(--ink); font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif; background:radial-gradient(circle at 18% 0%,rgba(199,154,85,.18),transparent 30%),radial-gradient(circle at 90% 12%,rgba(143,39,48,.28),transparent 28%),linear-gradient(135deg,#120d0b,#21110f 48%,#090607); }
+        button { font:inherit; }
+        .page { width:min(1280px,100%); margin:auto; }
+        .topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 16px; border:1px solid var(--line); border-radius:8px; background:var(--panel); box-shadow:0 22px 60px rgba(0,0,0,.28); }
+        .brand { display:flex; align-items:center; gap:10px; color:#fff4df; text-decoration:none; }
+        .brand img { width:40px; height:40px; object-fit:contain; border-radius:8px; }
+        .brand h1 { font-size:22px; }
+        .nav,.filters { display:flex; gap:8px; flex-wrap:wrap; }
+        .btn { min-height:38px; padding:0 12px; border:1px solid rgba(199,154,85,.28); border-radius:8px; background:rgba(255,255,255,.06); color:#fff4df; cursor:pointer; }
+        .btn:hover,.btn.active { background:rgba(143,39,48,.55); border-color:rgba(199,154,85,.48); }
+        .intro { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin:18px 0 14px; }
+        .intro h2 { font-size:24px; }
+        .intro p { margin-top:6px; color:var(--muted); font-size:13px; }
+        .catalog-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:10px; }
+        .item-card { min-height:182px; display:grid; align-content:center; justify-items:center; gap:8px; padding:14px; border:1px solid var(--line); border-radius:8px; background:var(--panel); box-shadow:0 12px 30px rgba(0,0,0,.18); content-visibility:auto; contain-intrinsic-size:180px; }
+        .item-card.locked { filter:saturate(.25); opacity:.58; }
+        .icon { font-size:36px; filter:drop-shadow(0 6px 10px rgba(0,0,0,.3)); }
+        .name { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#fff4df; font-weight:800; }
+        .meta,.desc { color:var(--muted); font-size:12px; text-align:center; }
+        .price { color:var(--gold); font-size:13px; font-weight:800; }
+        .quality-common { border-color:rgba(190,196,202,.42); }
+        .quality-uncommon { border-color:rgba(72,199,116,.58); background:rgba(72,199,116,.07); }
+        .quality-rare { border-color:rgba(67,153,255,.65); background:rgba(67,153,255,.08); }
+        .quality-epic { border-color:rgba(184,104,255,.72); background:rgba(184,104,255,.09); }
+        .quality-legendary { border-color:rgba(151,31,43,.94); background:rgba(111,17,27,.30); }
+        .empty { grid-column:1/-1; padding:50px; text-align:center; color:var(--muted); }
+        @media(max-width:760px){body{padding:12px}.topbar,.intro{align-items:flex-start;flex-direction:column}.catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.item-card{min-height:166px}.nav{width:100%}}
+    </style>
+</head>
+<body>
+<main class="page">
+    <header class="topbar">
+        <a class="brand" href="game.html"><img src="logo.png" alt=""><h1>旅途传说 · 道具图鉴</h1></a>
+        <nav class="nav">
+            <button class="btn" onclick="location.href='game.html'">游戏官网</button>
+            <button class="btn" onclick="location.href='bagdemo.html'">我的背包</button>
+            <button class="btn" onclick="location.href='lottery.html'">抽奖</button>
+            <button class="btn" onclick="location.href='market.html'">市场</button>
+            <button class="btn" onclick="location.href='forum.html'">论坛</button>
+        </nav>
+    </header>
+    <section class="intro">
+        <div><h2>旅途收藏</h2><p id="summary">正在读取图鉴...</p></div>
+        <div class="filters" id="filters"></div>
+    </section>
+    <section class="catalog-grid" id="catalogGrid"></section>
+</main>
+<script>
+const qualityNames = { all:'全部', common:'普通', uncommon:'精良', rare:'稀有', epic:'史诗', legendary:'传说', owned:'已拥有' };
+let catalog = [];
+let ownedIds = new Set();
+let currentFilter = 'all';
+
+window.addEventListener('DOMContentLoaded', init);
+
+async function init() {
+    renderFilters();
+    const catalogResponse = await fetch('board.php?action=getItemCatalog', { cache:'no-store' });
+    const catalogData = await catalogResponse.json();
+    catalog = catalogData.items || [];
+    const auth = await JourneyAuth.ready;
+    if (auth && auth.authenticated && auth.user) {
+        try {
+            const inventoryResponse = await fetch(`board.php?action=getInventory&userId=${encodeURIComponent(auth.user.userId)}`, { cache:'no-store' });
+            const inventoryData = await inventoryResponse.json();
+            (inventoryData.inventory || []).filter(Boolean).forEach((item) => ownedIds.add(item.id));
+        } catch (error) {}
+    }
+    renderCatalog();
+}
+
+function renderFilters() {
+    const box = document.getElementById('filters');
+    box.replaceChildren();
+    Object.entries(qualityNames).forEach(([key,label]) => {
+        const button = document.createElement('button');
+        button.className = `btn${currentFilter === key ? ' active' : ''}`;
+        button.textContent = label;
+        button.onclick = () => { currentFilter = key; renderFilters(); renderCatalog(); };
+        box.appendChild(button);
+    });
+}
+
+function renderCatalog() {
+    const rows = catalog.filter((item) => currentFilter === 'all' || (currentFilter === 'owned' ? ownedIds.has(item.id) : item.quality === currentFilter));
+    const grid = document.getElementById('catalogGrid');
+    grid.replaceChildren();
+    const collectedCount = catalog.filter((item) => ownedIds.has(item.id)).length;
+    document.getElementById('summary').textContent = `已收集 ${collectedCount} / ${catalog.length} · 系统回收价随品质提升`;
+    if (!rows.length) {
+        grid.innerHTML = '<div class="empty">该分类暂时没有已收集的物品。</div>';
+        return;
+    }
+    rows.forEach((item) => {
+        const card = document.createElement('article');
+        const owned = ownedIds.has(item.id);
+        card.className = `item-card quality-${item.quality || 'common'}${owned ? '' : ' locked'}`;
+        card.title = item.desc || '';
+        card.innerHTML = `<div class="icon">${item.icon || '?'}</div><div class="name">${item.name || item.id}</div><div class="meta">${item.qualityLabel || item.quality} · ${owned ? '已拥有' : '未获得'}</div><div class="price">系统回收 ${item.systemPrice || 1} 金币</div>`;
+        grid.appendChild(card);
+    });
+}
+</script>
+</body>
+</html>

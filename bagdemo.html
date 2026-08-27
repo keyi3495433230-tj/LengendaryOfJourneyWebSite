@@ -1,0 +1,2029 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="device-ui.js?v=17"></script>
+<link rel="stylesheet" href="device-ui.css?v=16">
+    <title>旅途传说 - 我的背包</title>
+    <style>
+        :root { --ink:#fffaf2; --muted:rgba(255,250,242,.64); --line:rgba(255,230,200,.16); --brand:#8f2730; --gold:#c79a55; --panel:rgba(255,246,232,.075); --shadow:0 22px 60px rgba(0,0,0,.28); }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { min-height: 100vh; padding: 22px; color: var(--ink); font-family: "Microsoft YaHei","PingFang SC",Arial,sans-serif; background:#130e0c; }
+        body::before { display:none; }
+        button,input { font: inherit; }
+        .app { position: relative; z-index: 1; width: min(100%, 1440px); margin: 0 auto; display: grid; grid-template-columns:minmax(560px,1.55fr) minmax(360px,.85fr); gap:16px; align-items:start; }
+        .topbar,.panel,.slot,.toast,.modal { border:1px solid var(--line); border-radius:6px; background:#1d1513; box-shadow:0 10px 28px rgba(0,0,0,.18); }
+        .topbar { grid-column:1/-1; display:flex; justify-content:space-between; gap:14px; align-items:center; padding:16px 18px; }
+        .brand h1 { font-size:24px; color:#fff4df; }
+        .brand p,.panel-title span,.account-card p,.desc { color:var(--muted); }
+        .brand p { margin-top:6px; font-size:13px; }
+        .nav,.actions { display:flex; gap:8px; flex-wrap:wrap; }
+        .btn { min-height:40px; padding:0 14px; border:1px solid rgba(199,154,85,.28); border-radius:8px; background:rgba(255,255,255,.07); color:#fff4df; cursor:pointer; font-weight:800; }
+        .btn.primary { border-color:#9d3540; background:#7d202b; }
+        .btn.danger { border-color:rgba(212,86,74,.38); color:#ffd8d3; }
+        .panel { min-width:0; padding:18px; }
+        .panel-title { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px; }
+        .panel-title h2 { font-size:18px; color:#fff4df; }
+        .account-card { display:grid; grid-template-columns:auto 1fr auto; gap:14px; align-items:center; padding:16px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.045); margin-bottom:16px; }
+        .avatar { width:58px; height:58px; border-radius:6px; display:grid; place-items:center; background:#7d202b; font-size:24px; font-weight:900; }
+        .account-card h3 { color:#fff4df; font-size:18px; }
+        .gold { text-align:right; }
+        .gold b { display:block; color:var(--gold); font-size:22px; }
+        .bag-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:10px; }
+        .warehouse-panel { grid-column:1/-1; }
+        #synthesisPanel { grid-column:1/-1; }
+        .warehouse-head { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:14px; }
+        .warehouse-head h2 { color:#fff4df; font-size:18px; }
+        .warehouse-head p { margin-top:5px; color:var(--muted); font-size:12px; }
+        .warehouse-summary { display:flex; align-items:center; justify-content:flex-end; gap:10px; flex-wrap:wrap; }
+        .warehouse-body { display:block; }
+        .warehouse-panel.collapsed .warehouse-body { display:none; }
+        .warehouse-toggle { min-width:92px; }
+        .warehouse-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:10px; }
+        .warehouse-empty { padding:34px 18px; border:1px dashed rgba(199,154,85,.28); border-radius:8px; color:var(--muted); text-align:center; }
+        .slot { position:relative; aspect-ratio:1; display:grid; place-items:center; background:rgba(255,255,255,.055); cursor:pointer; transition:.16s ease; }
+        .slot:hover,.slot.selected { transform:translateY(-1px); border-color:rgba(199,154,85,.55); background:rgba(255,255,255,.1); }
+        .slot:hover { z-index:30; }
+        .slot.empty { opacity:.58; cursor:default; }
+        .slot.drag-over { outline:2px solid rgba(199,154,85,.72); }
+        .slot-index { position:absolute; top:6px; left:7px; color:rgba(255,250,242,.36); font-size:11px; }
+        .icon { font-size:34px; filter:drop-shadow(0 5px 8px rgba(0,0,0,.25)); }
+        .count { position:absolute; right:5px; top:5px; min-width:22px; padding:1px 6px; border-radius:999px; background:rgba(12,8,8,.72); color:#fff4df; font-size:12px; text-align:center; }
+        .slot-name { position:absolute; left:5px; right:5px; bottom:5px; overflow:hidden; color:rgba(255,250,242,.88); font-size:10px; font-weight:800; line-height:18px; text-align:center; text-overflow:ellipsis; white-space:nowrap; pointer-events:none; text-shadow:0 1px 3px rgba(0,0,0,.85); }
+        .slot .icon { transform:translateY(-5px); }
+        .recycle-check { position:absolute; left:7px; top:7px; z-index:8; width:20px; height:20px; display:grid; place-items:center; border:2px solid rgba(255,250,242,.72); border-radius:5px; background:rgba(12,8,8,.82); color:#fff4df; font-size:13px; font-weight:900; pointer-events:none; }
+        .slot.recycle-selected { outline:2px solid #c79a55; outline-offset:-2px; background:rgba(199,154,85,.16); }
+        .slot.recycle-selected .recycle-check { border-color:#c79a55; background:#8f2730; }
+        .batch-tools { display:flex; align-items:center; justify-content:flex-end; gap:8px; flex-wrap:wrap; }
+        .quality-common .slot-name,.item-title.quality-common,.quality-common .item-tooltip strong { color:#c6cbd1; }
+        .quality-uncommon .slot-name,.item-title.quality-uncommon,.quality-uncommon .item-tooltip strong { color:#5ed184; }
+        .quality-rare .slot-name,.item-title.quality-rare,.quality-rare .item-tooltip strong { color:#63a8ff; }
+        .quality-epic .slot-name,.item-title.quality-epic,.quality-epic .item-tooltip strong { color:#c07aff; }
+        .quality-legendary .slot-name,.quality-system .slot-name,.item-title.quality-legendary,.item-title.quality-system,.quality-legendary .item-tooltip strong,.quality-system .item-tooltip strong { color:#b32635; }
+        .quality-system,.quality-legendary { border-color:rgba(151,31,43,.92); background:rgba(111,17,27,.2); }
+        .quality-common { border-color:rgba(190,196,202,.42); background:rgba(255,255,255,.06); }
+        .quality-uncommon { border-color:rgba(72,199,116,.56); background:rgba(72,199,116,.10); }
+        .quality-rare { border-color:rgba(78,158,255,.62); background:rgba(78,158,255,.11); }
+        .quality-epic { border-color:rgba(184,104,255,.68); background:rgba(184,104,255,.12); }
+        .details { margin-top:12px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.045); }
+        .details-head { display:flex; gap:12px; align-items:center; justify-content:space-between; }
+        .details h3 { color:#fff4df; font-size:18px; }
+        .quality { margin-top:4px; color:var(--gold); font-size:12px; }
+        .desc { line-height:1.7; font-size:13px; margin:12px 0; }
+        .prop,.market-item { display:flex; justify-content:space-between; gap:10px; padding:10px; border-radius:8px; background:rgba(255,255,255,.045); color:var(--muted); font-size:13px; margin-top:8px; }
+        .market-list { display:grid; gap:10px; padding-right:2px; }
+        .market-list.scrollable { max-height:520px; overflow-y:scroll; scrollbar-gutter:stable; }
+        .market-list.card-view { grid-template-columns:repeat(2,minmax(0,1fr)); }
+        .market-list.card-view .market-item { min-height:190px; flex-direction:column; align-items:stretch; }
+        .market-list.card-view .market-price { display:flex; align-items:center; justify-content:space-between; text-align:left; }
+        .market-tools { display:flex; align-items:center; justify-content:flex-end; gap:8px; flex-wrap:wrap; }
+        .market-main b,.market-main .item-name { color:#fff4df; font-weight:900; }
+        .item-name { position:relative; display:inline-flex; align-items:center; gap:6px; cursor:help; }
+        .market-main .item-name.quality-common { color:#c6cbd1; }
+        .market-main .item-name.quality-uncommon { color:#5ed184; }
+        .market-main .item-name.quality-rare { color:#63a8ff; }
+        .market-main .item-name.quality-epic { color:#c07aff; }
+        .market-main .item-name.quality-legendary,.market-main .item-name.quality-system { color:#b32635; }
+        .item-tooltip { position:absolute; left:0; top:calc(100% + 10px); z-index:20; width:260px; padding:12px; border:1px solid rgba(199,154,85,.34); border-radius:8px; background:rgba(20,12,10,.98); box-shadow:0 18px 44px rgba(0,0,0,.42); color:var(--muted); opacity:0; pointer-events:none; transform:translateY(-4px); transition:.14s ease; }
+        .item-name:hover .item-tooltip { opacity:1; transform:translateY(0); }
+        .slot .item-tooltip { left:50%; top:auto; bottom:calc(100% + 10px); transform:translate(-50%,4px); text-align:left; }
+        .slot:hover .item-tooltip { opacity:1; transform:translate(-50%,0); }
+        .item-tooltip strong { display:block; color:#fff4df; margin-bottom:6px; }
+        .item-tooltip p { line-height:1.6; margin:7px 0; }
+        .tooltip-props { display:grid; gap:5px; margin-top:8px; font-size:12px; }
+        .tooltip-props div { display:flex; justify-content:space-between; gap:10px; padding-top:5px; border-top:1px solid rgba(255,230,200,.09); }
+        .market-price { text-align:right; color:var(--gold); font-weight:900; }
+        .seller-line { display:flex; align-items:center; gap:8px; margin-top:6px; color:var(--muted); }
+        .seller-avatar { width:30px; height:30px; border-radius:8px; display:grid; place-items:center; overflow:hidden; background:linear-gradient(135deg,var(--brand),var(--gold)); color:#fff4df; font-weight:900; border:1px solid rgba(199,154,85,.28); }
+        .seller-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+        .seller-name { color:#fff4df; background:transparent; border:none; padding:0; min-height:auto; cursor:pointer; font-weight:900; }
+        .seller-name:hover { text-decoration:underline; }
+        .seller-meta { font-size:12px; color:var(--muted); }
+        .seller-note { margin-top:8px; padding:8px 10px; border-left:2px solid rgba(199,154,85,.48); background:rgba(255,255,255,.035); color:rgba(255,250,242,.72); font-size:12px; line-height:1.55; word-break:break-word; }
+        .social-panel { grid-column:1/-1; padding:0; overflow:hidden; }
+        .social-title { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 20px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.025); }
+        .social-title h2 { color:#fff4df; font-size:18px; }
+        .social-title p { margin-top:5px; color:var(--muted); font-size:12px; }
+        .social-status { color:var(--gold); font-size:12px; font-weight:800; }
+        .world-chat { min-width:0; background:rgba(255,255,255,.018); }
+        .chat-head { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:64px; padding:14px 18px; border-bottom:1px solid var(--line); }
+        .chat-head h3 { color:#fff4df; font-size:16px; }
+        .chat-head span { color:var(--muted); font-size:12px; }
+        .chat-messages { height:420px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; padding:18px; scrollbar-gutter:stable; }
+        .chat-empty { margin:auto; color:var(--muted); font-size:13px; }
+        .chat-message { max-width:86%; align-self:flex-start; display:grid; grid-template-columns:34px minmax(0,1fr); gap:8px; align-items:start; }
+        .chat-message.self { align-self:flex-end; grid-template-columns:minmax(0,1fr) 34px; text-align:right; }
+        .chat-avatar { width:34px; height:34px; display:grid; place-items:center; overflow:hidden; border:1px solid rgba(199,154,85,.28); border-radius:8px; background:linear-gradient(135deg,var(--brand),var(--gold)); color:#fff4df; cursor:pointer; font-weight:900; }
+        .chat-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+        .chat-message.self .chat-avatar { grid-column:2; grid-row:1; }
+        .chat-message-body { min-width:0; }
+        .chat-message.self .chat-message-body { grid-column:1; grid-row:1; }
+        .chat-author { border:0; padding:0; background:none; color:var(--gold); cursor:pointer; font-size:11px; font-weight:800; }
+        .chat-bubble { margin-top:3px; padding:8px 10px; border-radius:8px; background:rgba(255,255,255,.075); color:rgba(255,250,242,.82); line-height:1.55; font-size:13px; text-align:left; word-break:break-word; white-space:pre-wrap; }
+        .chat-message.self .chat-bubble { background:rgba(143,39,48,.42); }
+        .chat-message.system-broadcast { max-width:100%; align-self:stretch; grid-template-columns:34px minmax(0,1fr); }
+        .chat-message.system-broadcast .chat-avatar { cursor:default; background:#7b111e; }
+        .chat-message.system-broadcast .chat-author { cursor:default; color:#ffd58e; }
+        .chat-message.system-broadcast .chat-bubble { border:1px solid rgba(151,31,43,.72); background:rgba(111,17,27,.24); color:#fff4df; font-weight:800; }
+        .chat-time { margin-top:3px; color:rgba(255,250,242,.38); font-size:10px; }
+        .chat-compose { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; padding:14px 18px; border-top:1px solid var(--line); }
+        .chat-compose input { min-width:0; height:44px; padding:0 13px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.07); color:var(--ink); }
+        .chat-layout { display:grid; grid-template-columns:250px minmax(0,1fr) 280px; min-height:550px; }
+        .chat-main { min-width:0; display:grid; grid-template-rows:auto minmax(0,1fr) auto; }
+        .chat-sidebar { min-width:0; padding:16px; background:rgba(0,0,0,.10); overflow-y:auto; }
+        .chat-sidebar.channels { border-right:1px solid var(--line); }
+        .chat-sidebar.management { border-left:1px solid var(--line); }
+        .chat-side-title { margin:12px 0 7px; color:rgba(255,250,242,.48); font-size:11px; font-weight:800; }
+        .chat-side-title:first-child { margin-top:0; }
+        .channel-btn,.friend-row { width:100%; min-height:42px; display:flex; align-items:center; gap:8px; padding:7px 8px; border:1px solid transparent; border-radius:7px; background:transparent; color:rgba(255,250,242,.78); cursor:pointer; text-align:left; }
+        .channel-btn:hover,.channel-btn.active,.friend-row:hover,.friend-row.active { border-color:rgba(199,154,85,.30); background:rgba(255,255,255,.07); }
+        .friend-avatar { width:28px; height:28px; flex:0 0 auto; display:grid; place-items:center; overflow:hidden; border-radius:7px; background:linear-gradient(135deg,var(--brand),var(--gold)); color:#fff; font-weight:900; }
+        .friend-avatar img { width:100%; height:100%; object-fit:cover; }
+        .friend-copy { min-width:0; flex:1; }
+        .friend-copy b,.friend-copy span { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .friend-copy b { color:#fff4df; font-size:12px; }
+        .friend-copy span { margin-top:2px; color:var(--muted); font-size:10px; }
+        .online-dot { width:7px; height:7px; border-radius:50%; background:#5a5a5a; }
+        .online-dot.online { background:#58c67a; box-shadow:0 0 8px rgba(88,198,122,.5); }
+        .request-row { padding:8px; margin-top:6px; border:1px solid var(--line); border-radius:7px; background:rgba(255,255,255,.035); }
+        .request-actions { display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:7px; }
+        .request-actions .btn { min-height:30px; padding:0 6px; font-size:11px; }
+        .friend-add { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:5px; }
+        .friend-add input { min-width:0; height:36px; padding:0 8px; border:1px solid var(--line); border-radius:7px; background:rgba(255,255,255,.07); color:var(--ink); }
+        .friend-add .btn { min-height:36px; padding:0 9px; }
+        .side-empty { padding:8px; color:var(--muted); font-size:11px; text-align:center; }
+        .login-required { text-align:center; padding:54px 18px; }
+        .login-required h2 { color:#fff4df; margin-bottom:10px; }
+        .login-required p { color:var(--muted); margin-bottom:18px; }
+        .toast { position:fixed; left:50%; bottom:24px; z-index:50; padding:12px 16px; color:#fff4df; opacity:0; pointer-events:none; transform:translate(-50%,12px); transition:.2s ease; }
+        .toast.show { opacity:1; transform:translate(-50%,0); }
+        .modal-backdrop { position:fixed; inset:0; z-index:80; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.58); padding:16px; }
+        .modal-backdrop.show { display:flex; }
+        .modal { width:min(100%,360px); padding:18px; background:rgba(24,14,12,.96); }
+        .modal h3 { color:#fff4df; margin-bottom:12px; }
+        .modal input,.modal textarea,.modal select { width:100%; padding:0 12px; border:1px solid var(--line); border-radius:8px; background:#241613; color:var(--ink); margin-bottom:12px; }
+        .modal input,.modal select { height:42px; }
+        .modal textarea { min-height:82px; padding-top:10px; resize:vertical; font:inherit; }
+        .badge { display:none; min-width:20px; margin-left:5px; padding:2px 6px; border-radius:999px; background:#efc477; color:#24120d; font-size:11px; font-weight:900; }
+        .message-list { display:grid; gap:9px; max-height:330px; overflow:auto; margin:12px 0; }
+        .message-row { padding:13px; border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.05); }
+        .message-row.is-read { opacity:.68; background:rgba(255,255,255,.025); }
+        .message-state { display:inline-flex; align-items:center; min-height:22px; margin-left:7px; padding:0 7px; border:1px solid rgba(239,196,119,.28); border-radius:999px; color:#efc477; font-size:10px; font-weight:900; vertical-align:middle; }
+        .message-row.is-read .message-state { border-color:var(--line); color:var(--muted); }
+        .task-hero { padding:18px; border:1px solid rgba(93,209,132,.34); border-radius:8px; background:linear-gradient(135deg,rgba(72,199,116,.13),rgba(255,255,255,.035)); }
+        .task-hero-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+        .task-hero h4 { color:#fff4df; font-size:20px; }
+        .task-status { flex:0 0 auto; padding:5px 9px; border:1px solid rgba(93,209,132,.4); border-radius:4px; color:#7be39d; font-size:11px; font-weight:900; }
+        .task-progress { height:10px; margin:16px 0 8px; overflow:hidden; border-radius:3px; background:rgba(0,0,0,.3); }
+        .task-progress > span { display:block; height:100%; background:linear-gradient(90deg,#48c774,#86e9a6); transition:width .25s ease; }
+        .task-meta { display:flex; justify-content:space-between; gap:12px; color:var(--muted); font-size:12px; }
+        .xp-source-list { display:grid; gap:8px; margin:14px 0; }
+        .xp-source { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px; align-items:center; padding:12px; border:1px solid var(--line); border-radius:7px; background:rgba(255,255,255,.035); }
+        .xp-source b { display:block; color:#fff4df; font-size:13px; }
+        .xp-source p { margin-top:4px; color:var(--muted); font-size:11px; line-height:1.5; }
+        .xp-source-state { color:#c79a55; font-size:12px; font-weight:900; text-align:right; }
+        .xp-source.complete .xp-source-state { color:#7be39d; }
+        .message-row.mail { border-color:rgba(199,154,85,.4); background:rgba(199,154,85,.07); }
+        .message-row b { display:block; color:#fff4df; font-size:14px; line-height:1.5; }
+        .message-row p { margin-top:5px; color:var(--muted); font-size:12px; line-height:1.55; }
+        .message-row .actions { margin-top:11px; display:flex; gap:8px; flex-wrap:wrap; }
+        .message-row .actions .btn { min-height:42px; }
+        .reward-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:9px; }
+        .reward-chip { padding:5px 8px; border:1px solid rgba(199,154,85,.3); border-radius:999px; color:#ffe2a8; background:rgba(199,154,85,.1); font-size:11px; font-weight:800; }
+        .synthesis-workbench { display:grid; grid-template-columns:minmax(230px,.8fr) minmax(330px,1.2fr); gap:16px; margin-top:16px; }
+        .synthesis-bank,.synthesis-machine { min-width:0; padding:16px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.035); }
+        .synthesis-section-title { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
+        .synthesis-section-title b { font-size:13px; }
+        .synthesis-section-title span { color:var(--muted); font-size:11px; }
+        .synthesis-source-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(92px,1fr)); gap:8px; max-height:310px; overflow:auto; padding:2px; }
+        .synthesis-source { position:relative; min-height:92px; display:grid; place-items:center; align-content:center; gap:5px; padding:9px; border:1px solid rgba(230,235,235,.2); border-radius:10px; background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.025)); cursor:grab; text-align:center; }
+        .synthesis-source:hover { border-color:#e8eded; transform:translateY(-1px); }
+        .synthesis-source.depleted { opacity:.38; cursor:not-allowed; }
+        .synthesis-source .material-icon { font-size:27px; }
+        .synthesis-source strong { max-width:100%; overflow:hidden; color:#f1f3f3; font-size:10px; text-overflow:ellipsis; white-space:nowrap; }
+        .synthesis-source small { color:var(--muted); font-size:10px; }
+        .synthesis-slots { display:grid; grid-template-columns:repeat(5,minmax(48px,1fr)); gap:9px; }
+        .synthesis-slot { position:relative; aspect-ratio:1; min-height:58px; display:grid; place-items:center; border:1px dashed rgba(230,235,235,.25); border-radius:10px; color:rgba(230,235,235,.28); background:rgba(0,0,0,.18); transition:.16s; }
+        .synthesis-slot::before { content:attr(data-number); position:absolute; left:6px; top:4px; font:700 9px Georgia,serif; opacity:.48; }
+        .synthesis-slot.drag-over { border-color:#f4f6f6; background:rgba(255,255,255,.1); transform:scale(1.03); }
+        .synthesis-slot.filled { border-style:solid; border-color:rgba(230,235,235,.5); color:#fff; cursor:pointer; }
+        .synthesis-slot .material-icon { font-size:25px; }
+        .synthesis-slot .remove-hint { position:absolute; inset:auto 4px 3px; overflow:hidden; font-size:8px; text-align:center; text-overflow:ellipsis; white-space:nowrap; }
+        .synthesis-arrow { margin:14px 0 10px; color:var(--muted); text-align:center; font-size:12px; }
+        .synthesis-output { display:flex; align-items:center; justify-content:center; gap:10px; min-height:58px; border:1px solid rgba(94,209,132,.38); border-radius:10px; color:#8ee0aa; background:rgba(94,209,132,.08); font-weight:900; }
+        .synthesis-output span { font-size:26px; }
+        .synthesis-summary.ready { color:#8ee0aa; }
+        @media(max-width:760px){.synthesis-workbench{grid-template-columns:1fr}.synthesis-source-grid{max-height:190px}.synthesis-bank,.synthesis-machine{padding:12px}.synthesis-slots{gap:6px}.synthesis-slot{min-height:48px}}
+        .modal.wide { width:min(100%,620px); max-height:calc(100dvh - 24px); overflow-y:auto; }
+        .transfer-form { display:grid; grid-template-columns:minmax(0,1fr) 120px auto; gap:8px; }
+        .transfer-form input,.transfer-form select { margin:0; }
+        @media (max-width: 1120px) { body{padding:14px}.app{grid-template-columns:1fr}.market-list.card-view{grid-template-columns:repeat(2,minmax(0,1fr))}.chat-layout{grid-template-columns:220px minmax(0,1fr)}.chat-sidebar.management{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:0 18px;border-left:0;border-top:1px solid var(--line)} }
+        @media (max-width: 680px) { body{padding:10px}.topbar{align-items:flex-start;flex-direction:column;display:flex;padding:14px}.panel{padding:13px}.social-panel{padding:0}.social-title{align-items:flex-start;padding:15px;flex-direction:column}.nav{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.nav .btn{width:100%;padding:0 8px}.account-card{grid-template-columns:auto minmax(0,1fr);padding:12px}.account-card .avatar{grid-row:1 / span 2}.gold{grid-column:2;text-align:left;display:flex;align-items:baseline;gap:7px}.gold b{font-size:19px}.bag-grid,.warehouse-grid{grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.warehouse-head{align-items:flex-start;flex-direction:column}.warehouse-summary{width:100%;justify-content:flex-start}.slot-index{top:3px;left:4px;font-size:9px}.icon{font-size:23px}.details-head{align-items:flex-start;flex-direction:column}.details-head .actions{width:100%}.details-head .btn{flex:1;padding:0 8px}.market-list.card-view{grid-template-columns:1fr}.chat-layout{display:flex;flex-direction:column}.chat-main{order:2}.chat-sidebar.channels{order:1;border-right:0;border-bottom:1px solid var(--line)}.chat-sidebar.management{order:3;display:block;border-top:1px solid var(--line)}.chat-messages{height:380px;padding:13px}.chat-message{max-width:94%}.chat-compose{grid-template-columns:1fr;padding:12px}.chat-compose .btn{width:100%}.transfer-form{grid-template-columns:1fr}.transfer-form .btn{width:100%}.message-row .actions{display:grid;grid-template-columns:1fr 1fr}.message-row .actions .btn:only-child{grid-column:1/-1;width:100%} }
+    </style>
+</head>
+<body>
+<main class="app">
+    <header class="topbar">
+        <div class="brand">
+            <h1>旅途传说 · 我的背包</h1>
+            <p>账号背包、金币、每日签到和玩家市场。右键背包道具可以上架出售。</p>
+        </div>
+        <div class="nav">
+            <button class="btn" onclick="location.href='game.html'">游戏官网</button>
+            <button class="btn" onclick="location.href='forum.html'">论坛</button>
+            <button class="btn" onclick="location.href='profile.html'">个人信息</button>
+            <button class="btn" onclick="location.href='leaderboard.html'">排行榜</button>
+            <button class="btn" onclick="location.href='lottery.html'">抽奖</button>
+            <button class="btn" onclick="location.href='bottle.html'">漂流瓶</button>
+            <button class="btn" onclick="location.href='catalog.html'">图鉴</button>
+            <button class="btn primary" onclick="location.href='dungeon-wasd-demo.html'">进入地牢</button>
+            <button class="btn" type="button" onclick="openTaskModal()">任务<span id="taskBadge" class="badge">!</span></button>
+            <button class="btn" type="button" onclick="openMessagesModal()">我的消息<span id="messageBadge" class="badge">0</span></button>
+            <button class="btn" type="button" onclick="openSynthesisModal()">合成台</button>
+            <button class="btn primary" onclick="dailyCheckin()">每日签到</button>
+        </div>
+    </header>
+
+    <section id="loginRequired" class="panel login-required" style="display:none;">
+        <h2>请先登录</h2>
+        <p>背包、金币和市场都绑定你的注册账号。</p>
+        <button class="btn primary" onclick="location.href='game.html'">去登录</button>
+    </section>
+
+    <section id="synthesisPanel" class="panel" style="display:none;">
+        <div class="panel-title"><h2>白色物品兑换台</h2><button class="btn primary" type="button" onclick="openSynthesisModal()">打开兑换界面</button></div>
+        <p class="desc">将背包中的 10 件白色品质物品拖入兑换台，必定兑换 1 件随机绿色品质物品。</p>
+    </section>
+
+    <section id="bagPanel" class="panel" style="display:none;">
+        <div class="account-card">
+            <div class="avatar" id="avatar">旅</div>
+            <div>
+                <h3 id="accountName">玩家</h3>
+                <p id="accountMeta">账号背包 · 21 格</p>
+            </div>
+            <div class="gold"><b id="goldText">0</b><span>金币</span></div>
+        </div>
+        <div class="panel-title">
+            <h2>账号背包</h2>
+            <div class="batch-tools">
+                <span id="bagCount">0 / 21</span>
+                <button id="batchRecycleConfirm" class="btn primary" type="button" style="display:none;" onclick="confirmBatchRecycle()">回收选中</button>
+                <button id="batchRecycleToggle" class="btn" type="button" onclick="toggleBatchRecycle()">一键回收</button>
+            </div>
+        </div>
+        <div class="bag-grid" id="bagGrid"></div>
+        <div class="details" id="details"></div>
+    </section>
+
+    <section id="marketPanel" class="panel" style="display:none;">
+        <div class="panel-title">
+            <h2>玩家市场</h2>
+            <div class="market-tools">
+                <button class="btn" id="marketViewBtn" type="button" onclick="toggleMarketView()">卡片展示</button>
+                <button class="btn primary" type="button" onclick="location.href='market.html'">进入市场</button>
+            </div>
+        </div>
+        <div class="market-list" id="marketList"></div>
+    </section>
+
+    <section id="warehousePanel" class="panel warehouse-panel" style="display:none;">
+        <div class="warehouse-head">
+            <div>
+                <h2>账号仓库</h2>
+                <p>每次扩容增加 21 格。点击仓库中的物品可将一件取回背包。</p>
+            </div>
+            <div class="warehouse-summary">
+                <span id="warehouseCount" class="seller-meta">0 / 0</span>
+                <button id="warehouseUpgradeBtn" class="btn primary" type="button" onclick="buyWarehouseExpansion()">解锁仓库 · 100 金币</button>
+                <button id="warehouseToggleBtn" class="btn warehouse-toggle" type="button" onclick="toggleWarehouse()">收起仓库</button>
+            </div>
+        </div>
+        <div class="warehouse-body">
+            <div id="warehouseGrid" class="warehouse-grid"></div>
+            <div class="details" id="warehouseDetails"></div>
+        </div>
+    </section>
+
+    <section id="socialPanel" class="panel social-panel" style="display:none;">
+        <div class="social-title">
+            <div>
+                <h2>玩家通信中心</h2>
+                <p>在世界频道交流，或选择好友开始私聊。</p>
+            </div>
+            <span class="social-status">世界频道 · 好友私聊</span>
+        </div>
+        <section class="world-chat">
+            <div class="chat-layout">
+                <aside class="chat-sidebar channels">
+                    <div class="chat-side-title">频道</div>
+                    <button class="channel-btn active" id="worldChannelBtn" type="button" onclick="selectWorldChannel()">世界频道</button>
+                    <div class="chat-side-title">好友列表</div>
+                    <div id="bagFriendList"><div class="side-empty">正在读取...</div></div>
+                </aside>
+                <div class="chat-main">
+                    <div class="chat-head"><h3 id="chatChannelTitle">世界频道</h3><span id="chatChannelMeta">所有玩家都可以看到</span></div>
+                    <div class="chat-messages" id="worldChatMessages"><div class="chat-empty">正在读取消息...</div></div>
+                    <div class="chat-compose">
+                        <input id="worldChatInput" maxlength="300" placeholder="和大家聊聊..." onkeydown="if(event.key==='Enter') sendBagChatMessage()">
+                        <button class="btn primary" type="button" onclick="sendBagChatMessage()">发送</button>
+                    </div>
+                </div>
+                <aside class="chat-sidebar management">
+                    <div class="chat-side-title">好友申请</div>
+                    <div id="bagFriendRequests"><div class="side-empty">暂无申请</div></div>
+                    <div class="chat-side-title">添加好友</div>
+                    <div class="friend-add">
+                        <input id="bagFriendIdInput" placeholder="输入用户 ID">
+                        <button class="btn" type="button" onclick="sendBagFriendRequest()">申请</button>
+                    </div>
+                </aside>
+            </div>
+        </section>
+    </section>
+</main>
+
+<div class="modal-backdrop" id="sellModal">
+    <div class="modal">
+        <h3>上架到市场</h3>
+        <input id="sellPrice" type="number" min="1" value="10" placeholder="出售价格，单位：金币">
+        <textarea id="sellerNote" maxlength="80" placeholder="给买家留一句话（选填，最多 80 字）"></textarea>
+        <div class="actions">
+            <button class="btn primary" onclick="confirmSell()">确认上架</button>
+            <button class="btn" onclick="closeSellModal()">取消</button>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop" id="renameModal">
+    <div class="modal">
+        <h3>重命名物品</h3>
+        <p class="desc" id="renameHint">自定义名称会应用到当前整组物品。</p>
+        <input id="renameInput" maxlength="20" placeholder="输入新名称，留空恢复原名" onkeydown="if(event.key==='Enter') confirmRename()">
+        <div class="actions">
+            <button class="btn primary" type="button" onclick="confirmRename()">确认重命名</button>
+            <button class="btn" type="button" onclick="closeRenameModal()">取消</button>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop" id="messagesModal">
+    <div class="modal wide">
+        <h3>交易与消息中心</h3>
+        <p class="desc"><b>金币转账</b> · 金币会先冻结，对方领取后到账；若拒绝则自动退回。</p>
+        <div class="transfer-form">
+            <input id="transferTargetId" maxlength="32" placeholder="对方玩家 ID">
+            <input id="transferAmount" type="number" min="1" max="1000000" placeholder="金币数">
+            <button class="btn primary" type="button" onclick="createGoldTransfer()">金币转出 →</button>
+        </div>
+        <p class="desc"><b>赠送物品</b> · 对方可领取或拒绝；领取优先进入仓库，空间不足则进入 10 天有效邮件。</p>
+        <div class="transfer-form">
+            <input id="giftTargetId" maxlength="32" placeholder="对方玩家 ID">
+            <select id="giftItemSelect" aria-label="选择赠送物品"></select>
+            <button class="btn primary" type="button" onclick="createItemGift()">赠送礼物 →</button>
+        </div>
+        <div id="myMessageList" class="message-list"><div class="desc">正在读取...</div></div>
+        <div class="actions"><button class="btn" type="button" onclick="loadMyMessages()">刷新</button><button class="btn" type="button" onclick="closeMessagesModal()">关闭</button></div>
+    </div>
+</div>
+<div class="modal-backdrop" id="synthesisModal">
+    <div class="modal wide">
+        <h3>白色物品兑换台</h3>
+        <p class="desc">从背包拖入 10 件白色品质物品，必定兑换 1 件随机绿色品质物品。每个投入格代表 1 件。</p>
+        <div class="synthesis-workbench">
+            <section class="synthesis-bank"><div class="synthesis-section-title"><b>背包材料</b><span>拖动或点击放入</span></div><div id="synthesisSourceGrid" class="synthesis-source-grid"></div></section>
+            <section class="synthesis-machine"><div class="synthesis-section-title"><b>投入槽</b><span>点击已投入物品可取回</span></div><div id="synthesisSlots" class="synthesis-slots"></div><div class="synthesis-arrow">10 件白色物品 ↓</div><div class="synthesis-output"><span>◆</span>随机绿色品质物品 ×1</div></section>
+        </div>
+        <p id="synthesisSummary" class="desc synthesis-summary">已投入 0 / 10</p>
+        <div class="actions"><button class="btn primary" id="synthesisConfirmBtn" type="button" onclick="confirmSynthesis()" disabled>兑换绿色物品</button><button class="btn" type="button" onclick="closeSynthesisModal()">取消</button></div>
+    </div>
+</div>
+<div class="modal-backdrop" id="taskModal">
+    <div class="modal wide">
+        <h3>旅途任务</h3>
+        <p class="desc">每日随机任务在零点刷新。任务进度和奖励均由服务器记录。</p>
+        <div id="dailyTaskContent"><div class="desc">正在读取今日任务...</div></div>
+        <div class="actions"><button class="btn" type="button" onclick="loadDailyTasks()">刷新进度</button><button class="btn" type="button" onclick="closeTaskModal()">关闭</button></div>
+    </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const BAG_SIZE = 21;
+const qualityConfigs = {
+    common: { label: '普通', icon: '◇', power: [1, 18] },
+    uncommon: { label: '精良', icon: '◆', power: [20, 42] },
+    rare: { label: '稀有', icon: '✦', power: [45, 70] },
+    epic: { label: '史诗', icon: '✧', power: [75, 110] },
+    legendary: { label: '传说', icon: '✹', power: [120, 180] }
+};
+const commonNames = ['旧布片','磨损纽扣','裂纹石子','空玻璃瓶','褪色纸条','木质齿轮','断裂铅笔','生锈小钉','糖纸碎片','暗淡贝壳','干枯花瓣','旧钥匙胚','破损绷带','细麻绳','灰尘羽毛'];
+const highNames = ['星火徽记','月影晶片','梦境核心','绯红吊坠','雾银指环','秘纹齿轮','远古书签','琥珀棋子','烛光宝珠','镜界残片'];
+const itemPrefixes = ['旅途','旧日','糖果镇','玩具墓园','梦树','星末','红门','回声','村庄','迷雾'];
+let serverItemDefinitions = {};
+
+function generatedDef(itemId) {
+    if (serverItemDefinitions[itemId]) return serverItemDefinitions[itemId];
+    if (itemId === 'welcome_journey') {
+        return {
+            name: '欢迎来到旅途传说',
+            icon: '✦',
+            quality: 'legendary',
+            qualityLabel: '传说',
+            type: '网页道具',
+            desc: '每个注册账号默认拥有的纪念道具。后续可用于网页活动、身份展示或专属兑换。',
+            props: { 品质: '传说', 来源: '账号创建 / 首次打开背包', 用途: '网页系统道具', 状态: '永久保留' }
+        };
+    }
+    const match = /^(common|uncommon|rare|epic|legendary)_(\d{3})$/.exec(itemId || '');
+    if (!match) return null;
+    const quality = match[1];
+    const num = Number(match[2]);
+    const config = qualityConfigs[quality] || qualityConfigs.common;
+    const source = quality === 'common' ? commonNames : highNames;
+    const [min, max] = config.power;
+    const value = min + ((num * 7) % Math.max(1, max - min + 1));
+    return {
+        name: `${itemPrefixes[(num - 1) % itemPrefixes.length]}·${source[(num - 1) % source.length]}`,
+        icon: config.icon,
+        quality,
+        qualityLabel: config.label,
+        type: quality === 'common' ? '杂物' : '高品质杂物',
+        desc: quality === 'common' ? '旅途中随手收集的小杂物，也许以后会有用途。' : '带有特殊气息的网页道具，可用于市场交易和后续活动。',
+        props: {
+            品质: config.label,
+            编号: `${quality.toUpperCase()}-${String(num).padStart(3, '0')}`,
+            网页价值: String(value),
+            分类: quality === 'common' ? '普通杂物' : '高品质收藏'
+        }
+    };
+}
+
+let user = null;
+let inventory = [];
+let warehouse = [];
+let warehouseLevel = 0;
+let inventoryVersion = 1;
+let activeStorageDrag = null;
+let selectedWarehouseIndex = -1;
+let warehouseCollapsed = localStorage.getItem('warehouse_collapsed') === '1';
+let market = [];
+let marketView = localStorage.getItem('market_view') || 'list';
+let gold = 0;
+let unlimitedGold = false;
+let lastCheckin = '';
+let selectedIndex = 0;
+let sellingIndex = -1;
+let sellingSource = 'inventory';
+let renamingIndex = -1;
+let renamingSource = 'inventory';
+let batchRecycleMode = false;
+let batchRecycleSelection = new Set();
+let synthesisSelection = Array(10).fill(null);
+let synthesisBusy = false;
+let toastTimer = null;
+let worldChatSignature = '';
+let worldChatPolling = null;
+let chatMode = 'world';
+let activeFriend = null;
+let bagFriends = [];
+let myMessages = { transfers: [], gifts: [], mails: [], notifications: [], pendingCount: 0 };
+let messagesLoading = false;
+let dailyTaskData = null;
+
+window.addEventListener('DOMContentLoaded', init);
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && user) {
+        loadMyMessages();
+        if (chatMode === 'world') loadBagWorldMessages();
+        else loadBagPrivateMessages();
+    }
+});
+
+async function init() {
+    const auth = await JourneyAuth.ready;
+    if (!auth || !auth.authenticated || !auth.user) return showLoginRequired();
+    user = {
+        userId: auth.user.userId,
+        username: auth.user.user,
+        role: auth.user.role || 'user'
+    };
+    document.getElementById('loginRequired').style.display = 'none';
+    document.getElementById('bagPanel').style.display = 'block';
+    document.getElementById('marketPanel').style.display = 'block';
+    document.getElementById('warehousePanel').style.display = 'block';
+    document.getElementById('socialPanel').style.display = 'block';
+    document.getElementById('synthesisPanel').style.display = 'block';
+    document.getElementById('accountName').textContent = user.username || '玩家';
+    document.getElementById('avatar').textContent = user.username ? Array.from(user.username)[0] : '旅';
+    document.getElementById('accountMeta').textContent = `${user.userId || ''} · 账号背包 · 3 行 x 7 格`;
+    loadAll();
+    loadBagWorldMessages();
+    loadBagSocialPanel();
+    startBagWorldPolling();
+    loadMyMessages().then(() => { if (location.hash === '#messages') openMessagesModal(); });
+    loadDailyTasks().then(() => { if (location.hash === '#tasks') openTaskModal(); });
+    window.setInterval(loadMyMessages, 60000);
+}
+
+function showLoginRequired() {
+    document.getElementById('loginRequired').style.display = 'block';
+    document.getElementById('bagPanel').style.display = 'none';
+    document.getElementById('marketPanel').style.display = 'none';
+    document.getElementById('warehousePanel').style.display = 'none';
+    document.getElementById('socialPanel').style.display = 'none';
+    document.getElementById('synthesisPanel').style.display = 'none';
+}
+
+async function loadAll() {
+    await Promise.all([loadInventory(), loadMarket(), loadServerItemDefinitions()]);
+}
+
+async function loadInventory() {
+    try {
+        const currentUserId = user.userId || user.uid || user.id || '';
+        const currentUsername = user.username || user.user || '';
+        const url = `board.php?action=getInventory&userId=${encodeURIComponent(currentUserId)}&username=${encodeURIComponent(currentUsername)}`;
+        const res = await fetch(url, { cache: 'no-store' });
+        const responseText = await res.text();
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (parseError) {
+            throw new Error('invalid_response');
+        }
+        if (data.code !== 'ok') throw new Error(data.code || 'fail');
+        if (data.userId && data.userId !== user.userId) {
+            user.userId = data.userId;
+            localStorage.setItem('forum_user', JSON.stringify(user));
+        }
+        inventory = normalizeSlots(data.inventory || []);
+        warehouse = Array.isArray(data.warehouse) ? data.warehouse : [];
+        warehouseLevel = Number(data.warehouseLevel || 0);
+        inventoryVersion = Number(data.inventoryVersion || 1);
+        gold = Number(data.gold || 0);
+        unlimitedGold = data.unlimitedGold === true;
+        lastCheckin = data.lastCheckin || '';
+        selectedIndex = firstItemIndex();
+        renderInventory();
+        renderWarehouse();
+    } catch (error) {
+        if (error.message === 'user_not_found') {
+            showToast('账号数据未找到，请重新登录');
+        } else {
+            showToast('背包数据读取失败，请刷新页面重试');
+        }
+    }
+}
+
+async function loadServerItemDefinitions() {
+    try {
+        const response = await fetch('board.php?action=getItemCatalog', { cache:'no-store' });
+        const data = await response.json();
+        if (data.code !== 'ok' || !Array.isArray(data.items)) return;
+        data.items.forEach((item) => {
+            if (item && item.id) serverItemDefinitions[item.id] = item;
+        });
+        renderInventory();
+        renderWarehouse();
+    } catch (error) {
+        // Core inventory data remains usable when optional catalog metadata fails.
+    }
+}
+
+async function loadMarket() {
+    const res = await fetch('board.php?action=getMarket', { cache: 'no-cache' });
+    const data = await res.json();
+    market = data.items || [];
+    market.forEach((entry) => {
+        if (entry.itemId && entry.item) serverItemDefinitions[entry.itemId] = entry.item;
+    });
+    renderMarket();
+}
+
+function renderInventory() {
+    const grid = document.getElementById('bagGrid');
+    grid.textContent = '';
+    if (selectedIndex < 0 || !inventory[selectedIndex]) {
+        selectedIndex = firstItemIndex();
+    }
+    document.getElementById('bagCount').textContent = `${inventory.filter(Boolean).length} / ${BAG_SIZE}`;
+    document.getElementById('goldText').textContent = unlimitedGold ? '∞' : gold;
+    for (let i = 0; i < BAG_SIZE; i++) {
+        const item = inventory[i] || null;
+        const slot = document.createElement('div');
+        slot.className = 'slot' + (item ? ` quality-${getDef(item).quality}` : ' empty')
+            + (item && !batchRecycleMode && selectedIndex === i ? ' selected' : '')
+            + (item && batchRecycleSelection.has(i) ? ' recycle-selected' : '');
+        slot.dataset.index = i;
+        slot.innerHTML = `<span class="slot-index">${i + 1}</span>`;
+        if (item) {
+            const def = getDef(item);
+            const icon = document.createElement('span');
+            icon.className = 'icon';
+            icon.textContent = def.icon;
+            slot.appendChild(icon);
+            const itemName = document.createElement('span');
+            itemName.className = 'slot-name';
+            itemName.textContent = def.name;
+            slot.appendChild(itemName);
+            slot.insertAdjacentHTML('beforeend', renderItemTooltip(def));
+            if (batchRecycleMode) {
+                const check = document.createElement('span');
+                check.className = 'recycle-check';
+                check.textContent = batchRecycleSelection.has(i) ? '✓' : '';
+                slot.appendChild(check);
+            }
+            if ((item.count || 1) > 1) {
+                const count = document.createElement('span');
+                count.className = 'count';
+                count.textContent = item.count;
+                slot.appendChild(count);
+            }
+            slot.draggable = !batchRecycleMode;
+            slot.onclick = () => {
+                if (batchRecycleMode) {
+                    toggleBatchRecycleItem(i);
+                } else {
+                    selectedIndex = i;
+                    renderInventory();
+                }
+            };
+            if (!batchRecycleMode) {
+                slot.oncontextmenu = (event) => { event.preventDefault(); openRenameModal(i, 'inventory'); };
+                slot.ondragstart = (event) => setStorageDragData(event, 'bag', i);
+                slot.ondragend = clearStorageDrag;
+            }
+        }
+        if (!batchRecycleMode) {
+            slot.ondragover = (event) => { event.preventDefault(); slot.classList.add('drag-over'); };
+            slot.ondragleave = () => slot.classList.remove('drag-over');
+            slot.ondrop = (event) => {
+                event.preventDefault();
+                slot.classList.remove('drag-over');
+                const payload = getStorageDragData(event);
+                if (!payload) return;
+                if (payload.source === 'warehouse') {
+                    transferStorageItem('toBag', payload.slotIndex);
+                } else {
+                    moveItem(payload.slotIndex, i);
+                }
+            };
+        }
+        grid.appendChild(slot);
+    }
+    renderDetails();
+    renderBatchRecycleControls();
+}
+
+function getDef(item) {
+    const id = item && (item.id || item.itemId);
+    const definition = item && item.item && item.item.name
+        ? item.item
+        : generatedDef(id) || { name: id || '未知道具', icon: '?', quality: 'common', qualityLabel: '普通', type: '未知道具', desc: '这个道具暂时还没有配置说明。', props: { 数量: String((item && item.count) || 1) } };
+    const customName = String((item && item.customName) || '');
+    return {
+        ...definition,
+        originalName: definition.originalName || definition.name,
+        name: customName || definition.name,
+        customName,
+        id,
+        recyclable: definition.recyclable !== false && !String(id || '').startsWith('d_'),
+        marketTradable: definition.marketTradable !== false,
+        systemPrice: definition.recyclable === false || String(id || '').startsWith('d_') ? 0 : Math.max(1, Number(definition.systemPrice || getSystemPrice(id, definition.quality)))
+    };
+}
+
+function getSystemPrice(itemId, quality) {
+    if (String(itemId || '').startsWith('d_')) return 0;
+    if (itemId === 'welcome_journey') return 50;
+    const ranges = { common:[1,2], uncommon:[2,4], rare:[7,14], epic:[20,40], legendary:[300,600] };
+    const range = ranges[quality] || ranges.common;
+    const number = Number((String(itemId || '').match(/(\d+)$/) || [0, 1])[1]);
+    return range[0] + ((Math.max(1, number) * 7) % (range[1] - range[0] + 1));
+}
+
+function renderItemTooltip(def) {
+    const props = Object.entries({ ...(def.props || {}), 系统回收: def.recyclable === false ? '不可回收' : `${def.systemPrice || 1} 金币`, 玩家市场: def.marketTradable === false ? '不可交易' : '可用金币交易' })
+        .map(([k, v]) => `<div><span>${k}</span><b>${v}</b></div>`)
+        .join('');
+    return `
+        <span class="item-tooltip">
+            <strong>${def.name}</strong>
+            <span>${def.qualityLabel || def.quality || '普通'} · ${def.type || '网页道具'}${def.customName ? ` · 原名：${def.originalName}` : ''}</span>
+            <p>${def.desc || '这个道具暂时还没有配置说明。'}</p>
+            <span class="tooltip-props">${props}</span>
+        </span>
+    `;
+}
+
+function normalizeSlots(items) {
+    const slots = Array.from({ length: BAG_SIZE }, (_, index) => items[index] || null);
+    if (!slots.some(Boolean) && items.length) slots[0] = items.find(Boolean) || null;
+    return slots;
+}
+
+function firstItemIndex() {
+    return inventory.findIndex(Boolean);
+}
+
+function toggleBatchRecycle() {
+    batchRecycleMode = !batchRecycleMode;
+    batchRecycleSelection.clear();
+    renderInventory();
+}
+
+function toggleBatchRecycleItem(index) {
+    if (!batchRecycleMode || !inventory[index]) return;
+    if (getDef(inventory[index]).recyclable === false) return showToast('[D] 地牢物品无法通过系统回收');
+    if (batchRecycleSelection.has(index)) batchRecycleSelection.delete(index);
+    else batchRecycleSelection.add(index);
+    renderInventory();
+}
+
+function getBatchRecycleEstimate() {
+    let items = 0;
+    let goldValue = 0;
+    batchRecycleSelection.forEach((index) => {
+        const item = inventory[index];
+        if (!item) return;
+        if (getDef(item).recyclable === false) return;
+        const count = Math.max(1, Number(item.count || 1));
+        items += count;
+        goldValue += getDef(item).systemPrice * count;
+    });
+    return { items, goldValue };
+}
+
+function renderBatchRecycleControls() {
+    const toggle = document.getElementById('batchRecycleToggle');
+    const confirmButton = document.getElementById('batchRecycleConfirm');
+    toggle.textContent = batchRecycleMode ? '取消回收' : '一键回收';
+    confirmButton.style.display = batchRecycleMode ? '' : 'none';
+    if (!batchRecycleMode) return;
+    const estimate = getBatchRecycleEstimate();
+    confirmButton.textContent = estimate.items
+        ? `回收选中 · ${estimate.items} 件 / ${estimate.goldValue} 金币`
+        : '回收选中';
+    confirmButton.disabled = estimate.items < 1;
+}
+
+async function confirmBatchRecycle() {
+    const estimate = getBatchRecycleEstimate();
+    if (!estimate.items) return showToast('请先勾选要回收的物品');
+    if (!confirm(`确定回收选中的 ${estimate.items} 件物品并获得 ${estimate.goldValue} 金币吗？`)) return;
+    const form = new FormData();
+    form.append('action', 'batchSellInventoryToSystem');
+    form.append('userId', user.userId);
+    form.append('slotIndexes', JSON.stringify([...batchRecycleSelection]));
+    const response = await fetch('board.php', { method:'POST', body:form });
+    const data = await response.json();
+    if (data.code !== 'ok') return showToast(data.code === 'contains_non_recyclable' ? '选中内容包含不可回收的 [D] 地牢物品' : '批量回收失败，请刷新后重试');
+    inventory = normalizeSlots(data.inventory || []);
+    gold = Number(data.gold || gold);
+    unlimitedGold = data.unlimitedGold === true;
+    batchRecycleMode = false;
+    batchRecycleSelection.clear();
+    selectedIndex = firstItemIndex();
+    renderInventory();
+    showToast(`已回收 ${data.totalItems} 件物品，获得 ${data.totalGold} 金币`);
+}
+
+function renderDetails() {
+    const box = document.getElementById('details');
+    if (batchRecycleMode) {
+        const estimate = getBatchRecycleEstimate();
+        box.innerHTML = `<div class="desc">批量回收模式：点击物品卡牌进行勾选。当前已选 ${estimate.items} 件，预计获得 ${estimate.goldValue} 金币。</div>`;
+        return;
+    }
+    const item = inventory[selectedIndex];
+    if (!item) {
+        box.innerHTML = '<div class="desc">背包暂无可操作的物品。</div>';
+        return;
+    }
+    const def = getDef(item);
+    box.innerHTML = `
+        <div class="details-head">
+            <div><h3 class="item-title quality-${def.quality || 'common'}">${def.name}${(item.count || 1) > 1 ? ` x${item.count}` : ''}</h3></div>
+            <div class="actions">
+                <button class="btn primary" onclick="openSellModal(${selectedIndex})">上架玩家市场</button>
+                <button class="btn" onclick="openRenameModal(${selectedIndex}, 'inventory')">重命名物品</button>
+                ${warehouseLevel > 0 ? `<button class="btn" onclick="transferStorageItem('toWarehouse', ${selectedIndex})">存入仓库</button>` : ''}
+                ${def.recyclable === false ? '<span class="btn" style="cursor:not-allowed;opacity:.58">[D] 不可系统回收</span>' : `<button class="btn" onclick="sellSelectedToSystem()">系统回收 · ${def.systemPrice} 金币</button>`}
+                <button class="btn danger" onclick="discardSelected()">丢弃</button>
+            </div>
+        </div>
+    `;
+}
+
+function renderWarehouse() {
+    const panel = document.getElementById('warehousePanel');
+    panel.classList.toggle('collapsed', warehouseCollapsed);
+    document.getElementById('warehouseToggleBtn').textContent = warehouseCollapsed ? '展开仓库' : '收起仓库';
+    const grid = document.getElementById('warehouseGrid');
+    const count = warehouse.filter(Boolean).length;
+    const capacity = warehouseLevel * BAG_SIZE;
+    const costs = [100, 200, 400, 800, 1200];
+    document.getElementById('warehouseCount').textContent = `${count} / ${capacity}`;
+    const upgrade = document.getElementById('warehouseUpgradeBtn');
+    if (warehouseLevel >= costs.length) {
+        upgrade.textContent = '仓库已满级 · 105 格';
+        upgrade.disabled = true;
+    } else {
+        upgrade.textContent = `${warehouseLevel ? '扩容仓库' : '解锁仓库'} · ${costs[warehouseLevel]} 金币`;
+        upgrade.disabled = false;
+    }
+    grid.replaceChildren();
+    if (!capacity) {
+        grid.className = 'warehouse-empty';
+        grid.textContent = '仓库尚未解锁。购买第一次扩容即可获得 21 个仓库格子。';
+        renderWarehouseDetails();
+        return;
+    }
+    if (selectedWarehouseIndex < 0 || !warehouse[selectedWarehouseIndex]) {
+        selectedWarehouseIndex = warehouse.findIndex(Boolean);
+    }
+    grid.className = 'warehouse-grid';
+    for (let index = 0; index < capacity; index++) {
+        const item = warehouse[index] || null;
+        const slot = document.createElement('button');
+        slot.type = 'button';
+        slot.className = 'slot' + (item ? ` quality-${getDef(item).quality}` : ' empty') + (item && selectedWarehouseIndex === index ? ' selected' : '');
+        slot.innerHTML = `<span class="slot-index">${index + 1}</span>`;
+        if (item) {
+            const def = getDef(item);
+            slot.innerHTML += `<span class="icon">${def.icon}</span><span class="slot-name">${def.name}</span>${renderItemTooltip(def)}${(item.count || 1) > 1 ? `<span class="count">${item.count}</span>` : ''}`;
+            slot.draggable = true;
+            slot.ondragstart = (event) => setStorageDragData(event, 'warehouse', index);
+            slot.ondragend = clearStorageDrag;
+            slot.onclick = () => { selectedWarehouseIndex = index; renderWarehouse(); };
+            slot.oncontextmenu = (event) => { event.preventDefault(); openRenameModal(index, 'warehouse'); };
+        }
+        slot.ondragover = (event) => {
+            const payload = getStorageDragData(event);
+            if (!payload) return;
+            event.preventDefault();
+            slot.classList.add('drag-over');
+        };
+        slot.ondragleave = () => slot.classList.remove('drag-over');
+        slot.ondrop = (event) => {
+            event.preventDefault();
+            slot.classList.remove('drag-over');
+            const payload = getStorageDragData(event);
+            if (payload && payload.source === 'bag') {
+                transferStorageItem('toWarehouse', payload.slotIndex);
+            } else if (payload && payload.source === 'warehouse') {
+                moveWarehouseItem(payload.slotIndex, index);
+            }
+        };
+        grid.appendChild(slot);
+    }
+    renderWarehouseDetails();
+}
+
+function toggleWarehouse() {
+    warehouseCollapsed = !warehouseCollapsed;
+    localStorage.setItem('warehouse_collapsed', warehouseCollapsed ? '1' : '0');
+    const panel = document.getElementById('warehousePanel');
+    panel.classList.toggle('collapsed', warehouseCollapsed);
+    document.getElementById('warehouseToggleBtn').textContent = warehouseCollapsed ? '展开仓库' : '收起仓库';
+}
+
+function renderWarehouseDetails() {
+    const box = document.getElementById('warehouseDetails');
+    if (!warehouseLevel) {
+        box.innerHTML = '<div class="desc">解锁仓库后，可以在这里管理仓库物品。</div>';
+        return;
+    }
+    const item = warehouse[selectedWarehouseIndex];
+    if (!item) {
+        box.innerHTML = '<div class="desc">仓库暂无可操作的物品。</div>';
+        return;
+    }
+    const def = getDef(item);
+    box.innerHTML = `
+        <div class="details-head">
+            <div>
+                <h3 class="item-title quality-${def.quality || 'common'}">${def.name}${(item.count || 1) > 1 ? ` x${item.count}` : ''}</h3>
+                <div class="quality">${def.qualityLabel || def.quality} · ${def.type || '网页道具'}</div>
+            </div>
+            <div class="actions">
+                <button class="btn" onclick="transferStorageItem('toBag', ${selectedWarehouseIndex})">取回背包</button>
+                <button class="btn primary" onclick="openSellModal(${selectedWarehouseIndex}, 'warehouse')">上架市场</button>
+                <button class="btn danger" onclick="discardWarehouseSelected()">丢弃</button>
+            </div>
+        </div>
+    `;
+}
+
+async function moveWarehouseItem(from, to) {
+    if (from === to || !warehouse[from]) return;
+    const response = await fetch(`board.php?action=moveWarehouseItem&userId=${encodeURIComponent(user.userId)}&from=${from}&to=${to}`, { cache:'no-store' });
+    const data = await response.json();
+    if (data.code !== 'ok') return showToast('仓库物品换位失败');
+    warehouse = Array.isArray(data.warehouse) ? data.warehouse : warehouse;
+    selectedWarehouseIndex = to;
+    renderWarehouse();
+}
+
+async function discardWarehouseSelected() {
+    const item = warehouse[selectedWarehouseIndex];
+    if (!item || !confirm(`确定丢弃「${getDef(item).name}」吗？`)) return;
+    const response = await fetch(`board.php?action=discardWarehouseItem&userId=${encodeURIComponent(user.userId)}&slotIndex=${selectedWarehouseIndex}`, { cache:'no-store' });
+    const data = await response.json();
+    if (data.code !== 'ok') return showToast('仓库物品丢弃失败');
+    warehouse = Array.isArray(data.warehouse) ? data.warehouse : [];
+    selectedWarehouseIndex = warehouse.findIndex(Boolean);
+    renderWarehouse();
+    showToast('已丢弃仓库物品');
+}
+
+function setStorageDragData(event, source, slotIndex) {
+    activeStorageDrag = { source, slotIndex };
+    const payload = JSON.stringify({ source, slotIndex });
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('application/x-journey-item', payload);
+    event.dataTransfer.setData('text/plain', payload);
+}
+
+function getStorageDragData(event) {
+    const raw = event.dataTransfer.getData('application/x-journey-item')
+        || event.dataTransfer.getData('text/plain');
+    if (!raw) return activeStorageDrag;
+    try {
+        const payload = JSON.parse(raw);
+        if (!['bag', 'warehouse'].includes(payload.source)) return null;
+        const slotIndex = Number(payload.slotIndex);
+        return Number.isInteger(slotIndex) && slotIndex >= 0
+            ? { source: payload.source, slotIndex }
+            : null;
+    } catch (error) {
+        const legacyIndex = Number(raw);
+        return Number.isInteger(legacyIndex) && legacyIndex >= 0
+            ? { source: 'bag', slotIndex: legacyIndex }
+            : null;
+    }
+}
+
+function clearStorageDrag() {
+    activeStorageDrag = null;
+    document.querySelectorAll('.slot.drag-over').forEach((slot) => slot.classList.remove('drag-over'));
+}
+
+async function buyWarehouseExpansion() {
+    const button = document.getElementById('warehouseUpgradeBtn');
+    button.disabled = true;
+    try {
+        const response = await fetch(`board.php?action=buyWarehouseExpansion&userId=${encodeURIComponent(user.userId)}`, { cache:'no-store' });
+        const data = await response.json();
+        if (data.code === 'nogold') return showToast('金币不足，无法扩容仓库');
+        if (data.code === 'max') return showToast('仓库已经扩容到最高等级');
+        if (data.code !== 'ok') return showToast('仓库扩容失败');
+        warehouse = data.warehouse || [];
+        warehouseLevel = Number(data.warehouseLevel || 0);
+        gold = Number(data.gold || gold);
+        unlimitedGold = data.unlimitedGold === true;
+        renderInventory();
+        renderWarehouse();
+        showToast(`仓库已扩容至 ${warehouse.length} 格`);
+    } finally {
+        renderWarehouse();
+    }
+}
+
+async function transferStorageItem(direction, slotIndex) {
+    const response = await fetch(`board.php?action=transferStorageItem&userId=${encodeURIComponent(user.userId)}&direction=${direction}&slotIndex=${slotIndex}`, { cache:'no-store' });
+    const data = await response.json();
+    if (data.code === 'full') return showToast(direction === 'toBag' ? '背包已满，无法取回' : '仓库已满，请继续扩容');
+    if (data.code !== 'ok') return showToast('物品移动失败，请刷新后重试');
+    inventory = normalizeSlots(data.inventory || []);
+    warehouse = Array.isArray(data.warehouse) ? data.warehouse : [];
+    inventoryVersion = Number(data.inventoryVersion || inventoryVersion || 1);
+    selectedIndex = firstItemIndex();
+    selectedWarehouseIndex = warehouse.findIndex(Boolean);
+    renderInventory();
+    renderWarehouse();
+    showToast(direction === 'toBag' ? '物品已取回背包' : '物品已存入仓库');
+}
+
+async function moveItem(from, to) {
+    if (from === to || !inventory[from]) return;
+    const copy = inventory.slice();
+    const moved = copy[from];
+    copy[from] = copy[to] || null;
+    copy[to] = moved;
+    inventory = normalizeSlots(copy);
+    selectedIndex = to;
+    renderInventory();
+    try {
+        const form = new FormData();
+        form.append('action', 'moveInventoryItem');
+        form.append('fromSlot', String(from));
+        form.append('toSlot', String(to));
+        form.append('inventoryVersion', String(inventoryVersion || 1));
+        const res = await fetch('board.php', {
+            method: 'POST',
+            credentials: 'include',
+            cache: 'no-store',
+            body: form
+        });
+        const data = await res.json();
+        if (data.code === 'conflict') {
+            showToast('背包已被其他页面更新，正在同步最新数据');
+            await loadInventory();
+            return;
+        }
+        if (data.code !== 'ok') throw new Error(data.code || 'save_failed');
+        inventory = normalizeSlots(data.inventory || []);
+        inventoryVersion = Number(data.inventoryVersion || inventoryVersion || 1);
+        renderInventory();
+    } catch (error) {
+        showToast('背包同步失败，正在重新读取云端数据');
+        await loadInventory();
+    }
+}
+
+async function discardSelected() {
+    if (selectedIndex < 0 || !inventory[selectedIndex]) return;
+    if (!confirm('确定丢弃这个道具吗？')) return;
+    const res = await fetch(`board.php?action=discardInventoryItem&userId=${encodeURIComponent(user.userId)}&slotIndex=${selectedIndex}`);
+    const data = await res.json();
+    if (data.code === 'ok') {
+        inventory = normalizeSlots(data.inventory || []);
+        inventoryVersion = Number(data.inventoryVersion || inventoryVersion || 1);
+        selectedIndex = firstItemIndex();
+        showToast('已丢弃道具');
+        renderInventory();
+    }
+}
+
+async function sellSelectedToSystem() {
+    if (selectedIndex < 0 || !inventory[selectedIndex]) return;
+    const def = getDef(inventory[selectedIndex]);
+    if (def.recyclable === false) return showToast('[D] 地牢物品无法通过系统回收');
+    if (!confirm(`确定将「${def.name}」出售给系统并获得 ${def.systemPrice} 金币吗？`)) return;
+    const res = await fetch(`board.php?action=sellInventoryToSystem&userId=${encodeURIComponent(user.userId)}&slotIndex=${selectedIndex}`, { cache: 'no-store' });
+    const data = await res.json();
+    if (data.code !== 'ok') return showToast(data.code === 'not_recyclable' ? '[D] 地牢物品无法通过系统回收' : '系统回收失败');
+    inventory = normalizeSlots(data.inventory || []);
+    gold = Number(data.gold || gold);
+    unlimitedGold = data.unlimitedGold === true;
+    inventoryVersion = Number(data.inventoryVersion || inventoryVersion || 1);
+    selectedIndex = firstItemIndex();
+    renderInventory();
+    showToast(`出售成功，获得 ${data.price} 金币`);
+}
+
+function openRenameModal(index, source = 'inventory') {
+    const items = source === 'warehouse' ? warehouse : inventory;
+    const item = items[index];
+    if (!item) return;
+    const def = getDef(item);
+    renamingIndex = index;
+    renamingSource = source;
+    document.getElementById('renameInput').value = item.customName || '';
+    document.getElementById('renameHint').textContent = `当前为「${def.name}」${(item.count || 1) > 1 ? `，重命名会同时应用到叠放的 ${item.count} 个物品` : ''}。留空可恢复原名。`;
+    document.getElementById('renameModal').classList.add('show');
+    window.setTimeout(() => document.getElementById('renameInput').focus(), 0);
+}
+
+function closeRenameModal() {
+    document.getElementById('renameModal').classList.remove('show');
+    renamingIndex = -1;
+    renamingSource = 'inventory';
+}
+
+async function confirmRename() {
+    if (renamingIndex < 0) return;
+    const customName = document.getElementById('renameInput').value.trim();
+    const url = `board.php?action=renameStorageItem&userId=${encodeURIComponent(user.userId)}&storage=${encodeURIComponent(renamingSource)}&slotIndex=${renamingIndex}&customName=${encodeURIComponent(customName)}`;
+    const response = await fetch(url, { cache:'no-store' });
+    const data = await response.json();
+    if (data.code !== 'ok') return showToast('重命名失败，请刷新后重试');
+    inventory = normalizeSlots(data.inventory || []);
+    warehouse = Array.isArray(data.warehouse) ? data.warehouse : [];
+    inventoryVersion = Number(data.inventoryVersion || inventoryVersion || 1);
+    closeRenameModal();
+    renderInventory();
+    renderWarehouse();
+    showToast(customName ? '物品已重命名' : '物品已恢复原名');
+}
+
+function openSellModal(index, source = 'inventory') {
+    const sourceItems = source === 'warehouse' ? warehouse : inventory;
+    if (!sourceItems[index]) return;
+    sellingIndex = index;
+    sellingSource = source;
+    const def = getDef(sourceItems[index]);
+    const fallbackPrices = { common:1, uncommon:3, rare:10, epic:30, legendary:450 };
+    document.getElementById('sellPrice').value = Math.max(1, Number(def.systemPrice || fallbackPrices[def.quality] || 10));
+    document.getElementById('sellerNote').value = '';
+    document.getElementById('sellModal').classList.add('show');
+}
+
+function closeSellModal() {
+    document.getElementById('sellModal').classList.remove('show');
+    sellingIndex = -1;
+    sellingSource = 'inventory';
+}
+
+async function confirmSell() {
+    const price = Math.max(1, Number(document.getElementById('sellPrice').value || 1));
+    const sellerNote = document.getElementById('sellerNote').value.trim();
+    const res = await fetch(`board.php?action=listMarketItem&userId=${encodeURIComponent(user.userId)}&storage=${encodeURIComponent(sellingSource)}&slotIndex=${sellingIndex}&price=${price}&sellerNote=${encodeURIComponent(sellerNote)}`);
+    const data = await res.json();
+    if (data.code === 'ok') {
+        inventory = normalizeSlots(data.inventory || []);
+        warehouse = Array.isArray(data.warehouse) ? data.warehouse : warehouse;
+        selectedIndex = firstItemIndex();
+        selectedWarehouseIndex = warehouse.findIndex(Boolean);
+        closeSellModal();
+        showToast('已上架市场');
+        renderInventory();
+        renderWarehouse();
+        loadMarket();
+    } else {
+        showToast('上架失败');
+    }
+}
+
+function renderMarket() {
+    const list = document.getElementById('marketList');
+    list.textContent = '';
+    list.className = `market-list ${marketView === 'card' ? 'card-view' : 'list-view'}${market.length > 5 ? ' scrollable' : ''}`;
+    document.getElementById('marketViewBtn').textContent = marketView === 'card' ? '列表展示' : '卡片展示';
+    if (!market.length) {
+        list.innerHTML = '<div class="desc">市场暂无道具出售。</div>';
+        return;
+    }
+    market.forEach((item) => {
+        const def = getDef(item);
+        const row = document.createElement('div');
+        row.className = 'market-item';
+        const main = document.createElement('div');
+        main.className = 'market-main';
+        const title = document.createElement('span');
+        title.className = `item-name quality-${def.quality || 'common'}`;
+        title.innerHTML = `${def.icon || '?'} ${def.name || item.itemId || '未知道具'}${renderItemTooltip(def)}`;
+        const sellerLine = document.createElement('div');
+        sellerLine.className = 'seller-line';
+        sellerLine.appendChild(renderSellerAvatar(item));
+        const sellerInfo = document.createElement('div');
+        const sellerName = document.createElement('button');
+        sellerName.type = 'button';
+        sellerName.className = 'seller-name';
+        sellerName.textContent = item.sellerName || '玩家';
+        sellerName.onclick = (event) => {
+            event.stopPropagation();
+            location.href = `profile.html?userId=${encodeURIComponent(item.sellerId || '')}`;
+        };
+        const meta = document.createElement('div');
+        meta.className = 'seller-meta';
+        meta.textContent = `Lv.${item.sellerLevel || 1} · ${item.sellerTitle || '初来乍到'} · ${item.time || ''}`;
+        sellerInfo.append(sellerName, meta);
+        sellerLine.appendChild(sellerInfo);
+        main.append(title, sellerLine);
+        if (item.sellerNote) {
+            const note = document.createElement('div');
+            note.className = 'seller-note';
+            note.textContent = `卖家留言：${item.sellerNote}`;
+            main.appendChild(note);
+        }
+
+        const price = document.createElement('div');
+        price.className = 'market-price';
+        const amount = document.createElement('div');
+        amount.textContent = `${item.price} 金币`;
+        const action = document.createElement('button');
+        action.className = 'btn primary';
+        action.type = 'button';
+        if (item.sellerId === user.userId) {
+            action.textContent = '下架';
+            action.onclick = () => delistItem(item.marketId);
+        } else {
+            action.textContent = '购买';
+            action.onclick = () => buyItem(item.marketId);
+        }
+        price.append(amount, action);
+        row.append(main, price);
+        list.appendChild(row);
+    });
+}
+
+function toggleMarketView() {
+    marketView = marketView === 'card' ? 'list' : 'card';
+    localStorage.setItem('market_view', marketView);
+    renderMarket();
+}
+
+function renderSellerAvatar(item) {
+    const avatar = document.createElement('span');
+    avatar.className = 'seller-avatar';
+    const data = item.sellerAvatar || {};
+    if (data.type === 'image' && data.src) {
+        const img = document.createElement('img');
+        img.src = data.src;
+        img.alt = item.sellerName || '卖家';
+        avatar.appendChild(img);
+    } else {
+        avatar.textContent = data.text || (item.sellerName ? Array.from(item.sellerName)[0] : '旅');
+        if (data.color) avatar.style.background = data.color;
+    }
+    return avatar;
+}
+
+async function delistItem(marketId) {
+    const res = await fetch(`board.php?action=delistMarketItem&userId=${encodeURIComponent(user.userId)}&marketId=${encodeURIComponent(marketId)}`);
+    const data = await res.json();
+    if (data.code === 'ok') {
+        inventory = normalizeSlots(data.inventory || []);
+        selectedIndex = firstItemIndex();
+        showToast('已下架，物品已回到背包');
+        renderInventory();
+        loadMarket();
+    } else if (data.code === 'full') showToast('背包已满，无法下架');
+    else showToast('下架失败');
+}
+
+async function buyItem(marketId) {
+    const res = await fetch(`board.php?action=buyMarketItem&userId=${encodeURIComponent(user.userId)}&marketId=${encodeURIComponent(marketId)}`);
+    const data = await res.json();
+    if (data.code === 'ok') {
+        inventory = normalizeSlots(data.inventory || []);
+        gold = Number(data.gold || 0);
+        unlimitedGold = data.unlimitedGold === true;
+        showToast('购买成功');
+        renderInventory();
+        loadMarket();
+    } else if (data.code === 'nogold') showToast('金币不足');
+    else if (data.code === 'full') showToast('背包已满');
+    else if (data.code === 'self') showToast('不能购买自己上架的道具');
+    else showToast('购买失败');
+}
+
+async function dailyCheckin() {
+    const res = await fetch(`board.php?action=dailyCheckin&userId=${encodeURIComponent(user.userId)}`);
+    const data = await res.json();
+    if (data.code === 'ok') {
+        gold = Number(data.gold || gold);
+        unlimitedGold = data.unlimitedGold === true;
+        lastCheckin = data.lastCheckin || lastCheckin;
+        showToast(`签到成功，金币 +${data.gain}`);
+        renderInventory();
+    } else if (data.code === 'already') {
+        gold = Number(data.gold || gold);
+        unlimitedGold = data.unlimitedGold === true;
+        showToast('今天已经签到过了');
+        renderInventory();
+    } else showToast('签到失败');
+}
+
+async function loadDailyTasks() {
+    if (!user) return;
+    try {
+        const response = await fetch(`board.php?action=getDailyTasks&userId=${encodeURIComponent(user.userId)}`, { cache:'no-store' });
+        const data = await response.json();
+        if (data.code !== 'ok') throw new Error(data.code || 'load_failed');
+        dailyTaskData = data.task;
+        if (Number.isFinite(Number(data.gold))) gold = Number(data.gold);
+        renderDailyTasks();
+        renderInventory();
+    } catch (error) {
+        const content = document.getElementById('dailyTaskContent');
+        if (content) content.innerHTML = '<div class="desc">任务读取失败，请稍后重试。</div>';
+    }
+}
+
+function openTaskModal() {
+    document.getElementById('taskModal').classList.add('show');
+    loadDailyTasks();
+}
+
+function closeTaskModal() {
+    document.getElementById('taskModal').classList.remove('show');
+}
+
+function renderDailyTasks() {
+    const content = document.getElementById('dailyTaskContent');
+    const badge = document.getElementById('taskBadge');
+    if (!content || !dailyTaskData) return;
+    const task = dailyTaskData;
+    const completed = task.completed === true;
+    const claimed = task.claimed === true;
+    badge.style.display = completed && !claimed ? 'inline-block' : 'none';
+    const percent = Math.max(0, Math.min(100, Math.round(Number(task.progress || 0) / Math.max(1, Number(task.target || 1)) * 100)));
+    content.textContent = '';
+
+    const hero = document.createElement('section');
+    hero.className = 'task-hero';
+    const head = document.createElement('div');
+    head.className = 'task-hero-head';
+    const copy = document.createElement('div');
+    const title = document.createElement('h4');
+    title.textContent = task.title || '今日任务';
+    const description = document.createElement('p');
+    description.className = 'desc';
+    description.textContent = task.description || '';
+    copy.append(title, description);
+    const status = document.createElement('span');
+    status.className = 'task-status';
+    status.textContent = claimed ? '已领取' : (completed ? '已完成' : '进行中');
+    head.append(copy, status);
+    const progress = document.createElement('div');
+    progress.className = 'task-progress';
+    const progressFill = document.createElement('span');
+    progressFill.style.width = `${percent}%`;
+    progress.appendChild(progressFill);
+    const meta = document.createElement('div');
+    meta.className = 'task-meta';
+    const progressText = document.createElement('span');
+    progressText.textContent = `${task.progress || 0} / ${task.target || 1} ${task.unit || ''}`;
+    const rewardText = document.createElement('span');
+    rewardText.textContent = task.rewardKind === 'item' ? `奖励 ${task.rewardItem?.name || task.rewardReference || '高品质地牢物品'}` : `奖励 ${task.rewardGold || 0} 金币 · 等值于绿色「${task.rewardReference || '品质物品'}」`;
+    meta.append(progressText, rewardText);
+    hero.append(head, progress, meta);
+    if (!claimed) {
+        const claimButton = document.createElement('button');
+        claimButton.type = 'button';
+        claimButton.className = 'btn primary';
+        claimButton.style.marginTop = '14px';
+        claimButton.textContent = completed ? '领取任务奖励' : '尚未完成';
+        claimButton.disabled = !completed;
+        claimButton.onclick = claimDailyTask;
+        hero.appendChild(claimButton);
+    }
+    content.appendChild(hero);
+
+    const xpTitle = document.createElement('h3');
+    xpTitle.style.marginTop = '18px';
+    xpTitle.textContent = '经验获取途径';
+    content.appendChild(xpTitle);
+    const sourceList = document.createElement('div');
+    sourceList.className = 'xp-source-list';
+    (task.xpSources || []).forEach((source) => {
+        const row = document.createElement('div');
+        row.className = 'xp-source' + (source.completed ? ' complete' : '');
+        const rowCopy = document.createElement('div');
+        const rowTitle = document.createElement('b');
+        rowTitle.textContent = source.title || '经验途径';
+        const rowDescription = document.createElement('p');
+        rowDescription.textContent = `${source.description || ''} 奖励：${source.reward || ''}`;
+        rowCopy.append(rowTitle, rowDescription);
+        const rowState = document.createElement('span');
+        rowState.className = 'xp-source-state';
+        rowState.textContent = source.completed ? `今日已完成 · ${source.progress}` : '今日未完成';
+        row.append(rowCopy, rowState);
+        sourceList.appendChild(row);
+    });
+    content.appendChild(sourceList);
+}
+
+async function claimDailyTask() {
+    const form = new FormData();
+    form.append('action', 'claimDailyTask');
+    form.append('userId', user.userId);
+    const response = await fetch('board.php', { method:'POST', body:form });
+    const data = await response.json();
+    if (data.code === 'ok') {
+        dailyTaskData = data.task;
+        gold = Number(data.gold || gold);
+        renderDailyTasks();
+        renderInventory();
+        showToast(data.rewardItem ? `任务完成，获得「${data.rewardItem.name}」${data.delivery==='mail'?'，已发送到邮件':''}` : `任务完成，获得 ${data.rewardGold} 金币`);
+    } else if (data.code === 'already_claimed') {
+        dailyTaskData = data.task;
+        renderDailyTasks();
+        showToast('今天的任务奖励已经领取');
+    } else if (data.code === 'not_completed') {
+        dailyTaskData = data.task;
+        renderDailyTasks();
+        showToast('任务尚未完成');
+    } else showToast('任务奖励领取失败');
+}
+
+async function loadBagWorldMessages() {
+    try {
+        const res = await fetch('board.php?action=getWorldMessages', { cache: 'no-cache' });
+        const messages = await res.json();
+        worldChatSignature = getWorldChatSignature(messages);
+        renderBagWorldMessages(Array.isArray(messages) ? messages.slice(-100) : []);
+    } catch (error) {
+        showToast('世界聊天加载失败');
+    }
+}
+
+function renderBagWorldMessages(messages) {
+    const box = document.getElementById('worldChatMessages');
+    box.replaceChildren();
+    if (!messages.length) {
+        box.innerHTML = '<div class="chat-empty">还没有消息，来打个招呼吧。</div>';
+        return;
+    }
+    messages.forEach((message) => {
+        const isSelf = message.from === user.userId;
+        const isSystem = message.system === true;
+        const row = document.createElement('div');
+        row.className = `chat-message${isSelf ? ' self' : ''}${isSystem ? ' system-broadcast' : ''}`;
+        const avatar = document.createElement('button');
+        avatar.type = 'button';
+        avatar.className = 'chat-avatar';
+        if (!isSystem) avatar.onclick = () => location.href = `profile.html?userId=${encodeURIComponent(message.from || '')}`;
+        const avatarData = message.avatar || {};
+        if (avatarData.type === 'image' && avatarData.src) {
+            const image = document.createElement('img');
+            image.src = avatarData.src;
+            image.alt = '';
+            avatar.appendChild(image);
+        } else {
+            avatar.textContent = avatarData.text || Array.from(message.user || '旅')[0];
+            if (avatarData.color) avatar.style.background = avatarData.color;
+        }
+        const body = document.createElement('div');
+        body.className = 'chat-message-body';
+        const author = document.createElement('button');
+        author.type = 'button';
+        author.className = 'chat-author';
+        author.textContent = isSelf ? '我' : (message.user || '玩家');
+        if (!isSystem) author.onclick = () => location.href = `profile.html?userId=${encodeURIComponent(message.from || '')}`;
+        const bubble = document.createElement('div');
+        bubble.className = 'chat-bubble';
+        bubble.textContent = message.content || '';
+        const time = document.createElement('div');
+        time.className = 'chat-time';
+        time.textContent = message.time || '';
+        body.append(author, bubble, time);
+        row.append(avatar, body);
+        box.appendChild(row);
+    });
+    box.scrollTop = box.scrollHeight;
+}
+
+function getWorldChatSignature(messages) {
+    if (!Array.isArray(messages) || !messages.length) return '';
+    const last = messages[messages.length - 1];
+    return `${last.from || ''}|${last.time || ''}|${last.content || ''}`;
+}
+
+async function loadBagSocialPanel() {
+    if (!user) return;
+    try {
+        const [friendsRes, requestsRes] = await Promise.all([
+            fetch(`board.php?action=getFriends&userId=${encodeURIComponent(user.userId)}`, { cache: 'no-store' }),
+            fetch(`board.php?action=getFriendRequests&userId=${encodeURIComponent(user.userId)}`, { cache: 'no-store' })
+        ]);
+        bagFriends = await friendsRes.json();
+        const requests = await requestsRes.json();
+        renderBagFriends(Array.isArray(bagFriends) ? bagFriends : []);
+        renderBagFriendRequests(Array.isArray(requests) ? requests : []);
+    } catch (error) {
+        showToast('好友列表加载失败');
+    }
+}
+
+function fillSmallAvatar(container, avatarData, name) {
+    const data = avatarData || {};
+    if (data.type === 'image' && data.src) {
+        const image = document.createElement('img');
+        image.src = data.src;
+        image.alt = '';
+        container.appendChild(image);
+    } else {
+        container.textContent = data.text || Array.from(name || '旅')[0];
+        if (data.color) container.style.background = data.color;
+    }
+}
+
+function renderBagFriends(friends) {
+    const box = document.getElementById('bagFriendList');
+    box.replaceChildren();
+    if (!friends.length) {
+        box.innerHTML = '<div class="side-empty">暂无好友</div>';
+        return;
+    }
+    friends.forEach((friend) => {
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = `friend-row${activeFriend && activeFriend.userId === friend.userId ? ' active' : ''}`;
+        row.onclick = () => selectPrivateFriend(friend);
+        const avatar = document.createElement('span');
+        avatar.className = 'friend-avatar';
+        fillSmallAvatar(avatar, friend.avatar, friend.user);
+        const copy = document.createElement('span');
+        copy.className = 'friend-copy';
+        const name = document.createElement('b');
+        name.textContent = friend.remark || friend.user || '玩家';
+        const meta = document.createElement('span');
+        meta.textContent = friend.userId || '';
+        copy.append(name, meta);
+        const online = document.createElement('span');
+        online.className = `online-dot${friend.online ? ' online' : ''}`;
+        row.append(avatar, copy, online);
+        box.appendChild(row);
+    });
+}
+
+function renderBagFriendRequests(requests) {
+    const box = document.getElementById('bagFriendRequests');
+    box.replaceChildren();
+    if (!requests.length) {
+        box.innerHTML = '<div class="side-empty">暂无申请</div>';
+        return;
+    }
+    requests.forEach((request) => {
+        const row = document.createElement('div');
+        row.className = 'request-row';
+        const friend = document.createElement('div');
+        friend.className = 'friend-row';
+        const avatar = document.createElement('span');
+        avatar.className = 'friend-avatar';
+        fillSmallAvatar(avatar, request.avatar, request.user);
+        const copy = document.createElement('span');
+        copy.className = 'friend-copy';
+        copy.innerHTML = `<b></b><span></span>`;
+        copy.querySelector('b').textContent = request.user || '玩家';
+        copy.querySelector('span').textContent = request.userId || '';
+        friend.append(avatar, copy);
+        const actions = document.createElement('div');
+        actions.className = 'request-actions';
+        const accept = document.createElement('button');
+        accept.className = 'btn primary';
+        accept.textContent = '同意';
+        accept.onclick = () => respondBagFriendRequest(request.userId, 'accept');
+        const reject = document.createElement('button');
+        reject.className = 'btn';
+        reject.textContent = '拒绝';
+        reject.onclick = () => respondBagFriendRequest(request.userId, 'reject');
+        actions.append(accept, reject);
+        row.append(friend, actions);
+        box.appendChild(row);
+    });
+}
+
+async function sendBagFriendRequest() {
+    const input = document.getElementById('bagFriendIdInput');
+    const friendId = input.value.trim().toUpperCase();
+    if (!friendId) return showToast('请输入用户 ID');
+    const res = await fetch(`board.php?action=addFriend&userId=${encodeURIComponent(user.userId)}&friendId=${encodeURIComponent(friendId)}`, { cache: 'no-store' });
+    const result = (await res.text()).trim();
+    if (result === 'pending') {
+        input.value = '';
+        showToast('好友申请已发送');
+    } else if (result === 'already') showToast('已经是好友');
+    else if (result === 'self') showToast('不能添加自己');
+    else if (result === 'notfound') showToast('没有找到该用户');
+    else showToast('申请发送失败');
+}
+
+async function respondBagFriendRequest(friendId, decision) {
+    const res = await fetch(`board.php?action=respondFriendRequest&userId=${encodeURIComponent(user.userId)}&friendId=${encodeURIComponent(friendId)}&decision=${decision}`, { cache: 'no-store' });
+    if ((await res.text()).trim() === 'ok') {
+        showToast(decision === 'accept' ? '已添加好友' : '已拒绝申请');
+        await loadBagSocialPanel();
+    } else {
+        showToast('处理申请失败');
+    }
+}
+
+function selectWorldChannel() {
+    chatMode = 'world';
+    activeFriend = null;
+    document.getElementById('worldChannelBtn').classList.add('active');
+    document.getElementById('chatChannelTitle').textContent = '世界频道';
+    document.getElementById('chatChannelMeta').textContent = '所有玩家都可以看到';
+    document.getElementById('worldChatInput').placeholder = '和大家聊聊...';
+    renderBagFriends(bagFriends);
+    loadBagWorldMessages();
+}
+
+async function selectPrivateFriend(friend) {
+    chatMode = 'private';
+    activeFriend = friend;
+    document.getElementById('worldChannelBtn').classList.remove('active');
+    document.getElementById('chatChannelTitle').textContent = friend.remark || friend.user || '私聊';
+    document.getElementById('chatChannelMeta').textContent = `私聊 · ${friend.userId}`;
+    document.getElementById('worldChatInput').placeholder = `发送给 ${friend.user || '好友'}...`;
+    renderBagFriends(bagFriends);
+    await loadBagPrivateMessages();
+}
+
+async function loadBagPrivateMessages() {
+    if (!activeFriend) return;
+    try {
+        const res = await fetch(`board.php?action=getMessages&userId=${encodeURIComponent(user.userId)}&otherUserId=${encodeURIComponent(activeFriend.userId)}`, { cache: 'no-store' });
+        const messages = await res.json();
+        const normalized = (Array.isArray(messages) ? messages : []).map((message) => ({
+            ...message,
+            user: message.from === user.userId ? (user.username || '我') : activeFriend.user,
+            avatar: message.from === user.userId
+                ? { type:'initial', text:Array.from(user.username || '我')[0], color:'#8f2730' }
+                : activeFriend.avatar
+        }));
+        worldChatSignature = getWorldChatSignature(normalized);
+        renderBagWorldMessages(normalized.slice(-100));
+    } catch (error) {
+        showToast('私聊加载失败');
+    }
+}
+
+async function sendBagChatMessage() {
+    const input = document.getElementById('worldChatInput');
+    const content = input.value.trim();
+    if (!content || !user) return;
+    if (chatMode === 'private' && !activeFriend) return showToast('请选择好友');
+    input.disabled = true;
+    try {
+        const url = chatMode === 'world'
+            ? `board.php?action=sendWorldMessage&userId=${encodeURIComponent(user.userId)}&messageContent=${encodeURIComponent(content)}`
+            : `board.php?action=sendMessage&userId=${encodeURIComponent(user.userId)}&otherUserId=${encodeURIComponent(activeFriend.userId)}&messageContent=${encodeURIComponent(content)}`;
+        const res = await fetch(url, { cache: 'no-store' });
+        if ((await res.text()).trim() === 'ok') {
+            input.value = '';
+            if (chatMode === 'world') await loadBagWorldMessages();
+            else await loadBagPrivateMessages();
+        } else {
+            showToast('消息发送失败');
+        }
+    } finally {
+        input.disabled = false;
+        input.focus();
+    }
+}
+
+function startBagWorldPolling() {
+    clearInterval(worldChatPolling);
+    worldChatPolling = setInterval(async () => {
+        if (document.hidden) return;
+        try {
+            if (chatMode === 'private') {
+                await loadBagPrivateMessages();
+                return;
+            }
+            const res = await fetch('board.php?action=getWorldMessages', { cache: 'no-cache' });
+            const messages = await res.json();
+            const signature = getWorldChatSignature(messages);
+            if (Array.isArray(messages) && signature !== worldChatSignature) {
+                worldChatSignature = signature;
+                renderBagWorldMessages(messages.slice(-100));
+            }
+        } catch (error) {}
+    }, 8000);
+}
+
+async function loadMyMessages() {
+    if (!user || document.hidden || messagesLoading) return;
+    messagesLoading = true;
+    try {
+        const response = await fetch(`board.php?action=getMyMessages&userId=${encodeURIComponent(user.userId)}`, { cache:'no-store' });
+        const data = await response.json();
+        if (data.code !== 'ok') return;
+        myMessages = data;
+        const badge = document.getElementById('messageBadge');
+        const count = Number(data.pendingCount || 0);
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'inline-block' : 'none';
+        window.dispatchEvent(new CustomEvent('journey:messages-updated', { detail: { count } }));
+        renderMyMessages();
+    } catch (error) {}
+    finally { messagesLoading = false; }
+}
+
+function openMessagesModal() {
+    document.getElementById('messagesModal').classList.add('show');
+    renderGiftItemSelect();
+    loadMyMessages();
+}
+
+function closeMessagesModal() {
+    document.getElementById('messagesModal').classList.remove('show');
+    if (location.hash === '#messages') history.replaceState(null, '', location.pathname + location.search);
+}
+
+function renderMyMessages() {
+    const list = document.getElementById('myMessageList');
+    if (!list) return;
+    list.textContent = '';
+    const transfers = Array.isArray(myMessages.transfers) ? myMessages.transfers : [];
+    const notifications = Array.isArray(myMessages.notifications) ? myMessages.notifications : [];
+    const gifts = Array.isArray(myMessages.gifts) ? myMessages.gifts : [];
+    const mails = Array.isArray(myMessages.mails) ? myMessages.mails : [];
+    if (!transfers.length && !gifts.length && !mails.length && !notifications.length) {
+        list.innerHTML = '<div class="desc">暂无消息。</div>';
+        return;
+    }
+    transfers.forEach((transfer) => {
+        const row = document.createElement('div');
+        row.className = 'message-row';
+        const title = document.createElement('b');
+        title.textContent = `${transfer.senderName || transfer.senderId} 向你转入 ${transfer.amount} 金币`;
+        const meta = document.createElement('p');
+        meta.textContent = `${transfer.time || ''} · 玩家 ID ${transfer.senderId || ''}`;
+        const actions = document.createElement('div');
+        actions.className = 'actions';
+        const accept = document.createElement('button');
+        accept.className = 'btn primary'; accept.type = 'button'; accept.textContent = '领取金币';
+        accept.onclick = () => respondGoldTransfer(transfer.transferId, 'accept');
+        const reject = document.createElement('button');
+        reject.className = 'btn danger'; reject.type = 'button'; reject.textContent = '拒绝并退回';
+        reject.onclick = () => respondGoldTransfer(transfer.transferId, 'reject');
+        actions.append(accept, reject); row.append(title, meta, actions); list.appendChild(row);
+    });
+    gifts.forEach((gift) => {
+        const row = document.createElement('div'); row.className = 'message-row';
+        const title = document.createElement('b'); title.textContent = `${gift.senderName || gift.senderId} 赠送：${gift.item?.name || gift.itemId} × ${gift.count || 1}`;
+        const meta = document.createElement('p'); meta.textContent = `${gift.time || ''} · 领取后进入仓库，仓满转邮件`;
+        const actions = document.createElement('div'); actions.className = 'actions';
+        const accept = document.createElement('button'); accept.className='btn primary'; accept.textContent='领取礼物'; accept.onclick=()=>respondItemGift(gift.giftId,'accept');
+        const reject = document.createElement('button'); reject.className='btn danger'; reject.textContent='拒绝并退回'; reject.onclick=()=>respondItemGift(gift.giftId,'reject');
+        actions.append(accept,reject); row.append(title,meta,actions); list.appendChild(row);
+    });
+    mails.forEach((mail) => {
+        const row = document.createElement('div'); row.className = 'message-row mail';
+        const title = document.createElement('b'); title.textContent = `✉ ${mail.subject || '系统邮件'}`;
+        const meta = document.createElement('p');
+        meta.textContent = `${mail.body ? mail.body + ' · ' : ''}${mail.expiresAt || ''} 过期`;
+        const rewards = document.createElement('div'); rewards.className = 'reward-chips';
+        const hasAttachment = Boolean(mail.itemId) || Number(mail.xp || 0) > 0 || Number(mail.gold || 0) > 0;
+        if (mail.itemId) { const chip=document.createElement('span'); chip.className='reward-chip'; chip.textContent=`物品：${mail.item?.name || mail.itemId} × ${mail.count || 1}`; rewards.appendChild(chip); }
+        if (Number(mail.xp || 0) > 0) { const chip=document.createElement('span'); chip.className='reward-chip'; chip.textContent=`经验 +${mail.xp}`; rewards.appendChild(chip); }
+        if (Number(mail.gold || 0) > 0) { const chip=document.createElement('span'); chip.className='reward-chip'; chip.textContent=`金币 +${mail.gold}`; rewards.appendChild(chip); }
+        if (!rewards.childElementCount) { const chip=document.createElement('span'); chip.className='reward-chip'; chip.textContent='文字邮件'; rewards.appendChild(chip); }
+        const actions = document.createElement('div'); actions.className='actions';
+        const claim = document.createElement('button'); claim.className='btn primary'; claim.textContent=hasAttachment ? '✓ 领取邮件奖励' : '✓ 确认阅读'; claim.onclick=()=>claimItemMail(mail.mailId);
+        actions.appendChild(claim); row.append(title,meta,rewards,actions); list.appendChild(row);
+    });
+    notifications.forEach((notice) => {
+        const isRead = Boolean(notice.processed);
+        const row = document.createElement('div'); row.className = `message-row${isRead ? ' is-read' : ''}`;
+        const title = document.createElement('b'); title.textContent = notice.text || '系统消息';
+        const state = document.createElement('span'); state.className = 'message-state'; state.textContent = isRead ? '已读' : '未读'; title.appendChild(state);
+        const meta = document.createElement('p'); meta.textContent = notice.time || '';
+        const actions = document.createElement('div'); actions.className = 'actions';
+        const action = document.createElement('button'); action.type = 'button';
+        if (isRead) {
+            action.className = 'btn danger'; action.textContent = '删除'; action.onclick = () => deleteNotification(notice.id);
+        } else {
+            action.className = 'btn'; action.textContent = '标记已读'; action.onclick = () => dismissNotification(notice.id, action);
+        }
+        actions.appendChild(action); row.append(title, meta, actions); list.appendChild(row);
+    });
+}
+
+async function createGoldTransfer() {
+    const targetUserId = document.getElementById('transferTargetId').value.trim();
+    const amount = Math.floor(Number(document.getElementById('transferAmount').value || 0));
+    if (!targetUserId || amount < 1) return showToast('请填写正确的玩家 ID 和金币数');
+    if (!confirm(`确定向玩家 ${targetUserId} 转出 ${amount} 金币吗？`)) return;
+    const form = new FormData();
+    form.append('action', 'createGoldTransfer'); form.append('userId', user.userId);
+    form.append('targetUserId', targetUserId); form.append('amount', String(amount));
+    const response = await fetch('board.php', { method:'POST', body:form });
+    const data = await response.json();
+    const messages = { user_not_found:'找不到该玩家 ID', nogold:'金币不足', self:'不能给自己转金币', rate_limited:'转账过于频繁，请稍后再试' };
+    if (data.code !== 'ok') return showToast(messages[data.code] || '转账失败');
+    gold = Number(data.gold || 0); unlimitedGold = data.unlimitedGold === true;
+    document.getElementById('transferAmount').value = '';
+    renderInventory();
+    showToast('金币已转出，等待对方处理');
+}
+
+async function respondGoldTransfer(transferId, decision) {
+    const form = new FormData();
+    form.append('action', 'respondGoldTransfer'); form.append('userId', user.userId);
+    form.append('transferId', transferId); form.append('decision', decision);
+    const response = await fetch('board.php', { method:'POST', body:form });
+    const data = await response.json();
+    if (data.code !== 'ok') return showToast('该转账已处理或不存在');
+    if (decision === 'accept') {
+        gold = Number(data.gold || gold); renderInventory(); showToast('金币已领取');
+    } else showToast('已拒绝，金币已退回对方');
+    await loadMyMessages();
+}
+
+async function dismissNotification(notificationId, button = null) {
+    if (button) { button.disabled = true; button.textContent = '处理中...'; }
+    const form = new FormData();
+    form.append('action', 'dismissNotification'); form.append('userId', user.userId); form.append('notificationId', notificationId);
+    try {
+        const response = await fetch('board.php', { method:'POST', body:form });
+        const data = await response.json();
+        if (data.code !== 'ok') throw new Error(data.code || 'update_failed');
+        showToast('消息已标记为已读');
+        await loadMyMessages();
+    } catch (error) {
+        if (button) { button.disabled = false; button.textContent = '标记已读'; }
+        showToast('消息状态更新失败，请稍后重试');
+    }
+}
+
+async function deleteNotification(notificationId) {
+    if (!confirm('确定删除这条已读消息吗？')) return;
+    const form = new FormData();
+    form.append('action', 'deleteNotification'); form.append('userId', user.userId); form.append('notificationId', notificationId);
+    const response = await fetch('board.php', { method:'POST', body:form });
+    const data = await response.json();
+    if (data.code !== 'ok') return showToast(data.code === 'notification_unread' ? '请先将消息标记为已读' : '消息删除失败');
+    showToast('已读消息已删除');
+    await loadMyMessages();
+}
+
+function renderGiftItemSelect() {
+    const select = document.getElementById('giftItemSelect'); if (!select) return;
+    select.textContent = '';
+    [['inventory',inventory],['warehouse',warehouse]].forEach(([storage,items]) => items.forEach((item,slotIndex) => {
+        if (!item) return; const def=getDef(item); const option=document.createElement('option');
+        option.value=`${storage}:${slotIndex}`; option.textContent=`${storage==='inventory'?'背包':'仓库'} · ${def.name} × ${item.count || 1}`; select.appendChild(option);
+    }));
+    if (!select.options.length) { const option=document.createElement('option'); option.value=''; option.textContent='没有可赠送物品'; select.appendChild(option); }
+}
+
+async function createItemGift() {
+    const targetUserId=document.getElementById('giftTargetId').value.trim(); const value=document.getElementById('giftItemSelect').value;
+    if (!targetUserId || !value) return showToast('请填写玩家 ID 并选择物品');
+    const [storage,slotIndex]=value.split(':'); if (!confirm(`确定向 ${targetUserId} 赠送这件物品吗？`)) return;
+    const form=new FormData(); form.append('action','createItemGift'); form.append('userId',user.userId); form.append('targetUserId',targetUserId); form.append('storage',storage); form.append('slotIndex',slotIndex); form.append('count','1');
+    const response=await fetch('board.php',{method:'POST',body:form}); const data=await response.json();
+    if(data.code!=='ok') return showToast(data.code==='user_not_found'?'找不到该玩家':data.code==='self'?'不能赠送给自己':'赠送失败');
+    await loadInventory(); renderGiftItemSelect(); showToast('礼物已发出，等待对方处理');
+}
+
+async function respondItemGift(giftId,decision) {
+    const form=new FormData(); form.append('action','respondItemGift'); form.append('userId',user.userId); form.append('giftId',giftId); form.append('decision',decision);
+    const response=await fetch('board.php',{method:'POST',body:form}); const data=await response.json();
+    if(data.code!=='ok') return showToast('礼物已处理或不存在');
+    showToast(decision==='accept'?(data.delivery==='mail'?'仓库已满，礼物已进入邮件':'礼物已进入仓库'):'已拒绝，物品通过邮件退回赠送者');
+    await loadInventory(); await loadMyMessages();
+}
+
+async function claimItemMail(mailId) {
+    const form=new FormData(); form.append('action','claimItemMail'); form.append('userId',user.userId); form.append('mailId',mailId);
+    const response=await fetch('board.php',{method:'POST',body:form}); const data=await response.json();
+    if(data.code==='full') return showToast('仓库已满，暂时无法领取');
+    if(data.code!=='ok') return showToast(data.code==='expired'?'邮件已经过期':'领取失败');
+    const rewards=data.rewards||{}; const received=[];
+    if(rewards.itemId) received.push('物品已存入仓库');
+    if(Number(rewards.xp||0)>0) received.push(`经验 +${rewards.xp}`);
+    if(Number(rewards.gold||0)>0) received.push(`金币 +${rewards.gold}`);
+    showToast(received.length?`领取成功：${received.join('，')}`:'邮件已确认'); await loadInventory(); await loadMyMessages();
+}
+
+function openSynthesisModal() {
+    if (!user) return showToast('请先登录');
+    synthesisSelection = Array(10).fill(null);
+    renderSynthesisWorkbench();
+    document.getElementById('synthesisModal').classList.add('show');
+}
+
+function closeSynthesisModal() {
+    if (synthesisBusy) return;
+    document.getElementById('synthesisModal').classList.remove('show');
+}
+
+function synthesisSelectedCount(slotIndex) {
+    return synthesisSelection.filter((entry) => entry && entry.slotIndex === slotIndex).length;
+}
+
+function addSynthesisMaterial(slotIndex, targetIndex = -1) {
+    const item = inventory[slotIndex];
+    if (!item || getDef(item).quality !== 'common') return showToast('只能投入背包中的白色品质物品');
+    const selectedCount = synthesisSelectedCount(slotIndex);
+    if (selectedCount >= Number(item.count || 1)) return showToast('这个物品已经全部投入');
+    let destination = Number.isInteger(targetIndex) && targetIndex >= 0 && targetIndex < 10 && !synthesisSelection[targetIndex]
+        ? targetIndex
+        : synthesisSelection.findIndex((entry) => !entry);
+    if (destination < 0) return showToast('10 个投入槽已经放满');
+    synthesisSelection[destination] = { storage:'inventory', slotIndex, count:1, quality:'common' };
+    renderSynthesisWorkbench();
+}
+
+function removeSynthesisMaterial(targetIndex) {
+    if (synthesisBusy || !synthesisSelection[targetIndex]) return;
+    synthesisSelection[targetIndex] = null;
+    renderSynthesisWorkbench();
+}
+
+function renderSynthesisWorkbench() {
+    const sourceGrid = document.getElementById('synthesisSourceGrid');
+    const slots = document.getElementById('synthesisSlots');
+    if (!sourceGrid || !slots) return;
+    sourceGrid.replaceChildren();
+    slots.replaceChildren();
+    let commonUnits = 0;
+    inventory.forEach((item, slotIndex) => {
+        if (!item || getDef(item).quality !== 'common') return;
+        const def = getDef(item);
+        const total = Number(item.count || 1);
+        const used = synthesisSelectedCount(slotIndex);
+        const available = Math.max(0, total - used);
+        commonUnits += total;
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'synthesis-source' + (available < 1 ? ' depleted' : '');
+        card.draggable = available > 0 && !synthesisBusy;
+        card.title = `${def.name} · 剩余可投入 ${available} 件`;
+        const icon = document.createElement('span'); icon.className = 'material-icon'; icon.textContent = def.icon;
+        const name = document.createElement('strong'); name.textContent = def.name;
+        const count = document.createElement('small'); count.textContent = `可用 ${available} / ${total}`;
+        card.append(icon, name, count);
+        card.onclick = () => { if (available > 0 && !synthesisBusy) addSynthesisMaterial(slotIndex); };
+        card.ondragstart = (event) => {
+            event.dataTransfer.effectAllowed = 'copy';
+            event.dataTransfer.setData('application/x-journey-synthesis-slot', String(slotIndex));
+            event.dataTransfer.setData('text/plain', String(slotIndex));
+        };
+        sourceGrid.appendChild(card);
+    });
+    if (commonUnits < 1) {
+        const empty = document.createElement('div'); empty.className = 'desc'; empty.textContent = '背包里没有白色品质物品。'; sourceGrid.appendChild(empty);
+    }
+
+    synthesisSelection.forEach((entry, targetIndex) => {
+        const target = document.createElement('div');
+        target.className = 'synthesis-slot' + (entry ? ' filled' : '');
+        target.dataset.number = String(targetIndex + 1);
+        target.ondragover = (event) => { if (!entry && !synthesisBusy) { event.preventDefault(); target.classList.add('drag-over'); } };
+        target.ondragleave = () => target.classList.remove('drag-over');
+        target.ondrop = (event) => {
+            event.preventDefault(); target.classList.remove('drag-over');
+            if (entry || synthesisBusy) return;
+            const raw = event.dataTransfer.getData('application/x-journey-synthesis-slot') || event.dataTransfer.getData('text/plain');
+            const slotIndex = Number(raw);
+            if (Number.isInteger(slotIndex)) addSynthesisMaterial(slotIndex, targetIndex);
+        };
+        if (entry) {
+            const item = inventory[entry.slotIndex];
+            const def = getDef(item);
+            const icon = document.createElement('span'); icon.className = 'material-icon'; icon.textContent = def.icon;
+            const hint = document.createElement('span'); hint.className = 'remove-hint'; hint.textContent = def.name;
+            target.append(icon, hint);
+            target.title = `点击取回：${def.name}`;
+            target.onclick = () => removeSynthesisMaterial(targetIndex);
+        } else {
+            target.textContent = '+';
+        }
+        slots.appendChild(target);
+    });
+    updateSynthesisSummary();
+}
+
+function synthesisIngredients() {
+    const grouped = new Map();
+    synthesisSelection.filter(Boolean).forEach((entry) => {
+        const key = String(entry.slotIndex);
+        if (!grouped.has(key)) grouped.set(key, { storage:'inventory', slotIndex:entry.slotIndex, count:0, quality:'common' });
+        grouped.get(key).count += 1;
+    });
+    return [...grouped.values()];
+}
+
+function updateSynthesisSummary() {
+    const total = synthesisSelection.filter(Boolean).length;
+    const summary = document.getElementById('synthesisSummary');
+    summary.textContent = `已投入 ${total} / 10${total === 10 ? ' · 可以兑换' : ` · 还需要 ${10 - total} 件`}`;
+    summary.classList.toggle('ready', total === 10);
+    const button = document.getElementById('synthesisConfirmBtn');
+    button.disabled = synthesisBusy || total !== 10;
+    button.textContent = synthesisBusy ? '正在兑换…' : '兑换绿色物品';
+}
+
+async function confirmSynthesis() {
+    if (synthesisBusy) return;
+    const entries = synthesisIngredients();
+    const total = entries.reduce((sum, entry) => sum + entry.count, 0);
+    if (total !== 10) return showToast('必须放满 10 个材料槽');
+    synthesisBusy = true;
+    updateSynthesisSummary();
+    const form = new FormData();
+    form.append('action', 'synthesizeItems'); form.append('userId', user.userId); form.append('ingredients', JSON.stringify(entries));
+    try {
+        const response = await fetch('board.php', { method:'POST', body:form });
+        const data = await response.json();
+        if (data.code !== 'ok') {
+            showToast({ common_only:'只能兑换白色品质物品', inventory_only:'只能使用背包物品', need_ten:'必须投入 10 件物品', missing:'物品数量已经发生变化', full:'背包和仓库没有空间' }[data.code] || '兑换失败');
+            await loadInventory();
+            synthesisSelection = Array(10).fill(null);
+            renderSynthesisWorkbench();
+            return;
+        }
+        inventory = normalizeSlots(data.inventory || []); warehouse = Array.isArray(data.warehouse) ? data.warehouse : [];
+        if (data.item?.id) serverItemDefinitions[data.item.id] = data.item;
+        synthesisSelection = Array(10).fill(null);
+        document.getElementById('synthesisModal').classList.remove('show');
+        renderInventory(); renderWarehouse();
+        showToast(`兑换成功：${data.item?.name || '绿色品质物品'}已送达`);
+    } catch (error) {
+        showToast('网络异常，材料没有在本地提前扣除，请刷新确认');
+    } finally {
+        synthesisBusy = false;
+        updateSynthesisSummary();
+    }
+}
+
+function showToast(text) {
+    const toast = document.getElementById('toast');
+    toast.textContent = text;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1600);
+}
+</script>
+</body>
+</html>

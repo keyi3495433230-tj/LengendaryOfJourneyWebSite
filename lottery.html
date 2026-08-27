@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="device-ui.js?v=16"></script>
+<link rel="stylesheet" href="device-ui.css?v=16">
+    <title>旅途传说 - 道具抽奖</title>
+    <style>
+        :root {
+            --ink: #fffaf2;
+            --muted: rgba(255,250,242,.66);
+            --line: rgba(255,230,200,.16);
+            --brand: #8f2730;
+            --gold: #c79a55;
+            --panel: rgba(255,246,232,.075);
+            --shadow: 0 24px 70px rgba(0,0,0,.34);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            color: var(--ink);
+            font-family: "Microsoft YaHei","PingFang SC",Arial,sans-serif;
+            background:
+                radial-gradient(circle at 12% 8%, rgba(199,154,85,.18), transparent 26%),
+                radial-gradient(circle at 86% 0%, rgba(143,39,48,.26), transparent 30%),
+                linear-gradient(135deg,#120d0b 0%,#21110f 48%,#090607 100%);
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255,230,200,.026) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,230,200,.026) 1px, transparent 1px);
+            background-size: 42px 42px;
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,.9), transparent 82%);
+        }
+        button, a { font: inherit; color: inherit; }
+        .page { position: relative; z-index: 1; width: min(1440px, calc(100% - 36px)); margin: 0 auto; padding: 22px 0 40px; }
+        .topbar, .panel, .card, .result, .modal {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(14px);
+        }
+        .topbar { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 16px; }
+        .brand h1 { font-size: 24px; color: #fff4df; }
+        .brand p { margin-top: 5px; color: var(--muted); font-size: 13px; }
+        .nav { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+        .btn {
+            min-height: 40px;
+            padding: 0 14px;
+            border: 1px solid rgba(199,154,85,.28);
+            border-radius: 8px;
+            background: rgba(255,255,255,.07);
+            color: #fff4df;
+            cursor: pointer;
+            font-weight: 900;
+        }
+        .btn.primary { border: 0; background: linear-gradient(135deg,var(--brand),#3b0d14); }
+        .btn:disabled { opacity: .58; cursor: wait; }
+        .hero { margin-top: 18px; }
+        .panel { padding: 24px; overflow: hidden; }
+        .lottery-panel { width:100%; }
+        .section-title { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+        .section-title h2 { color: #fff4df; font-size: 22px; }
+        .section-title span, .copy, .rate-row { color: var(--muted); }
+        .copy { line-height: 1.8; font-size: 14px; }
+        .case-stage {
+            position: relative;
+            height: 360px;
+            margin-top: 22px;
+            border: 1px solid rgba(255,230,200,.12);
+            border-radius: 8px;
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.025));
+        }
+        .case-stage::before, .case-stage::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            z-index: 3;
+            width: 16%;
+            pointer-events: none;
+        }
+        .case-stage::before { left: 0; background: linear-gradient(90deg, #130d0c, transparent); }
+        .case-stage::after { right: 0; background: linear-gradient(270deg, #130d0c, transparent); }
+        .pointer {
+            position: absolute;
+            z-index: 4;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, #ffd58e 18%, #ffd58e 82%, transparent);
+            box-shadow: 0 0 22px rgba(255,213,142,.82);
+        }
+        .strip {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 0 24px;
+            will-change: transform;
+            transform: translateX(-1200px);
+        }
+        .strip.spinning { transition: transform 10s cubic-bezier(.15,.55,.35,1); }
+        .card {
+            flex: 0 0 180px;
+            height: 238px;
+            display: grid;
+            align-content: center;
+            justify-items: center;
+            gap: 10px;
+            padding: 14px 10px;
+            text-align: center;
+            background: rgba(255,255,255,.055);
+        }
+        .icon { font-size: 58px; filter: drop-shadow(0 7px 10px rgba(0,0,0,.28)); }
+        .name { width: 100%; color: #fff4df; font-size: 15px; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .quality { font-size: 13px; color: var(--muted); }
+        .quality-common { border-color: rgba(190,196,202,.42); }
+        .quality-uncommon { border-color: rgba(72,199,116,.62); background: rgba(72,199,116,.10); }
+        .quality-rare { border-color: rgba(78,158,255,.66); background: rgba(78,158,255,.11); }
+        .quality-epic { border-color: rgba(184,104,255,.72); background: rgba(184,104,255,.12); }
+        .quality-legendary { border-color: rgba(151,31,43,.94); background: linear-gradient(135deg,rgba(111,17,27,.42),rgba(55,7,13,.30)); box-shadow: inset 0 0 20px rgba(151,31,43,.14); }
+        .controls { display: flex; justify-content:center; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 20px; }
+        .draw-btn { min-width:220px; min-height:48px; font-size:15px; }
+        .wallet { min-width:160px; text-align:center; }
+        .pity-panel { width:min(1120px,100%); display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:16px auto 0; }
+        .pity-card { padding:14px 15px; border:1px solid rgba(255,230,200,.13); border-radius:7px; background:rgba(255,255,255,.035); }
+        .pity-head { display:flex; align-items:center; justify-content:space-between; gap:12px; color:#fff4df; font-size:12px; font-weight:900; }
+        .pity-head span:last-child { color:var(--gold); }
+        .pity-track { height:6px; margin:10px 0 8px; overflow:hidden; border-radius:99px; background:rgba(0,0,0,.34); }
+        .pity-track i { display:block; width:0; height:100%; border-radius:inherit; background:linear-gradient(90deg,#9c4ed0,#d59bff); transition:width .3s ease; }
+        .pity-card.uncommon .pity-track i { background:linear-gradient(90deg,#2f9b58,#78dc96); box-shadow:0 0 12px rgba(94,209,132,.35); }
+        .pity-card.legendary .pity-track i { background:linear-gradient(90deg,#8f2730,#ef7c62); }
+        .pity-card small { color:var(--muted); font-size:10px; line-height:1.6; }
+        .pity-triggered { display:inline-flex; margin-left:7px; padding:3px 7px; border:1px solid rgba(239,196,119,.35); border-radius:999px; color:#ffd58e; font-size:10px; vertical-align:middle; }
+        .result { display: none; width:min(720px,100%); margin: 18px auto 0; padding: 18px; align-items: center; gap: 16px; background: rgba(255,255,255,.06); }
+        .result.show { display: flex; }
+        .result .icon { width: 64px; height: 64px; display: grid; place-items: center; border-radius: 8px; border: 1px solid rgba(199,154,85,.38); }
+        .result h3 { color: #fff4df; font-size: 20px; }
+        .result-copy { min-width:0; flex:1; }
+        .result-actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+        .xp-gain { display:inline-flex; margin-top:7px; padding:4px 8px; border:1px solid rgba(199,154,85,.30); border-radius:6px; color:#ffd58e; background:rgba(199,154,85,.08); font-size:12px; font-weight:900; }
+        .btn.danger { border-color:rgba(212,86,74,.42); color:#ffd8d3; }
+        .rates { display: grid; gap: 10px; margin-top: 12px; }
+        .rate-row { display: flex; justify-content: space-between; gap: 10px; padding: 11px 12px; border: 1px solid rgba(255,230,200,.12); border-radius: 8px; background: rgba(255,255,255,.045); font-size: 13px; }
+        .history { margin-top:22px; padding-top:20px; border-top:1px solid var(--line); }
+        .history-list { display:grid; max-height:126px; overflow-y:auto; padding-right:3px; scrollbar-gutter:stable; }
+        .history-row { min-height:42px; display:flex; align-items:center; gap:5px; overflow:hidden; padding:0 12px; border-bottom:1px solid rgba(255,230,200,.09); color:var(--muted); font-size:13px; white-space:nowrap; }
+        .history-row:first-child { border-top:1px solid rgba(255,230,200,.09); }
+        .history-player { flex:0 0 auto; border:0; padding:0; background:none; color:var(--gold); cursor:pointer; font-weight:800; }
+        .history-item { min-width:0; overflow:hidden; font-weight:900; text-overflow:ellipsis; }
+        .history-time { flex:0 0 auto; margin-left:auto; color:rgba(255,250,242,.42); font-size:12px; }
+        .history-item.quality-common { color:#c6cbd1; }
+        .history-item.quality-uncommon { color:#5ed184; }
+        .history-item.quality-rare { color:#63a8ff; }
+        .history-item.quality-epic { color:#c07aff; }
+        .history-item.quality-legendary { color:#b32635; }
+        .history-empty { padding:28px; color:var(--muted); text-align:center; }
+        .modal-backdrop { position:fixed; inset:0; z-index:80; display:none; align-items:center; justify-content:center; padding:18px; background:rgba(0,0,0,.68); }
+        .modal-backdrop.show { display:flex; }
+        .modal { width:min(440px,100%); padding:20px; background:rgba(22,13,11,.98); }
+        .modal-head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+        .modal-head h2 { color:#fff4df; font-size:20px; }
+        .icon-btn { width:40px; height:40px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.06); color:#fff4df; cursor:pointer; font-size:22px; }
+        .login-box { margin-top: 16px; display: none; }
+        @media (max-width: 860px) {
+            .topbar { display: flex; flex-direction: column; align-items: stretch; }
+            .nav { justify-content: flex-start; }
+            .panel { padding:16px; }
+            .case-stage { height: 290px; }
+            .card { flex-basis: 150px; height: 206px; }
+            .result { align-items:flex-start; flex-wrap:wrap; }
+            .result-actions { width:100%; justify-content:stretch; }
+            .result-actions .btn { flex:1; }
+            .pity-panel { grid-template-columns:1fr; }
+            .history-row { font-size:12px; }
+            .history-time { font-size:11px; }
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <header class="topbar">
+        <div class="brand">
+            <h1>旅途传说 · 道具抽奖</h1>
+            <p>每日首次免费，之后消耗金币开启补给箱。只要金币充足即可继续抽取。</p>
+        </div>
+        <nav class="nav">
+            <button class="btn" onclick="location.href='game.html'">游戏官网</button>
+            <button class="btn" onclick="location.href='bagdemo.html'">我的背包</button>
+            <button class="btn" onclick="location.href='leaderboard.html'">排行榜</button>
+            <button class="btn" onclick="location.href='forum.html'">论坛</button>
+            <button class="btn" onclick="location.href='catalog.html'">图鉴</button>
+            <button class="btn" onclick="location.href='market.html'">市场</button>
+        </nav>
+    </header>
+
+    <section id="loginBox" class="panel login-box">
+        <div class="section-title">
+            <h2>请先登录</h2>
+            <span>抽到的物品需要绑定账号</span>
+        </div>
+        <p class="copy">请先从游戏官网登录，再回来抽奖。物品会直接进入你的 3 x 7 背包。</p>
+        <div class="controls"><button class="btn primary" onclick="location.href='game.html'">去登录</button></div>
+    </section>
+
+    <section id="lotteryApp" class="hero" style="display:none;">
+        <div class="panel lottery-panel">
+            <div class="section-title">
+                <h2>杂物补给箱</h2>
+            </div>
+            <p class="copy">每天第一次成功抽奖免费。物品的系统回收价会随市场每日浮动；开奖成功后物品会立即放入背包。</p>
+            <div class="case-stage" id="stage">
+                <div class="pointer"></div>
+                <div class="strip" id="strip"></div>
+            </div>
+            <div class="controls">
+                <button id="drawBtn" class="btn primary draw-btn" onclick="drawLottery()">今日首抽免费</button>
+                <button class="btn" onclick="location.href='bagdemo.html'">查看背包</button>
+                <span class="copy wallet" id="goldLine">金币：读取中</span>
+                <span class="copy wallet" id="drawLine">今日次数：读取中</span>
+            </div>
+            <div class="pity-panel" aria-label="抽奖保底进度">
+                <section class="pity-card uncommon"><div class="pity-head"><span>精良保底</span><span id="uncommonPityText">0 / 10</span></div><div class="pity-track"><i id="uncommonPityBar"></i></div><small>连续 10 抽内必得绿色或更高品质物品，获得后重新累计。</small></section>
+                <section class="pity-card"><div class="pity-head"><span>史诗保底</span><span id="epicPityText">0 / 40</span></div><div class="pity-track"><i id="epicPityBar"></i></div><small>40 抽内必得紫色或红色物品，获得后重新累计。</small></section>
+                <section class="pity-card legendary"><div class="pity-head"><span>传说祈愿</span><span id="legendaryPityText">0 / 600</span></div><div class="pity-track"><i id="legendaryPityBar"></i></div><small id="legendaryPityHint">350 抽后逐步提升，600 抽内必得红色物品。</small></section>
+            </div>
+            <div class="result" id="result"></div>
+            <section class="history">
+                <div class="section-title">
+                    <h2>传说出货记录</h2>
+                    <span>仅记录最高品质 · 最近 30 条</span>
+                </div>
+                <div class="history-list" id="lotteryHistory"><div class="history-empty">正在读取记录...</div></div>
+            </section>
+            <section class="history">
+                <div class="section-title">
+                    <h2>普通出货记录</h2>
+                    <span>除传说外 · 最近 30 条</span>
+                </div>
+                <div class="history-list" id="normalLotteryHistory"><div class="history-empty">正在读取记录...</div></div>
+            </section>
+        </div>
+    </section>
+</main>
+
+<script>
+let user = null;
+let catalog = [];
+let spinning = false;
+let gold = 0;
+let unlimitedGold = false;
+let freeDrawAvailable = false;
+let latestDraw = null;
+        let drawCost = 10;
+let drawsToday = 0;
+let lotteryPity = { uncommon:0, uncommonHard:10, epic:0, epicHard:40, legendary:0, legendarySoftStart:350, legendaryHard:600, softActive:false };
+
+window.addEventListener('DOMContentLoaded', init);
+
+async function init() {
+    const auth = await JourneyAuth.ready;
+    if (!auth || !auth.authenticated || !auth.user) return showLogin();
+    user = {
+        userId: auth.user.userId,
+        username: auth.user.user,
+        role: auth.user.role || 'user'
+    };
+    document.getElementById('lotteryApp').style.display = 'block';
+    await loadCatalog();
+    await loadWallet();
+    renderIdleStrip();
+    loadLotteryHistory();
+    loadNormalLotteryHistory();
+}
+
+function showLogin() {
+    document.getElementById('loginBox').style.display = 'block';
+}
+
+async function loadCatalog() {
+    const res = await fetch('board.php?action=getItemCatalog', { cache: 'no-store' });
+    const data = await res.json();
+    catalog = data.items || [];
+}
+
+async function loadWallet() {
+    const res = await fetch(`board.php?action=getInventory&userId=${encodeURIComponent(user.userId)}`, { cache: 'no-store' });
+    const data = await res.json();
+    if (data.code === 'ok') {
+        gold = Number(data.gold || 0);
+        unlimitedGold = data.unlimitedGold === true;
+        freeDrawAvailable = data.freeDrawAvailable === true;
+                drawCost = Number(data.lotteryDrawCost || 10);
+        drawsToday = Number(data.lotteryDrawsToday || 0);
+        if (data.lotteryPity) lotteryPity = data.lotteryPity;
+        renderGold();
+        renderPity();
+        renderDrawButton();
+    }
+}
+
+function renderGold() {
+    document.getElementById('goldLine').textContent = `金币：${unlimitedGold ? '∞' : gold}${freeDrawAvailable ? ' · 今日首抽免费' : ''}`;
+    document.getElementById('drawLine').textContent = `今日已抽：${drawsToday} 次`;
+}
+
+function renderDrawButton() {
+    const btn = document.getElementById('drawBtn');
+    if (!btn) return;
+    btn.disabled = spinning;
+    btn.textContent = freeDrawAvailable ? '今日首抽免费' : `开始抽奖 · ${drawCost} 金币`;
+}
+
+function renderPity() {
+    const uncommon = Math.max(0, Number(lotteryPity.uncommon || 0));
+    const uncommonHard = Math.max(1, Number(lotteryPity.uncommonHard || 10));
+    const epic = Math.max(0, Number(lotteryPity.epic || 0));
+    const epicHard = Math.max(1, Number(lotteryPity.epicHard || 40));
+    const legendary = Math.max(0, Number(lotteryPity.legendary || 0));
+    const legendaryHard = Math.max(1, Number(lotteryPity.legendaryHard || 600));
+    document.getElementById('uncommonPityText').textContent = `${uncommon} / ${uncommonHard}`;
+    document.getElementById('epicPityText').textContent = `${epic} / ${epicHard}`;
+    document.getElementById('legendaryPityText').textContent = `${legendary} / ${legendaryHard}`;
+    document.getElementById('uncommonPityBar').style.width = `${Math.min(100, uncommon / uncommonHard * 100)}%`;
+    document.getElementById('epicPityBar').style.width = `${Math.min(100, epic / epicHard * 100)}%`;
+    document.getElementById('legendaryPityBar').style.width = `${Math.min(100, legendary / legendaryHard * 100)}%`;
+    document.getElementById('legendaryPityHint').textContent = lotteryPity.softActive
+        ? '软保底已启动，红色物品权重会逐步提升。'
+        : `累计到 ${Number(lotteryPity.legendarySoftStart || 350)} 抽后启动软保底。`;
+}
+
+function sampleItem() {
+    return catalog[Math.floor(Math.random() * catalog.length)] || {
+        id: 'common_001',
+        name: '旅途·旧布片',
+        icon: '◇',
+        quality: 'common',
+        qualityLabel: '普通',
+        type: '杂物'
+    };
+}
+
+function makeCard(item, isWin = false) {
+    const card = document.createElement('div');
+    card.className = `card quality-${item.quality || 'common'}`;
+    if (isWin) card.dataset.win = '1';
+    card.innerHTML = `
+        <div class="icon">${item.icon || '?'}</div>
+        <div class="name" title="${item.name || item.id}">${item.name || item.id}</div>
+        <div class="quality">${item.qualityLabel || item.quality || '普通'}</div>
+    `;
+    return card;
+}
+
+function renderIdleStrip() {
+    const strip = document.getElementById('strip');
+    strip.classList.remove('spinning');
+    strip.style.transform = 'translateX(-720px)';
+    strip.textContent = '';
+    for (let i = 0; i < 24; i++) strip.appendChild(makeCard(sampleItem()));
+}
+
+async function drawLottery() {
+    if (spinning || !user || !user.userId) return;
+    spinning = true;
+    const btn = document.getElementById('drawBtn');
+    const result = document.getElementById('result');
+    btn.disabled = true;
+    btn.textContent = '抽取中...';
+    result.classList.remove('show');
+
+    try {
+        const res = await fetch(`board.php?action=drawLottery&userId=${encodeURIComponent(user.userId)}`, { cache: 'no-store' });
+        const data = await res.json();
+        if (data.code === 'full') throw new Error('背包已满，请先整理背包或上架物品。');
+        if (data.code === 'nogold') {
+            gold = Number(data.gold || 0);
+            renderGold();
+            throw new Error(`金币不足，抽奖需要 ${drawCost} 金币。可以每日签到或出售物品获得金币。`);
+        }
+        if (data.code !== 'ok') throw new Error('抽奖失败，请稍后再试。');
+        gold = Number(data.gold || gold);
+        unlimitedGold = data.unlimitedGold === true;
+        freeDrawAvailable = data.freeDrawAvailable === true;
+        drawCost = Number(data.drawCost || drawCost);
+        drawsToday = Number(data.drawsToday || drawsToday + 1);
+        const nextPity = data.pity || null;
+        renderGold();
+        await playSpin(data.item);
+        latestDraw = {
+            item: data.item,
+            slotIndex: Number(data.slotIndex),
+            xpGain: Number(data.xpGain || 5),
+            level: Number(data.level || 1),
+            pityTriggered: data.pityTriggered || ''
+        };
+        showResult(latestDraw);
+        // Reveal the prize first so pity progress cannot leak the result during the spin.
+        await new Promise(resolve => window.setTimeout(resolve, 300));
+        if (nextPity) {
+            lotteryPity = nextPity;
+            renderPity();
+        }
+        if (data.item && data.item.quality === 'legendary') loadLotteryHistory();
+        else loadNormalLotteryHistory();
+    } catch (err) {
+        result.className = 'result show';
+        result.innerHTML = `<div><h3>没有完成抽奖</h3><p class="copy">${err.message || '请稍后重试。'}</p></div>`;
+    } finally {
+        spinning = false;
+        btn.disabled = false;
+        renderDrawButton();
+    }
+}
+
+function playSpin(winningItem) {
+    return new Promise((resolve) => {
+        const strip = document.getElementById('strip');
+        const stage = document.getElementById('stage');
+        const winIndex = 60;
+        strip.classList.remove('spinning');
+        strip.textContent = '';
+        for (let i = 0; i < 84; i++) strip.appendChild(makeCard(i === winIndex ? winningItem : sampleItem(), i === winIndex));
+
+        const cards = [...strip.children];
+        const card = cards[winIndex];
+        const stageCenter = stage.clientWidth / 2;
+        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+        const finalX = stageCenter - cardCenter;
+        const travelDistance = Math.min(7200, Math.max(5200, stage.clientWidth * 7));
+        const startX = finalX - travelDistance;
+        strip.style.transform = `translateX(${startX}px)`;
+        strip.offsetHeight;
+        strip.classList.add('spinning');
+        strip.style.transform = `translateX(${finalX}px)`;
+        window.setTimeout(resolve, 10050);
+    });
+}
+
+function showResult(draw) {
+    const item = draw.item;
+    const result = document.getElementById('result');
+    const pityLabels = { uncommon:'精良保底触发', epic:'史诗保底触发', legendary:'传说保底触发' };
+    result.className = `result show quality-${item.quality || 'common'}`;
+    result.innerHTML = `
+        <div class="icon">${item.icon || '?'}</div>
+        <div class="result-copy">
+            <h3>${item.name || item.id}${draw.pityTriggered ? `<span class="pity-triggered">${pityLabels[draw.pityTriggered] || '保底触发'}</span>` : ''}</h3>
+            <p class="copy">${item.qualityLabel || item.quality || '普通'} · ${item.type || '网页道具'}，已放入你的背包。</p>
+            <span class="xp-gain">经验 +${draw.xpGain} · 当前等级 ${draw.level}</span>
+        </div>
+        <div class="result-actions">
+            <button class="btn" type="button" onclick="location.href='bagdemo.html'">查看背包</button>
+            <button class="btn" type="button" onclick="sellLatestDraw()">出售给系统 · ${Number(item.systemPrice || 1)} 金币</button>
+            <button class="btn danger" type="button" onclick="discardLatestDraw()">丢弃</button>
+        </div>
+    `;
+}
+
+async function loadLotteryHistory() {
+    await loadHistoryInto('getLegendaryLotteryHistory', 'lotteryHistory', '还没有玩家抽到传说品质物品。');
+}
+
+async function loadNormalLotteryHistory() {
+    await loadHistoryInto('getNormalLotteryHistory', 'normalLotteryHistory', '还没有普通出货记录。');
+}
+
+async function loadHistoryInto(action, elementId, emptyText) {
+    const box = document.getElementById(elementId);
+    try {
+        const response = await fetch(`board.php?action=${action}`, { cache:'no-store' });
+        const data = await response.json();
+        renderLotteryHistory(box, Array.isArray(data.items) ? data.items : [], emptyText);
+    } catch (error) {
+        box.innerHTML = '<div class="history-empty">记录加载失败，请稍后刷新。</div>';
+    }
+}
+
+function renderLotteryHistory(box, items, emptyText) {
+    box.replaceChildren();
+    if (!items.length) {
+        box.innerHTML = `<div class="history-empty">${emptyText}</div>`;
+        return;
+    }
+    items.slice(0, 30).forEach((record) => {
+        const definition = catalog.find((item) => item.id === record.itemId) || {};
+        const quality = record.quality || definition.quality || 'common';
+        const row = document.createElement('div');
+        row.className = 'history-row';
+        const player = document.createElement('button');
+        player.type = 'button';
+        player.className = 'history-player';
+        player.textContent = record.user || '玩家';
+        player.onclick = () => location.href = `profile.html?userId=${encodeURIComponent(record.userId || '')}`;
+        const actionText = document.createElement('span');
+        actionText.textContent = '抽到了';
+        const itemName = document.createElement('span');
+        itemName.className = `history-item quality-${quality}`;
+        itemName.textContent = record.itemName || definition.name || '物品';
+        const time = document.createElement('time');
+        time.className = 'history-time';
+        time.textContent = record.time || '';
+        row.append(player, actionText, itemName, time);
+        box.appendChild(row);
+    });
+}
+
+async function discardLatestDraw() {
+    if (!latestDraw || spinning) return;
+    const item = latestDraw.item;
+    const button = document.querySelector('.result-actions .danger');
+    button.disabled = true;
+    button.textContent = '丢弃中...';
+    try {
+        const url = `board.php?action=discardLotteryItem&userId=${encodeURIComponent(user.userId)}&slotIndex=${encodeURIComponent(latestDraw.slotIndex)}&itemId=${encodeURIComponent(item.id)}`;
+        const response = await fetch(url, { cache: 'no-store' });
+        const data = await response.json();
+        if (data.code !== 'ok') throw new Error();
+        latestDraw = null;
+        const result = document.getElementById('result');
+        result.className = 'result show';
+        result.innerHTML = `<div class="result-copy"><h3>物品已丢弃</h3><p class="copy">${item.name || item.id} 已从背包移除。</p></div>`;
+    } catch (error) {
+        button.disabled = false;
+        button.textContent = '重试丢弃';
+    }
+}
+
+async function sellLatestDraw() {
+    if (!latestDraw || spinning) return;
+    const item = latestDraw.item;
+    const expectedPrice = Number(item.systemPrice || 1);
+    if (!confirm(`确定将「${item.name || item.id}」出售给系统并获得 ${expectedPrice} 金币吗？`)) return;
+    const buttons = document.querySelectorAll('.result-actions .btn');
+    buttons.forEach((button) => { button.disabled = true; });
+    try {
+        const url = `board.php?action=sellLotteryItemToSystem&userId=${encodeURIComponent(user.userId)}&slotIndex=${encodeURIComponent(latestDraw.slotIndex)}&itemId=${encodeURIComponent(item.id)}`;
+        const response = await fetch(url, { cache:'no-store' });
+        const data = await response.json();
+        if (data.code !== 'ok') throw new Error();
+        gold = Number(data.gold || gold);
+        unlimitedGold = data.unlimitedGold === true;
+        renderGold();
+        latestDraw = null;
+        const result = document.getElementById('result');
+        result.className = 'result show';
+        result.innerHTML = `<div class="result-copy"><h3>已出售给系统</h3><p class="copy">${item.name || item.id} 已出售，获得 ${Number(data.price || expectedPrice)} 金币。</p></div>`;
+    } catch (error) {
+        buttons.forEach((button) => { button.disabled = false; });
+    }
+}
+
+</script>
+</body>
+</html>

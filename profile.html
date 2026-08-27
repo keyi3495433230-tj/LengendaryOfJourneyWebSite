@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="device-ui.js?v=16"></script>
+<link rel="stylesheet" href="device-ui.css?v=16">
+    <title>个人信息 - 旅途传说</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, "Microsoft YaHei";
+            background: linear-gradient(135deg, #faf7f2 0%, #f5ebe0 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .back-btn {
+            padding: 8px 14px;
+            background: #c57f5e;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #a54623;
+            text-shadow: 1px 1px 2px rgba(165, 70, 35, 0.1);
+        }
+
+        .profile-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+        .profile-hero {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #f0e6dc;
+        }
+        .avatar-preview {
+            width: 72px;
+            height: 72px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #a54623, #d4957a);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            font-size: 28px;
+            font-weight: 800;
+            box-shadow: 0 10px 24px rgba(165,70,35,.18);
+        }
+        .avatar-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .level-panel { flex: 1; min-width: 0; }
+        .level-title { color: #4a3728; font-size: 18px; font-weight: 800; }
+        .level-subtitle { margin-top: 5px; color: #8b6914; font-size: 13px; }
+        .level-bar { height: 9px; border-radius: 99px; background: #f0e6dc; overflow: hidden; margin-top: 10px; }
+        .level-fill { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #a54623, #d4957a); }
+        .xp-rule-btn {
+            margin-top: 10px;
+            min-height: 30px;
+            padding: 0 10px;
+            border: 1px solid rgba(199,154,85,.28);
+            border-radius: 8px;
+            background: rgba(255,255,255,.07);
+            color: #fff4df;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: 12px;
+            align-items: center;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #8b6914;
+            font-size: 14px;
+        }
+        .info-value {
+            color: #4a3728;
+            font-size: 14px;
+            word-break: break-all;
+        }
+
+        .edit-section {
+            background: #fff;
+            border-radius: 16px;
+            padding: 22px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+        .edit-section h3 {
+            color: #a54623;
+            margin-bottom: 18px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .edit-section h3::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: #c57f5e;
+            border-radius: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #644f3a;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #f0e6dc;
+            border-radius: 10px;
+            font-size: 14px;
+            background: #faf7f2;
+            transition: border-color 0.2s;
+        }
+        .avatar-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-secondary {
+            padding: 11px 14px;
+            background: #faf7f2;
+            color: #a54623;
+            border: 1px solid #ead8c7;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #c57f5e;
+        }
+
+        .btn-primary {
+            padding: 12px;
+            background: linear-gradient(135deg, #c57f5e 0%, #d4957a 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(197, 127, 94, 0.3);
+        }
+
+        .btn-danger {
+            padding: 14px;
+            background: linear-gradient(135deg, #d4564a 0%, #e06b5e 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-danger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(212, 86, 74, 0.3);
+        }
+
+        .login-required {
+            text-align: center;
+            padding: 60px 20px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+        .login-required h3 {
+            color: #a54623;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        .login-required button {
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #c57f5e 0%, #d4957a 100%);
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+        }
+        .modal-overlay.hidden {
+            display: none;
+        }
+        .modal-box {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 16px;
+            max-width: 360px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .modal-box h3 {
+            margin-bottom: 1.5rem;
+            color: #a54623;
+            font-size: 18px;
+        }
+        .modal-box input {
+            width: 100%;
+            padding: 12px 14px;
+            margin: 10px 0;
+            border: 2px solid #f0e6dc;
+            border-radius: 10px;
+            font-size: 14px;
+            background: #faf7f2;
+        }
+        .modal-box input:focus {
+            outline: none;
+            border-color: #c57f5e;
+        }
+        .modal-box button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #c57f5e 0%, #d4957a 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            margin: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .modal-box .switch-btn {
+            background: transparent;
+            color: #a54623;
+            text-decoration: underline;
+            margin-top: 12px;
+            padding: 8px;
+        }
+        .modal-tip {
+            color: #a54623;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+        .modal-tip.error {
+            color: #d4564a;
+        }
+        .modal-tip.success {
+            color: #5a9b5a;
+        }
+        :root {
+            --ink: #fffaf2;
+            --muted: rgba(255,250,242,.64);
+            --line: rgba(255,230,200,.16);
+            --brand: #8f2730;
+            --brand-deep: #3b0d14;
+            --gold: #c79a55;
+            --panel: rgba(255,246,232,.075);
+            --panel-strong: rgba(255,246,232,.105);
+            --shadow: 0 22px 60px rgba(0,0,0,.28);
+            --soft-shadow: 0 10px 28px rgba(0,0,0,.18);
+        }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 18% 0%, rgba(199,154,85,.18), transparent 30%),
+                radial-gradient(circle at 90% 12%, rgba(143,39,48,.28), transparent 28%),
+                linear-gradient(135deg, #120d0b 0%, #21110f 48%, #090607 100%);
+            background-attachment: fixed;
+            padding: 24px;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255,230,200,.028) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,230,200,.028) 1px, transparent 1px);
+            background-size: 42px 42px;
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,.86), transparent 78%);
+        }
+        .container {
+            position: relative;
+            z-index: 1;
+            width: min(100%, 1180px);
+            max-width: none;
+        }
+        .header {
+            padding: 18px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(255,246,232,.07);
+            box-shadow: var(--soft-shadow);
+            backdrop-filter: blur(14px);
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .back-btn,
+        .header .back-btn {
+            min-height: 42px;
+            padding: 0 16px;
+            border: 1px solid rgba(199,154,85,.28);
+            border-radius: 8px;
+            background: rgba(255,255,255,.07);
+            color: #fff4df;
+            box-shadow: none;
+        }
+        .title {
+            margin: 18px 0;
+            color: #fff4df;
+            font-size: 30px;
+            text-shadow: none;
+            letter-spacing: 0;
+        }
+        #profileContent {
+            grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+            gap: 16px;
+            align-items: start;
+        }
+        .profile-card,
+        .edit-section,
+        .login-required,
+        .modal-box {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            color: var(--ink);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+        }
+        .profile-card {
+            position: sticky;
+            top: 18px;
+            padding: 22px;
+        }
+        .profile-hero {
+            border-bottom-color: var(--line);
+        }
+        .avatar-preview {
+            width: 86px;
+            height: 86px;
+            border-radius: 8px;
+            border: 1px solid rgba(199,154,85,.34);
+            background: linear-gradient(135deg, var(--brand), var(--gold));
+        }
+        .level-title {
+            color: #fff4df;
+            font-size: 20px;
+        }
+        .level-subtitle,
+        .info-value,
+        .form-group label,
+        .modal-tip {
+            color: var(--muted);
+        }
+        .level-bar {
+            background: rgba(255,255,255,.08);
+        }
+        .level-fill {
+            background: linear-gradient(90deg, var(--gold), #b86642);
+        }
+        .info-grid {
+            grid-template-columns: 90px minmax(0, 1fr);
+            gap: 14px 16px;
+        }
+        .info-label {
+            color: #ead2ad;
+        }
+        .edit-section {
+            padding: 22px;
+        }
+        .edit-section h3 {
+            color: #fff4df;
+        }
+        .edit-section h3::before {
+            background: linear-gradient(to bottom, var(--gold), var(--brand));
+        }
+        .form-group input,
+        .form-group select,
+        .modal-box input {
+            border: 1px solid var(--line);
+            background: rgba(255,255,255,.08);
+            color: var(--ink);
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .modal-box input:focus {
+            border-color: rgba(199,154,85,.5);
+            box-shadow: 0 0 0 4px rgba(199,154,85,.10);
+        }
+        .form-group select option {
+            background: #21110f;
+            color: #fffaf2;
+        }
+        .btn-primary,
+        .modal-box button,
+        .login-required button {
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--brand), var(--brand-deep));
+            box-shadow: 0 10px 22px rgba(184,102,66,.22);
+        }
+        .btn-secondary {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(255,255,255,.07);
+            color: #fff4df;
+        }
+        .btn-danger {
+            border-radius: 8px;
+            background: linear-gradient(135deg, #9f2f34, #5d151a);
+        }
+        .modal-overlay {
+            backdrop-filter: blur(6px);
+        }
+        .modal-box {
+            background: rgba(24,14,12,.96);
+        }
+        .modal-box h3,
+        .modal-box .switch-btn {
+            color: #fff4df;
+        }
+        @media (max-width: 860px) {
+            body { padding: 14px 10px 34px; }
+            #profileContent {
+                grid-template-columns: 1fr;
+            }
+            .profile-card {
+                position: static;
+            }
+            .title {
+                font-size: 24px;
+            }
+        }
+        .form-group textarea {
+            width: 100%;
+            min-height: 92px;
+            padding: 12px 14px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(255,255,255,.08);
+            color: var(--ink);
+            resize: vertical;
+            line-height: 1.6;
+        }
+        .form-group textarea:focus {
+            outline: none;
+            border-color: rgba(199,154,85,.5);
+            box-shadow: 0 0 0 4px rgba(199,154,85,.10);
+        }
+        .public-hidden {
+            display: none !important;
+        }
+        /* Final profile layout cleanup */
+        body {
+            padding: 22px;
+        }
+        .container {
+            width: min(100%, 1120px);
+            margin: 0 auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        .back-btn,
+        .header .back-btn {
+            min-height: 38px;
+            padding: 0 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 800;
+        }
+        .title {
+            margin: 0 0 18px;
+            text-align: left;
+            font-size: 24px;
+            line-height: 1.2;
+        }
+        #profileContent {
+            grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+            gap: 16px;
+        }
+        #profileContent.public-view {
+            grid-template-columns: minmax(280px, 520px);
+            justify-content: center;
+        }
+        .settings-column {
+            display: grid;
+            gap: 14px;
+            min-width: 0;
+        }
+        .profile-card,
+        .edit-section,
+        .login-required {
+            border-radius: 8px;
+            background: rgba(255,246,232,.072);
+            box-shadow: 0 14px 38px rgba(0,0,0,.22);
+        }
+        .profile-card {
+            padding: 18px;
+        }
+        .profile-hero {
+            display: grid;
+            grid-template-columns: 82px minmax(0, 1fr);
+            gap: 14px;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 16px;
+        }
+        .avatar-preview {
+            width: 82px;
+            height: 82px;
+        }
+        .level-title {
+            font-size: 18px;
+            line-height: 1.35;
+        }
+        .xp-rule-btn {
+            min-height: 30px;
+            color: #fff4df;
+            background: rgba(255,255,255,.07);
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 76px minmax(0, 1fr);
+            gap: 11px 14px;
+            align-items: start;
+        }
+        .info-label {
+            font-size: 13px;
+            color: rgba(234,210,173,.86);
+        }
+        .info-value {
+            min-width: 0;
+            color: rgba(255,250,242,.78);
+            line-height: 1.55;
+            word-break: break-word;
+        }
+        #showBio {
+            padding: 10px;
+            border: 1px solid rgba(255,230,200,.12);
+            border-radius: 8px;
+            background: rgba(255,255,255,.045);
+        }
+        .public-inventory {
+            display: none;
+            padding: 18px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(255,246,232,.072);
+            box-shadow: 0 14px 38px rgba(0,0,0,.22);
+        }
+        #profileContent.public-view .public-inventory {
+            display: block;
+        }
+        .public-inventory h3 {
+            margin-bottom: 6px;
+            color: #fff4df;
+            font-size: 16px;
+        }
+        .inventory-summary {
+            margin-bottom: 14px;
+            color: rgba(255,250,242,.58);
+            font-size: 12px;
+        }
+        .public-bag-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 7px;
+        }
+        .public-bag-slot {
+            position: relative;
+            aspect-ratio: 1;
+            min-width: 0;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(255,230,200,.12);
+            border-radius: 6px;
+            background: rgba(255,255,255,.035);
+        }
+        .public-bag-slot.has-item {
+            cursor: help;
+        }
+        .public-bag-slot .bag-icon {
+            font-size: 23px;
+        }
+        .public-bag-slot .bag-count {
+            position: absolute;
+            right: 4px;
+            bottom: 3px;
+            color: #fff4df;
+            font-size: 10px;
+            font-weight: 800;
+        }
+        .public-bag-slot.quality-common { border-color: rgba(190,196,202,.42); }
+        .public-bag-slot.quality-uncommon { border-color: rgba(72,199,116,.58); background: rgba(72,199,116,.08); }
+        .public-bag-slot.quality-rare { border-color: rgba(67,153,255,.65); background: rgba(67,153,255,.09); }
+        .public-bag-slot.quality-epic { border-color: rgba(184,104,255,.72); background: rgba(184,104,255,.10); }
+        .public-bag-slot.quality-legendary { border-color: rgba(151,31,43,.94); background: rgba(111,17,27,.32); }
+        .edit-section {
+            padding: 18px;
+            margin-bottom: 0;
+        }
+        .edit-section h3 {
+            margin-bottom: 14px;
+            font-size: 16px;
+            line-height: 1.2;
+        }
+        .form-group {
+            margin-bottom: 13px;
+        }
+        .form-group label {
+            margin-bottom: 7px;
+            color: rgba(234,210,173,.88);
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            border-radius: 8px;
+            min-height: 42px;
+        }
+        .avatar-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+        .btn-primary,
+        .btn-danger {
+            min-height: 42px;
+            border-radius: 8px;
+            font-weight: 800;
+        }
+        .btn-secondary {
+            min-height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .modal-box {
+            border-radius: 8px;
+        }
+        @media (max-width: 820px) {
+            body {
+                padding: 12px;
+            }
+            .header {
+                justify-content: flex-start;
+            }
+            #profileContent {
+                grid-template-columns: 1fr;
+            }
+            .profile-card {
+                position: static;
+            }
+            .avatar-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+        /* Full-page profile shell */
+        html,
+        body {
+            min-height: 100%;
+        }
+        body {
+            height: 100vh;
+            overflow: hidden;
+            padding: 16px;
+        }
+        .container {
+            height: calc(100vh - 32px);
+            width: min(100%, 1280px);
+            display: grid;
+            grid-template-rows: auto auto minmax(0, 1fr);
+        }
+        .header {
+            margin-bottom: 12px;
+        }
+        .title {
+            margin-bottom: 12px;
+        }
+        #profileContent {
+            min-height: 0;
+            grid-template-columns: minmax(300px, 390px) minmax(0, 1fr);
+            gap: 16px;
+            overflow: hidden;
+        }
+        .profile-card {
+            position: static;
+            height: 100%;
+            overflow: auto;
+        }
+        .settings-column {
+            height: 100%;
+            overflow: auto;
+            padding-right: 4px;
+            align-content: start;
+        }
+        .settings-column::-webkit-scrollbar,
+        .profile-card::-webkit-scrollbar {
+            width: 8px;
+        }
+        .settings-column::-webkit-scrollbar-thumb,
+        .profile-card::-webkit-scrollbar-thumb {
+            background: rgba(199,154,85,.28);
+            border-radius: 999px;
+        }
+        .settings-column .edit-section:last-child {
+            margin-bottom: 0;
+        }
+        .password-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+        @media (max-width: 820px) {
+            body {
+                height: auto;
+                min-height: 100vh;
+                overflow: auto;
+                padding: 12px;
+            }
+            .container {
+                height: auto;
+                display: block;
+            }
+            #profileContent {
+                overflow: visible;
+            }
+            .profile-card,
+            .settings-column {
+                height: auto;
+                overflow: visible;
+            }
+            .password-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="loginModal" class="modal-overlay hidden">
+    <div class="modal-box">
+        <h3>登录</h3>
+        <input id="loginName" placeholder="用户名/邮箱">
+        <input id="loginPwd" type="password" placeholder="密码">
+        <button onclick="doLogin()">登录</button>
+        <div class="modal-tip" id="loginTip"></div>
+        <button class="switch-btn" onclick="switchToReg()">没有账号？去注册</button>
+    </div>
+</div>
+
+<div id="regModal" class="modal-overlay hidden">
+    <div class="modal-box">
+        <h3>注册</h3>
+        <input id="regName" placeholder="用户名">
+        <input id="regPwd" type="password" placeholder="密码">
+        <button onclick="doReg()">注册</button>
+        <div class="modal-tip" id="regTip"></div>
+        <button class="switch-btn" onclick="switchToLogin()">已有账号？去登录</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="header">
+        <button class="back-btn" onclick="location.href='game.html'">
+            ← 返回
+        </button>
+        <button class="back-btn" onclick="location.href='forum.html'">
+            进入论坛
+        </button>
+        <button class="back-btn" onclick="location.href='leaderboard.html'">
+            排行榜
+        </button>
+        <button class="back-btn" onclick="location.href='bagdemo.html#messages'">我的消息</button>
+    </div>
+    
+    <div class="title">✦ 个人信息 ✦</div>
+
+    <div id="loginRequired" class="login-required" style="display: none;">
+        <h3>请先登录</h3>
+        <button onclick="showLoginModal()">去登录</button>
+    </div>
+
+    <div id="profileContent" style="display: none;">
+        <div class="profile-card">
+            <div class="profile-hero">
+                <div class="avatar-preview" id="avatarPreview">旅</div>
+                <div class="level-panel">
+                    <div class="level-title" id="levelTitle">Lv.1 初来乍到</div>
+                    <div class="level-subtitle" id="levelSubtitle">经验 0 / 20</div>
+                    <div class="level-bar"><div class="level-fill" id="levelFill"></div></div>
+                    <button class="xp-rule-btn" type="button" onclick="showXpRules()">经验规则</button>
+                </div>
+            </div>
+            <div class="info-grid">
+                <div class="info-label">用户名</div>
+                <div class="info-value" id="showName"></div>
+                
+                <div class="info-label">用户ID</div>
+                <div class="info-value" style="display: flex; gap: 8px; align-items: center;">
+                    <span id="showUid"></span>
+                    <button class="btn-secondary" style="padding: 4px 8px; font-size: 12px; border-radius: 4px;" onclick="copyUid()">复制</button>
+                </div>
+                
+                <div class="info-label">性别</div>
+                <div class="info-value" id="showGender">未设置</div>
+                
+                <div class="info-label">邮箱</div>
+                <div class="info-value" id="showEmail">未设置</div>
+
+                <div class="info-label">当前称号</div>
+                <div class="info-value" id="showTitle">初来乍到</div>
+
+                <div class="info-label">自我简介</div>
+                <div class="info-value" id="showBio">这个玩家还没有写简介。</div>
+            </div>
+        </div>
+
+        <section class="public-inventory" id="publicInventory">
+            <h3>玩家背包</h3>
+            <div class="inventory-summary" id="publicInventorySummary">0 / 21 件物品</div>
+            <div class="public-bag-grid" id="publicBagGrid"></div>
+        </section>
+
+        <div class="edit-section">
+            <h3>修改昵称</h3>
+            <div class="form-group">
+                <label>新昵称</label>
+                <input id="newName" placeholder="请输入新昵称">
+                <div class="modal-tip" id="nameTip" style="display:none;"></div>
+            </div>
+            <button class="btn-primary" onclick="updateName()">保存昵称</button>
+        </div>
+
+        <div class="settings-column">
+        <div class="edit-section">
+            <h3>基本资料</h3>
+            <div class="form-group">
+                <label>头像</label>
+                <div class="avatar-actions">
+                    <label class="btn-secondary">
+                        上传头像
+                        <input id="avatarInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none;" onchange="handleAvatar(this)">
+                    </label>
+                    <button class="btn-secondary" type="button" onclick="resetAvatar()">使用默认头像</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>称号</label>
+                <select id="titleSelect"></select>
+            </div>
+            <div class="form-group">
+                <label>自我简介</label>
+                <textarea id="bioInput" maxlength="180" placeholder="写一句别人能看到的个人简介"></textarea>
+            </div>
+            <div class="form-group">
+                <label>性别</label>
+                <select id="genderSelect">
+                    <option value="">请选择性别</option>
+                    <option value="男">男</option>
+                    <option value="女">女</option>
+                    <option value="保密">保密</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>邮箱</label>
+                <input id="emailInput" type="email" placeholder="请输入邮箱地址">
+                <div class="modal-tip" id="emailTip" style="display:none;"></div>
+            </div>
+            <button class="btn-primary" onclick="saveProfile()">保存资料</button>
+        </div>
+
+        <div class="edit-section">
+            <h3>账号安全</h3>
+            <div class="password-grid">
+                <div class="form-group">
+                    <label>原密码</label>
+                    <input id="oldPwdInput" type="password" placeholder="请输入原密码">
+                </div>
+                <div class="form-group">
+                    <label>新密码</label>
+                    <input id="newPwdInput" type="password" placeholder="请输入新密码">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>确认新密码</label>
+                <input id="confirmPwdInput" type="password" placeholder="再次输入新密码">
+                <div class="modal-tip" id="pwdTip" style="display:none;"></div>
+            </div>
+            <button class="btn-primary" onclick="updatePassword()">修改密码</button>
+            <div style="height: 10px;"></div>
+            <button class="btn-danger" onclick="logout()">退出登录</button>
+        </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let user = null;
+let userProfile = null;
+let currentAvatar = '';
+let avatarChanged = false;
+let avatarReset = false;
+let publicUserId = new URLSearchParams(location.search).get('userId') || '';
+let isPublicView = false;
+
+window.onload = function() {
+    init();
+};
+
+async function init() {
+    const auth = await JourneyAuth.ready;
+    if (auth && auth.authenticated && auth.user) {
+        user = { userId: auth.user.userId, username: auth.user.user, role: auth.user.role };
+        isPublicView = Boolean(publicUserId && publicUserId !== user.userId);
+        await loadUserProfile();
+        showProfile();
+    } else if (publicUserId) {
+        isPublicView = true;
+        await loadUserProfile();
+        showProfile();
+    } else {
+        showLoginRequired();
+    }
+}
+
+async function loadUserProfile() {
+    currentAvatar = '';
+    avatarChanged = false;
+    avatarReset = false;
+    try {
+        const targetId = isPublicView ? publicUserId : (publicUserId || user.userId);
+        const action = isPublicView ? 'getPublicUser' : 'getUser';
+        let res = await fetch(`board.php?action=${action}&userId=${targetId}`);
+        let j = await res.json();
+        if (j && Object.keys(j).length > 0) {
+            userProfile = j;
+        }
+    } catch(e) {
+        userProfile = {};
+    }
+}
+
+function showLoginRequired() {
+    document.getElementById("loginRequired").style.display = "block";
+    document.getElementById("profileContent").style.display = "none";
+}
+
+function showProfile() {
+    document.getElementById("loginRequired").style.display = "none";
+    document.getElementById("profileContent").style.display = "grid";
+    document.getElementById("profileContent").classList.toggle("public-view", isPublicView);
+    const displayName = userProfile && userProfile.user ? userProfile.user : (user ? user.username : "玩家");
+    document.getElementById("showName").innerText = displayName;
+    document.getElementById("showUid").innerText = userProfile && userProfile.userId ? userProfile.userId : (user ? user.userId : "");
+    renderAvatarPreview(userProfile && userProfile.avatar ? userProfile.avatar : null, displayName);
+    renderLevelInfo();
+    renderTitleSelect();
+    renderPublicInventory();
+    document.querySelectorAll(".edit-section").forEach((section) => section.classList.toggle("public-hidden", isPublicView));
+    const settingsColumn = document.querySelector(".settings-column");
+    if (settingsColumn) settingsColumn.classList.toggle("public-hidden", isPublicView);
+    
+    let gender = userProfile && userProfile.gender ? userProfile.gender : "未设置";
+    document.getElementById("showGender").innerText = gender;
+    document.getElementById("genderSelect").value = userProfile && userProfile.gender ? userProfile.gender : "";
+    
+    let email = userProfile && userProfile.email ? userProfile.email : "未设置";
+    document.getElementById("showEmail").innerText = email;
+    if (document.getElementById("emailInput")) document.getElementById("emailInput").value = userProfile && userProfile.email ? userProfile.email : "";
+    document.getElementById("showTitle").innerText = userProfile && userProfile.selectedTitle ? userProfile.selectedTitle : "初来乍到";
+    document.getElementById("showBio").innerText = userProfile && userProfile.bio ? userProfile.bio : "这个玩家还没有写简介。";
+    if (document.getElementById("bioInput")) document.getElementById("bioInput").value = userProfile && userProfile.bio ? userProfile.bio : "";
+}
+
+function renderPublicInventory() {
+    const grid = document.getElementById("publicBagGrid");
+    const summary = document.getElementById("publicInventorySummary");
+    if (!grid || !summary) return;
+    const entries = userProfile && Array.isArray(userProfile.publicInventory) ? userProfile.publicInventory : [];
+    const slotMap = new Map(entries.map((entry) => [Number(entry.slotIndex), entry]));
+    grid.replaceChildren();
+    for (let index = 0; index < 21; index++) {
+        const entry = slotMap.get(index);
+        const slot = document.createElement("div");
+        slot.className = "public-bag-slot";
+        if (entry && entry.item) {
+            const item = entry.item;
+            slot.classList.add("has-item", `quality-${item.quality || "common"}`);
+            slot.title = `${item.name || "未知道具"}\n${item.qualityLabel || item.quality || "普通"} · ${item.type || "网页道具"}\n${item.desc || ""}`;
+            const icon = document.createElement("span");
+            icon.className = "bag-icon";
+            icon.textContent = item.icon || "?";
+            slot.appendChild(icon);
+            if (Number(entry.count || 1) > 1) {
+                const count = document.createElement("span");
+                count.className = "bag-count";
+                count.textContent = `x${entry.count}`;
+                slot.appendChild(count);
+            }
+        }
+        grid.appendChild(slot);
+    }
+    summary.textContent = `${entries.length} / 21 个格子已使用`;
+}
+
+function renderAvatarPreview(avatar, name) {
+    const preview = document.getElementById("avatarPreview");
+    preview.innerHTML = "";
+    if (avatar && avatar.type === "image" && avatar.src) {
+        const img = document.createElement("img");
+        img.src = avatar.src;
+        img.alt = "头像";
+        preview.appendChild(img);
+    } else {
+        preview.textContent = avatar && avatar.text ? avatar.text : (name ? Array.from(name)[0] : "旅");
+        preview.style.background = avatar && avatar.color ? avatar.color : "linear-gradient(135deg, #a54623, #d4957a)";
+    }
+}
+
+function renderLevelInfo() {
+    const level = userProfile && userProfile.level ? userProfile.level : 1;
+    const xp = userProfile && userProfile.xp ? userProfile.xp : 0;
+    const next = userProfile && userProfile.nextLevelXp ? userProfile.nextLevelXp : 20;
+    const title = userProfile && userProfile.selectedTitle ? userProfile.selectedTitle : "初来乍到";
+    document.getElementById("levelTitle").innerText = `Lv.${level} ${title}`;
+    document.getElementById("levelSubtitle").innerText = level >= 1000 ? `满级 · 经验 ${xp}` : `经验 ${xp} / ${next}`;
+    const start = Math.max(0, (level - 1) * 20);
+    const percent = level >= 1000 ? 100 : Math.max(0, Math.min(100, ((xp - start) / 20) * 100));
+    document.getElementById("levelFill").style.width = `${percent}%`;
+}
+
+function showXpRules() {
+    alert("经验与奖励规则：\n\n1. 每日首次发布帖子：获得 10 经验和 30-50 随机金币。\n2. 回复帖子：每回复 1 条随机获得 1-10 经验。\n3. 帖子或评论每次获得一位玩家的首次点赞，作者获得 5 金币；取消后重赞不重复奖励。\n4. 等级最高 1000 级，100 级起每 100 级解锁 1※ 至 10※ 称号。");
+}
+
+function renderTitleSelect() {
+    const select = document.getElementById("titleSelect");
+    if (!select) return;
+    select.innerHTML = "";
+    const titles = userProfile && Array.isArray(userProfile.unlockedTitles) ? userProfile.unlockedTitles : ["初来乍到"];
+    titles.forEach((title) => {
+        const option = document.createElement("option");
+        option.value = title;
+        option.textContent = title;
+        select.appendChild(option);
+    });
+    select.value = userProfile && userProfile.selectedTitle ? userProfile.selectedTitle : titles[titles.length - 1];
+}
+
+async function handleAvatar(input) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    if (!file.type.startsWith("image/")) {
+        alert("请选择图片文件。");
+        input.value = "";
+        return;
+    }
+    input.disabled = true;
+    try {
+        currentAvatar = await compressAvatarImage(file);
+        avatarChanged = true;
+        avatarReset = false;
+        renderAvatarPreview({ type: "image", src: currentAvatar }, user.username);
+    } catch (error) {
+        input.value = "";
+        alert("图片读取或压缩失败，请换一张图片重试。");
+    } finally {
+        input.disabled = false;
+    }
+}
+
+async function compressAvatarImage(file) {
+    const source = await loadAvatarBitmap(file);
+    const sourceWidth = source.width || source.naturalWidth;
+    const sourceHeight = source.height || source.naturalHeight;
+    if (!sourceWidth || !sourceHeight) throw new Error("invalid_image");
+
+    const maxSide = 512;
+    let scale = Math.min(1, maxSide / Math.max(sourceWidth, sourceHeight));
+    let width = Math.max(1, Math.round(sourceWidth * scale));
+    let height = Math.max(1, Math.round(sourceHeight * scale));
+    let quality = .84;
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d", { alpha: true });
+    const supportsWebp = document.createElement("canvas").toDataURL("image/webp").startsWith("data:image/webp");
+    const outputType = supportsWebp ? "image/webp" : "image/jpeg";
+    let resultBlob = null;
+
+    for (let attempt = 0; attempt < 14; attempt++) {
+        canvas.width = width;
+        canvas.height = height;
+        context.clearRect(0, 0, width, height);
+        context.drawImage(source, 0, 0, width, height);
+        resultBlob = await new Promise((resolve) => canvas.toBlob(resolve, outputType, quality));
+        if (resultBlob && resultBlob.size <= 100 * 1024) break;
+        if (quality > .46) {
+            quality -= .08;
+        } else {
+            width = Math.max(96, Math.round(width * .82));
+            height = Math.max(96, Math.round(height * .82));
+            quality = .72;
+        }
+    }
+    if (typeof source.close === "function") source.close();
+    if (!resultBlob || resultBlob.size > 112 * 1024) throw new Error("compression_failed");
+    return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(resultBlob);
+    });
+}
+
+async function loadAvatarBitmap(file) {
+    if ("createImageBitmap" in window) {
+        try {
+            return await createImageBitmap(file, { imageOrientation: "from-image" });
+        } catch (error) {}
+    }
+    return new Promise((resolve, reject) => {
+        const image = new Image();
+        const url = URL.createObjectURL(file);
+        image.onload = () => {
+            URL.revokeObjectURL(url);
+            resolve(image);
+        };
+        image.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error("decode_failed"));
+        };
+        image.src = url;
+    });
+}
+
+function resetAvatar() {
+    currentAvatar = "";
+    avatarChanged = false;
+    avatarReset = true;
+    const input = document.getElementById("avatarInput");
+    if (input) input.value = "";
+    renderAvatarPreview({ type: "initial", text: user.username ? Array.from(user.username)[0] : "旅", color: "#8f2730" }, user.username);
+}
+
+function copyUid() {
+    let uid = document.getElementById("showUid").innerText;
+    navigator.clipboard.writeText(uid).then(() => {
+        alert("用户ID已复制！");
+    }).catch(() => {
+        let temp = document.createElement('textarea');
+        temp.value = uid;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        alert("用户ID已复制！");
+    });
+}
+
+function showLoginModal() {
+    document.getElementById('loginModal').classList.remove('hidden');
+    document.getElementById('regModal').classList.add('hidden');
+}
+
+function showRegModal() {
+    document.getElementById('regModal').classList.remove('hidden');
+    document.getElementById('loginModal').classList.add('hidden');
+}
+
+function switchToReg() {
+    showRegModal();
+}
+
+function switchToLogin() {
+    showLoginModal();
+}
+
+async function doReg() {
+    let name = document.getElementById("regName").value.trim();
+    let pwd = document.getElementById("regPwd").value.trim();
+    let tip = document.getElementById("regTip");
+    if (!name || !pwd) {
+        tip.innerText = "请输入用户名和密码";
+        tip.className = "modal-tip error";
+        return;
+    }
+    let res = await fetch('board.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: new URLSearchParams({ action: 'reg', name, pwd })
+    });
+    let t = (await res.text()).trim();
+    try { t = JSON.parse(t).code; } catch (error) {}
+    if (t === "ok" || t === "created") {
+        tip.innerText = "注册成功！请登录";
+        tip.className = "modal-tip success";
+        setTimeout(() => showLoginModal(), 1500);
+    } else if (t === "exist") {
+        tip.innerText = "用户名已存在";
+        tip.className = "modal-tip error";
+    }
+}
+
+async function doLogin() {
+    let name = document.getElementById("loginName").value.trim();
+    let pwd = document.getElementById("loginPwd").value.trim();
+    let tip = document.getElementById("loginTip");
+    if (!name || !pwd) {
+        tip.innerText = "请输入用户名和密码";
+        tip.className = "modal-tip error";
+        return;
+    }
+    let res = await fetch('board.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: new URLSearchParams({ action: 'login', name, pwd })
+    });
+    let j = await res.json();
+    if (j.code === 0) {
+        user = { userId: j.userId, username: j.user };
+        localStorage.setItem("forum_user", JSON.stringify(user));
+        document.getElementById('loginModal').classList.add('hidden');
+        await loadUserProfile();
+        showProfile();
+    } else {
+        tip.innerText = "账号或密码错误";
+        tip.className = "modal-tip error";
+    }
+}
+
+async function updateName() {
+    let newName = document.getElementById("newName").value.trim();
+    let tip = document.getElementById("nameTip");
+    
+    if (!newName) {
+        tip.innerText = "请输入新昵称";
+        tip.style.display = "block";
+        tip.className = "modal-tip error";
+        return;
+    }
+    
+    if (newName === user.username) {
+        tip.innerText = "新昵称不能和当前昵称相同";
+        tip.style.display = "block";
+        tip.className = "modal-tip error";
+        return;
+    }
+    
+    let checkRes = await fetch(`board.php?action=checkName&name=${encodeURIComponent(newName)}`);
+    let checkResult = await checkRes.text();
+    
+    if (checkResult === "exist") {
+        tip.innerText = "该昵称已被使用";
+        tip.style.display = "block";
+        tip.className = "modal-tip error";
+        return;
+    }
+    
+    if (!confirm("确认修改昵称吗？修改后将使用新昵称登录")) return;
+
+    let res = await fetch(`board.php?action=updateName&newName=${encodeURIComponent(newName)}&userId=${user.userId}`);
+    let result = await res.text();
+    
+    if (result === "ok") {
+        user.username = newName;
+        localStorage.setItem("forum_user", JSON.stringify(user));
+        showProfile();
+        document.getElementById("newName").value = "";
+        tip.style.display = "none";
+        alert("昵称修改成功！");
+    } else {
+        tip.innerText = "修改失败，请重试";
+        tip.style.display = "block";
+        tip.className = "modal-tip error";
+    }
+}
+
+async function saveProfile() {
+    let gender = document.getElementById("genderSelect").value;
+    let email = document.getElementById("emailInput").value.trim();
+    let selectedTitle = document.getElementById("titleSelect").value;
+    let bio = document.getElementById("bioInput").value.trim();
+    let tip = document.getElementById("emailTip");
+    
+    if (email && !validateEmail(email)) {
+        tip.innerText = "请输入有效的邮箱地址";
+        tip.style.display = "block";
+        tip.className = "modal-tip error";
+        return;
+    }
+    
+    tip.style.display = "none";
+    
+    let formData = new FormData();
+    formData.append('action', 'updateProfile');
+    formData.append('userId', user.userId);
+    if (gender) formData.append('gender', gender);
+    if (email) formData.append('email', email);
+    formData.append('bio', bio);
+    if (selectedTitle) formData.append('selectedTitle', selectedTitle);
+    if (avatarChanged && /^data:image\/(?:png|jpe?g|gif|webp);base64,/i.test(currentAvatar)) {
+        formData.append('avatar', currentAvatar);
+    }
+    if (avatarReset) formData.append('avatarReset', '1');
+    
+    let res = await fetch('board.php', {
+        method: 'POST',
+        body: formData
+    });
+    
+    let result = await res.text();
+    if (result === "ok") {
+        alert("资料保存成功！");
+        currentAvatar = '';
+        avatarChanged = false;
+        avatarReset = false;
+        await loadUserProfile();
+        showProfile();
+    } else if (result === "title_locked") {
+        alert("这个称号还没有解锁。");
+    } else if (result === "avatar_invalid") {
+        alert("头像压缩结果无效，请重新选择图片。");
+    } else {
+        alert("保存失败，请重试");
+    }
+}
+
+async function updatePassword() {
+    if (!user || !user.userId) return;
+    const oldPwd = document.getElementById("oldPwdInput").value.trim();
+    const newPwd = document.getElementById("newPwdInput").value.trim();
+    const confirmPwd = document.getElementById("confirmPwdInput").value.trim();
+    const tip = document.getElementById("pwdTip");
+    tip.style.display = "block";
+    tip.className = "modal-tip error";
+
+    if (!oldPwd || !newPwd || !confirmPwd) {
+        tip.innerText = "请完整填写原密码和新密码";
+        return;
+    }
+    if (newPwd.length < 8 || !/[A-Za-z]/.test(newPwd) || !/\d/.test(newPwd)) {
+        tip.innerText = "新密码至少 8 位，并同时包含字母和数字";
+        return;
+    }
+    if (newPwd !== confirmPwd) {
+        tip.innerText = "两次输入的新密码不一致";
+        return;
+    }
+
+    const params = new URLSearchParams({
+        action: "updatePassword",
+        oldPwd,
+        newPwd
+    });
+    const res = await fetch('board.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: params
+    });
+    const result = (await res.text()).trim();
+    if (result === "ok") {
+        tip.className = "modal-tip success";
+        tip.innerText = "密码修改成功";
+        document.getElementById("oldPwdInput").value = "";
+        document.getElementById("newPwdInput").value = "";
+        document.getElementById("confirmPwdInput").value = "";
+    } else if (result === "wrong") {
+        tip.innerText = "原密码错误";
+    } else {
+        tip.innerText = "修改失败，请稍后再试";
+    }
+}
+
+function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+}
+
+async function logout() {
+    if (!confirm("确定退出登录？")) return;
+    user = null;
+    await JourneyAuth.logout();
+}
+</script>
+</body>
+</html>

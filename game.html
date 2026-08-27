@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="device-ui.js?v=16"></script>
+<link rel="stylesheet" href="device-ui.css?v=16">
+    <title>《旅途传说》游戏官网</title>
+    <style>
+        :root {
+            --bg: #110d0b;
+            --paper: #fff6e8;
+            --paper-soft: #f7e5d0;
+            --ink: #251812;
+            --muted: #806957;
+            --cream: #fffaf2;
+            --red: #8f2730;
+            --red-deep: #3b0d14;
+            --gold: #c79a55;
+            --brown: #7a432c;
+            --line: rgba(255, 230, 200, 0.16);
+            --shadow: 0 28px 80px rgba(0, 0, 0, 0.32);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            color: var(--cream);
+            background:
+                radial-gradient(circle at 20% 0%, rgba(199, 154, 85, 0.18), transparent 30%),
+                radial-gradient(circle at 88% 10%, rgba(143, 39, 48, 0.28), transparent 26%),
+                linear-gradient(135deg, #120d0b 0%, #21110f 48%, #090607 100%);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(rgba(255, 230, 200, 0.028) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 230, 200, 0.028) 1px, transparent 1px);
+            background-size: 42px 42px;
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,.86), transparent 78%);
+        }
+
+        a,
+        button,
+        input {
+            font: inherit;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            border-bottom: 1px solid var(--line);
+            background: rgba(17, 13, 11, 0.82);
+            backdrop-filter: blur(14px);
+        }
+
+        .nav {
+            width: min(1160px, calc(100% - 32px));
+            margin: 0 auto;
+            min-height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        .brand {
+            font-weight: 900;
+            letter-spacing: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff4df;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .brand-logo {
+            width: 38px;
+            height: 38px;
+            display: block;
+            border-radius: 8px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.24);
+        }
+
+        .account-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--red), var(--gold));
+            color: #fff4df;
+            font-weight: 900;
+            flex: 0 0 auto;
+        }
+
+        .nav-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .nav-links a,
+        .nav-links button {
+            min-height: 36px;
+            padding: 0 12px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background: transparent;
+            color: rgba(255, 250, 242, 0.78);
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .nav-links a:hover,
+        .nav-links button:hover {
+            border-color: var(--line);
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+        }
+
+        .page {
+            width: min(1160px, calc(100% - 32px));
+            margin: 0 auto;
+        }
+
+        .hero {
+            min-height: calc(100vh - 68px);
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+            gap: 28px;
+            align-items: center;
+            padding: 56px 0 42px;
+        }
+
+        .eyebrow {
+            width: fit-content;
+            padding: 8px 12px;
+            border: 1px solid rgba(199, 154, 85, 0.28);
+            border-radius: 999px;
+            background: rgba(255, 246, 232, 0.07);
+            color: #ead2ad;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        h1 {
+            margin-top: 22px;
+            font-size: clamp(52px, 9vw, 112px);
+            line-height: .9;
+            letter-spacing: 0;
+        }
+
+        .slogan {
+            margin-top: 24px;
+            max-width: 680px;
+            color: #f0d5be;
+            font-size: clamp(20px, 3vw, 34px);
+            line-height: 1.28;
+            font-weight: 900;
+        }
+
+        .hero-text {
+            max-width: 660px;
+            margin-top: 18px;
+            color: rgba(255, 250, 242, 0.72);
+            line-height: 1.85;
+            font-size: 16px;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            padding: 0 18px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 900;
+            transition: transform .18s ease, background .18s ease, border-color .18s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn.primary {
+            border: none;
+            color: #fff;
+            background: linear-gradient(135deg, var(--red), var(--red-deep));
+            box-shadow: 0 16px 34px rgba(143, 39, 48, 0.34);
+        }
+
+        .btn.secondary {
+            color: #fff8ed;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .hero-card {
+            min-height: 520px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background:
+                linear-gradient(160deg, rgba(255, 246, 232, 0.12), rgba(143, 39, 48, 0.18)),
+                #1a100f;
+            box-shadow: var(--shadow);
+            transform: perspective(900px) rotateX(var(--tilt-y, 0deg)) rotateY(var(--tilt-x, 0deg));
+            transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+        }
+
+        .hero-card:hover {
+            border-color: rgba(199, 154, 85, 0.34);
+            box-shadow: 0 34px 92px rgba(0, 0, 0, 0.42), 0 0 70px rgba(143, 39, 48, 0.16);
+        }
+
+        .tree {
+            position: absolute;
+            inset: 34px 28px 24px;
+            display: flex;
+            align-items: end;
+            justify-content: center;
+        }
+
+        .trunk {
+            width: 58px;
+            height: 330px;
+            border-radius: 50px 50px 12px 12px;
+            background: linear-gradient(to right, #2b1411, #6c3428 48%, #1b0b0d);
+            box-shadow: 0 0 80px rgba(143, 39, 48, 0.28);
+        }
+
+        .crown {
+            position: absolute;
+            top: 22px;
+            width: 320px;
+            height: 250px;
+            border-radius: 46% 54% 44% 56%;
+            border: 1px solid rgba(199, 154, 85, 0.20);
+            background:
+                radial-gradient(circle at 30% 26%, rgba(255, 220, 160, 0.24), transparent 20%),
+                radial-gradient(circle at 70% 34%, rgba(143, 39, 48, 0.28), transparent 22%),
+                rgba(55, 24, 19, 0.76);
+        }
+
+        .cage {
+            position: absolute;
+            width: 42px;
+            height: 58px;
+            border: 1px solid rgba(255, 230, 190, 0.42);
+            border-radius: 18px 18px 14px 14px;
+            background: rgba(255, 255, 255, 0.035);
+        }
+
+        .cage::before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: -22px;
+            width: 1px;
+            height: 22px;
+            background: rgba(255, 230, 190, 0.28);
+        }
+
+        .cage:nth-child(3) { top: 105px; left: 78px; }
+        .cage:nth-child(4) { top: 74px; right: 74px; transform: scale(.86); }
+        .cage:nth-child(5) { top: 178px; right: 126px; transform: scale(.72); }
+        .cage:nth-child(6) { top: 198px; left: 130px; transform: scale(.66); }
+
+        .hero-card:hover .cage {
+            animation: cageSway 2.8s ease-in-out infinite;
+        }
+
+        .hero-card:hover .cage:nth-child(4) { animation-delay: .18s; }
+        .hero-card:hover .cage:nth-child(5) { animation-delay: .32s; }
+        .hero-card:hover .cage:nth-child(6) { animation-delay: .46s; }
+
+        .card-caption {
+            position: absolute;
+            left: 24px;
+            right: 24px;
+            bottom: 22px;
+            padding: 16px;
+            border: 1px solid rgba(255, 230, 200, 0.14);
+            border-radius: 10px;
+            background: rgba(12, 8, 8, 0.62);
+            backdrop-filter: blur(10px);
+        }
+
+        .card-caption strong {
+            display: block;
+            color: #fff4df;
+            margin-bottom: 6px;
+        }
+
+        .card-caption span {
+            color: rgba(255, 250, 242, 0.68);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        section {
+            padding: 52px 0;
+        }
+
+        .section-title {
+            font-size: clamp(30px, 5vw, 54px);
+            line-height: 1.05;
+        }
+
+        .section-lead {
+            max-width: 760px;
+            margin-top: 14px;
+            color: rgba(255, 250, 242, 0.68);
+            line-height: 1.8;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .feature,
+        .world,
+        .account-panel {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: rgba(255, 246, 232, 0.07);
+            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.14);
+            transition: transform .2s ease, border-color .2s ease, background .2s ease;
+        }
+
+        .feature:hover,
+        .world:hover,
+        .account-panel:hover {
+            transform: translateY(-3px);
+            border-color: rgba(199, 154, 85, 0.28);
+            background: rgba(255, 246, 232, 0.095);
+        }
+
+        .feature {
+            padding: 22px;
+        }
+
+        .feature h3,
+        .world h3 {
+            color: #fff4df;
+            font-size: 21px;
+            margin-bottom: 10px;
+        }
+
+        .feature p,
+        .world p {
+            color: rgba(255, 250, 242, 0.66);
+            line-height: 1.75;
+            font-size: 14px;
+        }
+
+        .worlds {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .world {
+            min-height: 280px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .world::after {
+            content: "";
+            position: absolute;
+            inset: auto -40px -80px auto;
+            width: 190px;
+            height: 190px;
+            border-radius: 50%;
+            background: rgba(199, 154, 85, 0.13);
+        }
+
+        .world.dark::after {
+            background: rgba(143, 39, 48, 0.18);
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .tag {
+            padding: 7px 10px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            color: #ead2ad;
+            background: rgba(255, 255, 255, 0.04);
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .loop {
+            display: grid;
+            grid-template-columns: 0.8fr 1.2fr;
+            gap: 18px;
+            align-items: stretch;
+            margin-top: 24px;
+        }
+
+        .stat {
+            padding: 28px;
+            border-radius: 10px;
+            background: var(--paper);
+            color: var(--ink);
+            box-shadow: var(--shadow);
+        }
+
+        .stat strong {
+            display: block;
+            font-size: clamp(54px, 8vw, 96px);
+            line-height: .9;
+            color: var(--red);
+        }
+
+        .stat span {
+            display: block;
+            margin-top: 12px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .steps {
+            display: grid;
+            gap: 10px;
+        }
+
+        .step {
+            padding: 16px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: rgba(255, 246, 232, 0.07);
+        }
+
+        .step b {
+            color: #fff4df;
+        }
+
+        .step p {
+            margin-top: 6px;
+            color: rgba(255, 250, 242, 0.66);
+            line-height: 1.65;
+            font-size: 14px;
+        }
+
+        .account-panel {
+            padding: 22px;
+            margin-top: 24px;
+            display: flex;
+            gap: 14px;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .account-panel p {
+            color: rgba(255, 250, 242, 0.68);
+            line-height: 1.7;
+        }
+
+        .account-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        footer {
+            padding: 38px 0 50px;
+            color: rgba(255, 250, 242, 0.46);
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            place-items: center;
+            padding: 18px;
+            z-index: 50;
+            background: rgba(0, 0, 0, 0.62);
+        }
+
+        .modal.show {
+            display: grid;
+        }
+
+        .modal-box {
+            width: min(380px, 100%);
+            padding: 24px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: #fff8ef;
+            color: var(--ink);
+            box-shadow: var(--shadow);
+        }
+
+        .modal-box h2 {
+            margin-bottom: 14px;
+        }
+
+        .modal-box input,
+        .modal-box select {
+            width: 100%;
+            height: 44px;
+            margin-top: 10px;
+            padding: 0 12px;
+            border: 1px solid rgba(73, 47, 30, 0.18);
+            border-radius: 8px;
+            background: #fff;
+            color: #251812;
+            -webkit-text-fill-color: #251812;
+            caret-color: #251812;
+        }
+
+        .modal-box.wide {
+            width: min(760px, 100%);
+            max-height: min(82vh, 760px);
+            overflow-y: auto;
+        }
+
+        .code-list {
+            display: grid;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .code-row {
+            padding: 12px;
+            border: 1px solid rgba(73, 47, 30, 0.14);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.62);
+        }
+
+        .code-row strong {
+            color: var(--red);
+        }
+
+        .code-meta,
+        .code-usages {
+            margin-top: 6px;
+            color: rgba(39, 25, 17, 0.7);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .field-hidden {
+            display: none !important;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .modal-actions .btn {
+            min-height: 42px;
+            color: var(--ink);
+        }
+
+        .tip {
+            min-height: 20px;
+            margin-top: 10px;
+            color: var(--red);
+            font-size: 13px;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity .55s ease, transform .55s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .nav-links a.active {
+            border-color: rgba(199, 154, 85, 0.32);
+            background: rgba(255, 246, 232, 0.08);
+            color: #fff4df;
+        }
+
+        @keyframes cageSway {
+            0%, 100% { translate: 0 0; }
+            50% { translate: 0 6px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after {
+                animation-duration: .001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .001ms !important;
+            }
+        }
+
+        @media (max-width: 860px) {
+            .nav {
+                align-items: flex-start;
+                flex-direction: column;
+                padding: 12px 0;
+            }
+
+            .nav-links {
+                justify-content: flex-start;
+            }
+
+            .hero,
+            .loop {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-card {
+                min-height: 420px;
+            }
+
+            .grid,
+            .worlds {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 560px) {
+            .nav { width: calc(100% - 20px); gap: 10px; }
+            .nav-links { width: 100%; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; }
+            .nav-links a,.nav-links button { width: 100%; min-width: 0; padding: 0 7px; text-align: center; white-space: normal; }
+            .page { width: calc(100% - 20px); }
+            .hero { min-height: auto; padding: 28px 0 18px; }
+            .hero h1 { font-size: 38px; line-height: 1.12; }
+            .hero-card { min-height: 300px; }
+            .account-panel { padding: 16px; }
+        }
+        @media (max-width: 350px) {
+            .nav-links { grid-template-columns: repeat(2,minmax(0,1fr)); }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <nav class="nav">
+            <a class="brand" href="index.html">
+                <img class="brand-logo" src="logo.png" alt="旅途传说 Logo">
+                <span>旅途传说</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">首页</a>
+                <a href="#world">世界观</a>
+                <a href="#gameplay">玩法</a>
+                <a href="bagdemo.html">我的背包</a>
+                <a href="lottery.html">抽奖</a>
+                <a href="catalog.html">图鉴</a>
+                <a href="market.html">市场</a>
+                <a href="bottle.html">漂流瓶</a>
+                <a href="leaderboard.html">排行榜</a>
+                <a href="minecraft.html">服务器</a>
+                <a href="forum.html">论坛</a>
+                <button type="button" onclick="dailyCheckin()">签到</button>
+                <a id="messageNavLink" href="bagdemo.html#messages">我的消息</a>
+                <button type="button" id="redeemNavBtn" style="display:none;" onclick="showRedeem()">兑换码</button>
+                <button type="button" id="redeemAdminBtn" style="display:none;" onclick="showRedeemAdmin()">兑换码管理</button>
+                <button type="button" id="loginNavBtn" onclick="showLogin()">登录</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="page">
+        <section class="hero">
+            <div>
+                <div class="eyebrow">黑暗童话肉鸽探险</div>
+                <h1>旅途传说</h1>
+                <p class="slogan">越靠近梦境的尽头，世界就越不像梦。</p>
+                <p class="hero-text">
+                    甜美柔和的童话美术，包裹着一场关于执念、轮回与真相的冒险。你将在糖果与玩具搭建的幻境中一次次深入地牢，把装备带回主城，也把被遗忘的痛苦带回记忆深处。
+                </p>
+                <div class="hero-actions">
+                    <a class="btn primary" href="#gameplay">查看核心玩法</a>
+                    <a class="btn secondary" href="bagdemo.html">打开我的背包</a>
+                    <a class="btn secondary" href="lottery.html">道具抽奖</a>
+                    <a class="btn secondary" href="leaderboard.html">查看排行榜</a>
+                    <a class="btn secondary" href="forum.html">进入玩家论坛</a>
+                </div>
+            </div>
+
+            <div class="hero-card" aria-label="梦境树视觉卡片">
+                <div class="tree">
+                    <div class="crown"></div>
+                    <div class="trunk"></div>
+                    <div class="cage"></div>
+                    <div class="cage"></div>
+                    <div class="cage"></div>
+                    <div class="cage"></div>
+                </div>
+                <div class="card-caption">
+                    <strong>梦境树不是神树，而是囚笼。</strong>
+                    <span>树上挂着的不是果实，而是一座座透明牢笼。美梦越甜，真相越冷。</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="world">
+            <h2 class="section-title">治愈外壳，悲剧内核</h2>
+            <p class="section-lead">
+                游戏世界由巨型梦境树生成。它看似温柔、明亮、糖果与玩具遍地，实际上是主角死后执念凝结出的精神囚笼。所有人都会遗忘，只有主角记得每一次死亡。
+            </p>
+
+            <div class="worlds">
+                <article class="world">
+                    <h3>甜梦腐化域 · 奶油镇</h3>
+                    <p>
+                        第一大关是幻想中的完美童年：绵软街巷、玩偶闲径、狂欢月台。柔和暖调和糖果童话制造安全感，却在地形缓慢膨胀中露出不安。
+                    </p>
+                    <div class="tag-list">
+                        <span class="tag">糖果小镇</span>
+                        <span class="tag">生日国王</span>
+                        <span class="tag">虚假幸福</span>
+                    </div>
+                </article>
+
+                <article class="world dark">
+                    <h3>玩具墓园</h3>
+                    <p>
+                        第二大关是内心封存的真实苦难：废弃工坊、残肢玩偶、巨型娃娃机场。怪物会模仿玩家动作，像镜子一样复刻你的挣扎。
+                    </p>
+                    <div class="tag-list">
+                        <span class="tag">废弃玩具</span>
+                        <span class="tag">镜像压迫</span>
+                        <span class="tag">墓园傀儡领主</span>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section id="gameplay">
+            <h2 class="section-title">每一次撤离，都是唯一的沉淀</h2>
+            <p class="section-lead">
+                《旅途传说》不是大而散的随机堆料，而是固定关卡结构下的反复深入：死亡会夺走本局装备，完整通关撤离才能把收获带回主城。
+            </p>
+
+            <div class="grid">
+                <article class="feature">
+                    <h3>装备留存与掉落</h3>
+                    <p>地牢死亡，本局成果归零；成功撤离，装备与物品带回主城。每次选择都更有重量。</p>
+                </article>
+                <article class="feature">
+                    <h3>2 大关 · 6 小关 · 2 Boss</h3>
+                    <p>每大关 3 小关，第三小关直通 Boss。出生房、宝箱房、传送门房形成稳定节奏。</p>
+                </article>
+                <article class="feature">
+                    <h3>SAN 与诡秘日</h3>
+                    <p>累计通关到 32、64、128、256 天时，世界进入“星期？”：视野缩小，色调失真，耳鸣取代音乐。</p>
+                </article>
+            </div>
+
+            <div class="loop">
+                <div class="stat">
+                    <strong>365</strong>
+                    <span>第 365 天抵达单轮周目终点；新一轮开始后，时间归零，周目数继续叠加。</span>
+                </div>
+                <div class="steps">
+                    <div class="step">
+                        <b>失败：轮回停滞</b>
+                        <p>死亡后天数不变，痛苦叠加，主角独自保留记忆。</p>
+                    </div>
+                    <div class="step">
+                        <b>胜利：天数推进</b>
+                        <p>完整通关所有关卡后撤离，天数 +1，星期正常顺延。</p>
+                    </div>
+                    <div class="step">
+                        <b>终点：真相红门</b>
+                        <p>完整周目后，血色红门出现。甜美幻象消散，梦境树的真相被揭开。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="section-title">为玩家留下记忆点</h2>
+            <p class="section-lead">
+                这不是普通的糖果童话，也不是纯粹的黑暗故事。它的核心记忆点是反差：越温柔的画面，越接近精神炼狱；越熟悉的玩具，越像无法逃离的噩梦。
+            </p>
+
+            <div class="account-panel">
+                <div>
+                    <h3>加入玩家社区</h3>
+                    <p id="accountText">登录后可以在论坛发帖、回复和参与讨论；游客也可以直接浏览论坛。</p>
+                </div>
+                <div class="account-actions" id="accountActions">
+                    <button class="btn secondary" type="button" onclick="showLogin()">登录</button>
+                    <button class="btn secondary" type="button" onclick="showReg()">注册</button>
+                    <a class="btn primary" href="forum.html">浏览论坛</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>乔治可翼 · 《旅途传说》游戏官网</footer>
+
+    <div class="modal" id="loginModal">
+        <div class="modal-box">
+            <h2>登录</h2>
+            <input id="loginName" placeholder="用户名 / 邮箱">
+            <input id="loginPwd" type="password" placeholder="密码">
+            <div class="tip" id="loginTip"></div>
+            <div class="modal-actions">
+                <button class="btn primary" type="button" onclick="doLogin()">登录</button>
+                <button class="btn" type="button" onclick="showReg()">注册</button>
+                <button class="btn" type="button" onclick="closeModals()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="regModal">
+        <div class="modal-box">
+            <h2>注册</h2>
+            <input id="regName" placeholder="用户名">
+            <input id="regPwd" type="password" placeholder="密码">
+            <div class="tip" id="regTip"></div>
+            <div class="modal-actions">
+                <button class="btn primary" type="button" onclick="doReg()">注册</button>
+                <button class="btn" type="button" onclick="showLogin()">去登录</button>
+                <button class="btn" type="button" onclick="closeModals()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="redeemModal">
+        <div class="modal-box">
+            <h2>兑换物品</h2>
+            <input id="redeemCodeInput" maxlength="20" placeholder="输入兑换码，例如 JT-XXXX-XXXX">
+            <div class="tip" id="redeemTip"></div>
+            <div class="modal-actions">
+                <button class="btn primary" type="button" onclick="redeemItemCode()">确认兑换</button>
+                <button class="btn" type="button" onclick="closeModals()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="redeemAdminModal">
+        <div class="modal-box wide">
+            <h2>兑换码管理</h2>
+            <select id="redeemRewardType" onchange="updateRedeemRewardFields()">
+                <option value="item">物品奖励</option>
+                <option value="gold">金币奖励</option>
+                <option value="xp">经验奖励</option>
+            </select>
+            <select id="redeemItemSelect"></select>
+            <input id="redeemRewardAmount" class="field-hidden" type="number" min="1" value="10" placeholder="奖励数量">
+            <select id="redeemTypeSelect">
+                <option value="unlimited">无限兑换码（每个账号一次）</option>
+                <option value="single">单次兑换码（全服仅一次）</option>
+            </select>
+            <div class="modal-actions">
+                <button class="btn primary" type="button" onclick="generateItemCode()">生成兑换码</button>
+                <button class="btn" type="button" onclick="closeModals()">关闭</button>
+            </div>
+            <div class="tip" id="redeemAdminTip"></div>
+            <div class="code-list" id="redeemCodeList"></div>
+        </div>
+    </div>
+
+    <script>
+        let user = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initPageInteractions();
+            JourneyAuth.ready.then((data) => {
+                if (!data || !data.authenticated || !data.user) return;
+                user = {
+                    userId: data.user.userId,
+                    username: data.user.user,
+                    role: data.user.role || 'player'
+                };
+                renderAccount();
+            });
+        });
+
+        function renderAccount() {
+            if (!user) return;
+            const loginNavBtn = document.getElementById('loginNavBtn');
+            const displayName = user.username || user.user || '玩家';
+            loginNavBtn.classList.add('account-nav');
+            loginNavBtn.textContent = '';
+            const avatar = document.createElement('span');
+            avatar.className = 'nav-avatar';
+            avatar.id = 'navAvatar';
+            avatar.textContent = Array.from(displayName)[0] || '旅';
+            const accountName = document.createElement('span');
+            accountName.textContent = displayName;
+            loginNavBtn.append(avatar, accountName);
+            loginNavBtn.onclick = () => location.href = 'profile.html';
+            document.getElementById('redeemNavBtn').style.display = '';
+            document.getElementById('redeemAdminBtn').style.display = user.role === 'admin' ? '' : 'none';
+            loadNavAvatar();
+            loadNavMessages();
+            document.getElementById('accountText').textContent = `欢迎回来，${user.username || user.user}。你可以进入论坛继续发布和回复。`;
+            document.getElementById('accountActions').innerHTML = `
+                <a class="btn primary" href="forum.html">进入论坛</a>
+                <a class="btn secondary" href="friends.html">好友和私信</a>
+                <a class="btn secondary" href="bagdemo.html#messages">我的消息</a>
+                <a class="btn secondary" href="profile.html">个人信息</a>
+                <button class="btn secondary" type="button" onclick="logout()">退出登录</button>
+            `;
+        }
+
+        async function loadNavMessages() {
+            if (!user) return;
+            try {
+                const response = await fetch(`board.php?action=getMyMessages&userId=${encodeURIComponent(user.userId)}`, { cache:'no-store' });
+                const data = await response.json();
+                const count = Number(data.pendingCount || 0);
+                const link = document.getElementById('messageNavLink');
+                if (link) link.textContent = count > 0 ? `我的消息 (${count})` : '我的消息';
+            } catch (error) {}
+        }
+
+        async function loadNavAvatar() {
+            if (!user || !user.userId) return;
+            try {
+                const res = await fetch(`board.php?action=getPublicUser&userId=${encodeURIComponent(user.userId)}`, { cache: 'no-store' });
+                const profile = await res.json();
+                const avatar = profile.avatar || {};
+                const target = document.getElementById('navAvatar');
+                if (!target) return;
+                if (avatar.type === 'image' && avatar.src) {
+                    const image = document.createElement('img');
+                    image.src = avatar.src;
+                    image.alt = '';
+                    target.replaceChildren(image);
+                } else {
+                    target.textContent = avatar.text || Array.from(user.username || user.user || '旅')[0];
+                    if (avatar.color) target.style.background = avatar.color;
+                }
+            } catch (error) {
+                // Keep the initial-based avatar if the profile request fails.
+            }
+        }
+
+        function showLogin() {
+            closeModals();
+            document.getElementById('loginModal').classList.add('show');
+        }
+
+        function showReg() {
+            closeModals();
+            document.getElementById('regModal').classList.add('show');
+        }
+
+        function closeModals() {
+            document.querySelectorAll('.modal').forEach((modal) => modal.classList.remove('show'));
+        }
+
+        function showRedeem() {
+            if (!user) return showLogin();
+            closeModals();
+            document.getElementById('redeemTip').textContent = '';
+            document.getElementById('redeemModal').classList.add('show');
+            document.getElementById('redeemCodeInput').focus();
+        }
+
+        async function redeemItemCode() {
+            if (!user) return showLogin();
+            const input = document.getElementById('redeemCodeInput');
+            const tip = document.getElementById('redeemTip');
+            const code = input.value.trim().toUpperCase();
+            if (!code) return tip.textContent = '请输入兑换码';
+            const res = await fetch(`board.php?action=redeemCode&userId=${encodeURIComponent(user.userId)}&redeemCode=${encodeURIComponent(code)}`, { cache: 'no-store' });
+            const data = await res.json();
+            if (data.code === 'ok') {
+                tip.textContent = `兑换成功：${data.reward ? data.reward.label : (data.item ? data.item.name : '奖励')}`;
+                input.value = '';
+            } else if (data.code === 'full') tip.textContent = '背包已满，请先整理背包';
+            else if (data.code === 'used') tip.textContent = '这个单次兑换码已经被使用';
+            else if (data.code === 'already') tip.textContent = '你的账号已经使用过这个兑换码';
+            else tip.textContent = '兑换码不存在或已失效';
+        }
+
+        async function showRedeemAdmin() {
+            if (!user || user.role !== 'admin') return;
+            closeModals();
+            document.getElementById('redeemAdminModal').classList.add('show');
+            await Promise.all([loadRedeemItems(), loadRedeemCodes()]);
+        }
+
+        async function loadRedeemItems() {
+            const select = document.getElementById('redeemItemSelect');
+            if (select.options.length) return;
+            const res = await fetch('board.php?action=getItemCatalog', { cache: 'no-store' });
+            const data = await res.json();
+            const items = data.items || [];
+            items.forEach((item) => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = `${item.name} · ${item.qualityLabel || item.quality}`;
+                select.appendChild(option);
+            });
+        }
+
+        function updateRedeemRewardFields() {
+            const rewardType = document.getElementById('redeemRewardType').value;
+            document.getElementById('redeemItemSelect').classList.toggle('field-hidden', rewardType !== 'item');
+            const amountInput = document.getElementById('redeemRewardAmount');
+            amountInput.classList.toggle('field-hidden', rewardType === 'item');
+            amountInput.placeholder = rewardType === 'gold' ? '金币数量（最多 10000）' : '经验数量（最多 2000）';
+            amountInput.max = rewardType === 'gold' ? '10000' : '2000';
+        }
+
+        async function generateItemCode() {
+            if (!user || user.role !== 'admin') return;
+            const itemId = document.getElementById('redeemItemSelect').value;
+            const rewardType = document.getElementById('redeemRewardType').value;
+            const rewardAmount = Math.max(1, Number(document.getElementById('redeemRewardAmount').value || 1));
+            const codeType = document.getElementById('redeemTypeSelect').value;
+            const tip = document.getElementById('redeemAdminTip');
+            const params = new URLSearchParams({
+                action: 'generateRedeemCode',
+                userId: user.userId,
+                rewardType,
+                rewardAmount: String(rewardAmount),
+                itemId,
+                codeType
+            });
+            const res = await fetch('board.php', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'}, body:params });
+            const data = await res.json();
+            if (data.code === 'ok') {
+                tip.textContent = `已生成：${data.redeemCode.code}`;
+                await loadRedeemCodes();
+            } else {
+                tip.textContent = `生成失败：${data.code || res.status}`;
+            }
+        }
+
+        async function loadRedeemCodes() {
+            if (!user || user.role !== 'admin') return;
+            const list = document.getElementById('redeemCodeList');
+            const res = await fetch(`board.php?action=getRedeemCodes&userId=${encodeURIComponent(user.userId)}`, { cache: 'no-store' });
+            const data = await res.json();
+            list.replaceChildren();
+            (data.codes || []).forEach((record) => {
+                const row = document.createElement('div');
+                row.className = 'code-row';
+                const title = document.createElement('strong');
+                title.textContent = record.code;
+                const meta = document.createElement('div');
+                meta.className = 'code-meta';
+                meta.textContent = `${record.rewardLabel || (record.item ? record.item.name : '奖励')} · ${record.type === 'single' ? '全服单次' : '无限使用'} · 已使用 ${record.usageCount || 0} 次 · 创建于 ${record.createdAt}`;
+                const usages = document.createElement('div');
+                usages.className = 'code-usages';
+                usages.textContent = (record.usages || []).length
+                    ? (record.usages || []).map((usage) => `${usage.user}（${usage.userId}） ${usage.time}`).join('；')
+                    : '暂未被使用';
+                row.append(title, meta, usages);
+                list.appendChild(row);
+            });
+            if (!(data.codes || []).length) list.innerHTML = '<div class="code-meta">暂未生成兑换码。</div>';
+        }
+
+        async function doReg() {
+            const name = document.getElementById('regName').value.trim();
+            const pwd = document.getElementById('regPwd').value.trim();
+            const tip = document.getElementById('regTip');
+            if (!name || !pwd) {
+                tip.textContent = '请输入用户名和密码';
+                return;
+            }
+            const res = await fetch('board.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                body: new URLSearchParams({ action: 'reg', name, pwd })
+            });
+            const text = (await res.text()).trim();
+            let result = text;
+            try { result = JSON.parse(text).code; } catch (error) {}
+            if (result === 'ok' || result === 'created') {
+                tip.textContent = '注册成功，请登录';
+                setTimeout(showLogin, 800);
+            } else if (result === 'exist') {
+                tip.textContent = '用户名已存在';
+            } else if (result === 'registration_limit') {
+                tip.textContent = '该网络或设备已达到账号上限';
+            } else {
+                tip.textContent = '注册失败，请稍后再试';
+            }
+        }
+
+        async function doLogin() {
+            const name = document.getElementById('loginName').value.trim();
+            const pwd = document.getElementById('loginPwd').value.trim();
+            const tip = document.getElementById('loginTip');
+            if (!name || !pwd) {
+                tip.textContent = '请输入用户名和密码';
+                return;
+            }
+            const res = await fetch('board.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                body: new URLSearchParams({ action: 'login', name, pwd })
+            });
+            const data = await res.json();
+            if (data.code === 0) {
+                user = { userId: data.userId, username: data.user, role: data.role || 'player' };
+                localStorage.setItem('forum_user', JSON.stringify(user));
+                closeModals();
+                renderAccount();
+            } else {
+                tip.textContent = '账号或密码错误';
+            }
+        }
+
+        async function logout() {
+            await JourneyAuth.logout();
+        }
+
+        async function dailyCheckin() {
+            if (!user || !user.userId) {
+                showLogin();
+                const tip = document.getElementById('loginTip');
+                if (tip) tip.textContent = '请先登录后再签到';
+                return;
+            }
+            try {
+                const res = await fetch(`board.php?action=dailyCheckin&userId=${encodeURIComponent(user.userId)}`);
+                const data = await res.json();
+                if (data.code === 'ok') {
+                    alert(`签到成功，获得 ${data.gain} 金币！`);
+                } else if (data.code === 'already') {
+                    alert('今天已经签到过了。');
+                } else {
+                    alert('签到失败，请稍后再试。');
+                }
+            } catch (e) {
+                alert('签到失败，请稍后再试。');
+            }
+        }
+
+        document.querySelectorAll('.modal').forEach((modal) => {
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) closeModals();
+            });
+        });
+
+        function initPageInteractions() {
+            document.querySelectorAll('section, .feature, .world, .step, .stat, .account-panel').forEach((el) => {
+                el.classList.add('reveal');
+            });
+
+            if (!('IntersectionObserver' in window)) {
+                document.querySelectorAll('.reveal').forEach((el) => el.classList.add('visible'));
+                return;
+            }
+
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        revealObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.12 });
+
+            document.querySelectorAll('.reveal').forEach((el) => revealObserver.observe(el));
+
+            const heroCard = document.querySelector('.hero-card');
+            if (heroCard && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                heroCard.addEventListener('mousemove', (event) => {
+                    const rect = heroCard.getBoundingClientRect();
+                    const x = (event.clientX - rect.left) / rect.width - 0.5;
+                    const y = (event.clientY - rect.top) / rect.height - 0.5;
+                    heroCard.style.setProperty('--tilt-x', `${x * 5}deg`);
+                    heroCard.style.setProperty('--tilt-y', `${y * -5}deg`);
+                });
+                heroCard.addEventListener('mouseleave', () => {
+                    heroCard.style.setProperty('--tilt-x', '0deg');
+                    heroCard.style.setProperty('--tilt-y', '0deg');
+                });
+            }
+
+            const navTargets = [...document.querySelectorAll('.nav-links a[href^="#"]')];
+            const sections = navTargets
+                .map((link) => document.querySelector(link.getAttribute('href')))
+                .filter(Boolean);
+
+            const navObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting) return;
+                    navTargets.forEach((link) => {
+                        link.classList.toggle('active', link.getAttribute('href') === `#${entry.target.id}`);
+                    });
+                });
+            }, { rootMargin: '-35% 0px -55% 0px' });
+
+            sections.forEach((section) => navObserver.observe(section));
+        }
+    </script>
+</body>
+</html>

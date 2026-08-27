@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="device-ui.js?v=17"></script>
+<link rel="stylesheet" href="device-ui.css?v=16">
+    <title>旅途传说 - 玩家市场</title>
+    <style>
+        :root { --ink:#fffaf2; --muted:rgba(255,250,242,.62); --line:rgba(255,230,200,.16); --brand:#8f2730; --gold:#c79a55; --panel:rgba(255,246,232,.075); }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { min-height:100vh; padding:22px; color:var(--ink); font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif; background:radial-gradient(circle at 18% 0%,rgba(199,154,85,.18),transparent 30%),radial-gradient(circle at 90% 12%,rgba(143,39,48,.28),transparent 28%),linear-gradient(135deg,#120d0b,#21110f 48%,#090607); }
+        button { font:inherit; }
+        .page { width:min(1280px,100%); margin:auto; }
+        .topbar,.market-item,.status,.trend-panel { border:1px solid var(--line); border-radius:8px; background:var(--panel); box-shadow:0 18px 48px rgba(0,0,0,.24); }
+        .topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 16px; }
+        .brand { display:flex; align-items:center; gap:10px; color:#fff4df; text-decoration:none; }
+        .brand img { width:40px; height:40px; object-fit:contain; border-radius:8px; }
+        .brand h1 { font-size:22px; }
+        .nav,.tools { display:flex; gap:8px; flex-wrap:wrap; }
+        .btn { min-height:38px; padding:0 12px; border:1px solid rgba(199,154,85,.28); border-radius:8px; background:rgba(255,255,255,.06); color:#fff4df; cursor:pointer; }
+        .btn:hover,.btn.primary { background:rgba(143,39,48,.58); }
+        .market-head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin:18px 0 14px; }
+        .market-head h2 { font-size:24px; }
+        .market-head p { color:var(--muted); margin-top:6px; font-size:13px; }
+        .status { display:flex; gap:18px; padding:12px 14px; margin-bottom:14px; color:var(--muted); }
+        .status b { color:var(--gold); }
+        .trend-panel { margin-bottom:18px; padding:16px; overflow:hidden; }
+        .trend-head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:14px; }
+        .trend-head h2 { font-size:20px; }
+        .trend-head p { margin-top:5px; color:var(--muted); font-size:12px; }
+        .trend-date { color:var(--gold); font-size:12px; white-space:nowrap; }
+        .trend-chart-wrap { width:100%; overflow-x:auto; border:1px solid rgba(255,230,200,.1); border-radius:7px; background:rgba(4,3,3,.28); }
+        .trend-chart { display:block; width:100%; min-width:760px; height:auto; }
+        .trend-legend { display:grid; grid-template-columns:repeat(5,minmax(120px,1fr)); gap:8px; margin-top:12px; }
+        .trend-chip { padding:9px 10px; border:1px solid rgba(255,255,255,.08); border-radius:7px; background:rgba(255,255,255,.035); font-size:12px; }
+        .trend-chip b { display:block; margin-bottom:3px; }
+        .trend-chip span { color:var(--muted); }
+        .market-grid { display:grid; gap:10px; }
+        .market-grid.card-view { grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); }
+        .market-item { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px; }
+        .card-view .market-item { min-height:220px; flex-direction:column; align-items:stretch; justify-content:space-between; content-visibility:auto; contain-intrinsic-size:220px; }
+        .item-line { display:flex; align-items:center; gap:10px; }
+        .item-icon { width:46px; height:46px; display:grid; place-items:center; border-radius:7px; background:rgba(255,255,255,.06); font-size:28px; }
+        .item-name { color:#fff4df; font-weight:900; }
+        .item-name.quality-common { color:#c6cbd1; }
+        .item-name.quality-uncommon { color:#5ed184; }
+        .item-name.quality-rare { color:#63a8ff; }
+        .item-name.quality-epic { color:#c07aff; }
+        .item-name.quality-legendary,.item-name.quality-system { color:#b32635; }
+        .item-meta,.seller-meta { color:var(--muted); font-size:12px; margin-top:4px; }
+        .seller { display:flex; align-items:center; gap:8px; margin-top:12px; }
+        .seller-avatar { width:32px; height:32px; display:grid; place-items:center; overflow:hidden; border-radius:7px; background:linear-gradient(135deg,var(--brand),var(--gold)); font-weight:900; }
+        .seller-avatar img { width:100%; height:100%; object-fit:cover; }
+        .seller-name { padding:0; border:0; background:none; color:#fff4df; cursor:pointer; font-weight:800; }
+        .seller-note { margin-top:10px; padding:9px 10px; border-left:2px solid rgba(199,154,85,.48); background:rgba(255,255,255,.035); color:rgba(255,250,242,.72); font-size:12px; line-height:1.55; word-break:break-word; }
+        .price { min-width:110px; text-align:right; color:var(--gold); font-weight:900; }
+        .price .btn { display:block; margin:8px 0 0 auto; }
+        .card-view .price { display:flex; align-items:center; justify-content:space-between; text-align:left; }
+        .card-view .price .btn { display:inline-flex; margin:0; align-items:center; }
+        .empty { padding:60px 20px; text-align:center; color:var(--muted); }
+        .toast { position:fixed; left:50%; bottom:24px; z-index:30; padding:12px 16px; border:1px solid var(--line); border-radius:8px; background:#21110f; opacity:0; transform:translate(-50%,12px); transition:.2s; pointer-events:none; }
+        .toast.show { opacity:1; transform:translate(-50%,0); }
+        @media(max-width:760px){body{padding:12px}.topbar,.market-head,.trend-head{align-items:flex-start;flex-direction:column}.market-grid.card-view{grid-template-columns:1fr}.market-item{align-items:stretch;flex-direction:column}.price{display:flex;align-items:center;justify-content:space-between;text-align:left}.price .btn{margin:0}.status{flex-wrap:wrap}.trend-legend{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    </style>
+</head>
+<body>
+<main class="page">
+    <header class="topbar">
+        <a class="brand" href="game.html"><img src="logo.png" alt=""><h1>旅途传说 · 玩家市场</h1></a>
+        <nav class="nav">
+            <button class="btn" onclick="location.href='game.html'">游戏官网</button>
+            <button class="btn" onclick="location.href='bagdemo.html'">我的背包</button>
+            <button class="btn" onclick="location.href='catalog.html'">图鉴</button>
+            <button class="btn" onclick="location.href='forum.html'">论坛</button>
+        </nav>
+    </header>
+    <section class="market-head">
+        <div><h2>玩家交易</h2><p>玩家自由定价。背包满时无法购买，也无法下架自己的商品。</p></div>
+        <div class="tools"><button class="btn" id="viewBtn" onclick="toggleView()">卡片展示</button><button class="btn primary" onclick="location.href='bagdemo.html'">上架物品</button></div>
+    </section>
+    <section class="status"><span>金币 <b id="goldText">--</b></span><span>背包 <b id="bagText">--</b></span><span id="accountText">未登录</span></section>
+    <section class="trend-panel">
+        <div class="trend-head">
+            <div><h2>每日系统回收价值</h2><p>折线为品质均价，色带为当日最低到最高回收价。纵轴采用对数刻度。</p></div>
+            <span class="trend-date" id="trendDate">读取市场走势...</span>
+        </div>
+        <div class="trend-chart-wrap" id="trendChart"><div class="empty">正在读取最近 30 天价格...</div></div>
+        <div class="trend-legend" id="trendLegend"></div>
+    </section>
+    <section class="market-grid" id="marketGrid"></section>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+const BAG_SIZE = 21;
+let user = null;
+let inventory = [];
+let market = [];
+let marketTrends = [];
+let gold = 0;
+let unlimitedGold = false;
+let viewMode = localStorage.getItem('market_view') || 'list';
+let toastTimer = null;
+
+window.addEventListener('DOMContentLoaded', init);
+
+async function init() {
+    const auth = await JourneyAuth.ready;
+    if (auth && auth.authenticated && auth.user) {
+        user = {
+            userId: auth.user.userId,
+            username: auth.user.user,
+            role: auth.user.role || 'user'
+        };
+    }
+    await Promise.all([loadWallet(), loadMarket(), loadMarketTrends()]);
+}
+
+async function loadWallet() {
+    if (!user || !user.userId) return renderStatus();
+    const response = await fetch(`board.php?action=getInventory&userId=${encodeURIComponent(user.userId)}`, { cache:'no-store' });
+    const data = await response.json();
+    if (data.code === 'ok') {
+        inventory = data.inventory || [];
+        gold = Number(data.gold || 0);
+        unlimitedGold = data.unlimitedGold === true;
+    }
+    renderStatus();
+}
+
+async function loadMarket() {
+    const response = await fetch('board.php?action=getMarket', { cache:'no-cache' });
+    const data = await response.json();
+    market = data.items || [];
+    renderMarket();
+}
+
+async function loadMarketTrends() {
+    try {
+        const response = await fetch('board.php?action=getMarketTrends&days=30', { cache:'no-store' });
+        const data = await response.json();
+        marketTrends = Array.isArray(data.history) ? data.history : [];
+        document.getElementById('trendDate').textContent = data.today ? `${data.today} · 每日更新` : '每日更新';
+        renderMarketTrends();
+    } catch (error) {
+        document.getElementById('trendChart').innerHTML = '<div class="empty">价格走势读取失败，请稍后刷新。</div>';
+    }
+}
+
+function renderMarketTrends() {
+    const host = document.getElementById('trendChart');
+    const legend = document.getElementById('trendLegend');
+    if (!marketTrends.length) {
+        host.innerHTML = '<div class="empty">暂时没有价格历史。</div>';
+        legend.replaceChildren();
+        return;
+    }
+    const qualities = [
+        ['common','普通','#c6cbd1'], ['uncommon','精良','#5ed184'], ['rare','稀有','#63a8ff'],
+        ['epic','史诗','#c07aff'], ['legendary','传说','#d84855']
+    ];
+    const width = 1120, height = 420, left = 58, right = 22, top = 24, bottom = 52;
+    const chartW = width - left - right, chartH = height - top - bottom;
+    const allValues = marketTrends.flatMap(row => qualities.flatMap(([key]) => {
+        const point = row.qualities?.[key] || {};
+        return [Number(point.min || 1), Number(point.max || 1)];
+    }));
+    const maxValue = Math.max(2, ...allValues);
+    const logMax = Math.log10(maxValue + 1);
+    const x = index => left + (marketTrends.length === 1 ? 0 : index / (marketTrends.length - 1)) * chartW;
+    const y = value => top + chartH - (Math.log10(Math.max(0, value) + 1) / logMax) * chartH;
+    const linePath = (key, field) => marketTrends.map((row,index) => `${index ? 'L' : 'M'}${x(index).toFixed(1)},${y(Number(row.qualities?.[key]?.[field] || 1)).toFixed(1)}`).join(' ');
+    const bandPath = key => {
+        const upper = marketTrends.map((row,index) => `${index ? 'L' : 'M'}${x(index).toFixed(1)},${y(Number(row.qualities?.[key]?.max || 1)).toFixed(1)}`).join(' ');
+        const lower = marketTrends.slice().reverse().map((row,reverseIndex) => {
+            const index = marketTrends.length - 1 - reverseIndex;
+            return `L${x(index).toFixed(1)},${y(Number(row.qualities?.[key]?.min || 1)).toFixed(1)}`;
+        }).join(' ');
+        return `${upper} ${lower} Z`;
+    };
+    const ticks = [1,2,5,10,20,50,100,200,500,1000].filter(value => value <= maxValue * 1.05);
+    const grid = ticks.map(value => `<g><line x1="${left}" y1="${y(value)}" x2="${width-right}" y2="${y(value)}" stroke="rgba(255,255,255,.08)"/><text x="${left-9}" y="${y(value)+4}" fill="rgba(255,250,242,.48)" font-size="11" text-anchor="end">${value}</text></g>`).join('');
+    const dateLabels = marketTrends.map((row,index) => {
+        if (index !== 0 && index !== marketTrends.length - 1 && index % 5 !== 0) return '';
+        return `<text x="${x(index)}" y="${height-20}" fill="rgba(255,250,242,.48)" font-size="11" text-anchor="middle">${row.date.slice(5)}</text>`;
+    }).join('');
+    const series = qualities.map(([key,label,color]) => `<path d="${bandPath(key)}" fill="${color}" opacity=".1"/><path d="${linePath(key,'avg')}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><title>${label}均价</title></path>`).join('');
+    host.innerHTML = `<svg class="trend-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="最近30天不同品质物品系统回收价值区间折线图">${grid}${series}${dateLabels}</svg>`;
+    const today = marketTrends[marketTrends.length - 1];
+    legend.innerHTML = qualities.map(([key,label,color]) => {
+        const point = today.qualities?.[key] || { min:1,max:1,avg:1 };
+        return `<div class="trend-chip"><b style="color:${color}">${label}</b><span>${point.min} - ${point.max} 金币 · 均价 ${point.avg}</span></div>`;
+    }).join('');
+}
+
+function renderStatus() {
+    document.getElementById('goldText').textContent = unlimitedGold ? '∞' : gold;
+    document.getElementById('bagText').textContent = `${inventory.filter(Boolean).length} / ${BAG_SIZE}`;
+    document.getElementById('accountText').textContent = user ? `${user.username || '玩家'} · ${user.userId}` : '登录后可以交易';
+}
+
+function renderMarket() {
+    const grid = document.getElementById('marketGrid');
+    grid.className = `market-grid ${viewMode === 'card' ? 'card-view' : 'list-view'}`;
+    document.getElementById('viewBtn').textContent = viewMode === 'card' ? '列表展示' : '卡片展示';
+    grid.replaceChildren();
+    if (!market.length) {
+        grid.innerHTML = '<div class="empty">市场暂时没有玩家商品。</div>';
+        return;
+    }
+    market.forEach((entry) => grid.appendChild(createMarketItem(entry)));
+}
+
+function createMarketItem(entry) {
+    const item = entry.item || {};
+    const row = document.createElement('article');
+    row.className = 'market-item';
+    row.title = `${item.name || entry.itemId}\n${item.qualityLabel || item.quality || '普通'} · ${item.type || '网页道具'}\n${item.desc || ''}`;
+    const main = document.createElement('div');
+    const itemLine = document.createElement('div');
+    itemLine.className = 'item-line';
+    const itemIcon = document.createElement('div');
+    itemIcon.className = 'item-icon';
+    itemIcon.textContent = item.icon || '?';
+    const itemCopy = document.createElement('div');
+    const itemName = document.createElement('div');
+    const quality = ['common','uncommon','rare','epic','legendary'].includes(item.quality) ? item.quality : 'common';
+    itemName.className = `item-name quality-${quality}`;
+    itemName.textContent = item.name || entry.itemId || '未知道具';
+    const itemMeta = document.createElement('div');
+    itemMeta.className = 'item-meta';
+    itemMeta.textContent = `${item.qualityLabel || item.quality || '普通'} · ${item.type || '网页道具'}`;
+    itemCopy.append(itemName, itemMeta);
+    itemLine.append(itemIcon, itemCopy);
+    main.appendChild(itemLine);
+    const seller = document.createElement('div');
+    seller.className = 'seller';
+    seller.appendChild(createAvatar(entry));
+    const sellerText = document.createElement('div');
+    const sellerName = document.createElement('button');
+    sellerName.className = 'seller-name';
+    sellerName.textContent = entry.sellerName || '玩家';
+    sellerName.onclick = () => location.href = `profile.html?userId=${encodeURIComponent(entry.sellerId || '')}`;
+    const sellerMeta = document.createElement('div');
+    sellerMeta.className = 'seller-meta';
+    sellerMeta.textContent = `Lv.${entry.sellerLevel || 1} · ${entry.sellerTitle || '初来乍到'}`;
+    sellerText.append(sellerName,sellerMeta);
+    seller.appendChild(sellerText);
+    main.appendChild(seller);
+    if (entry.sellerNote) {
+        const note = document.createElement('div');
+        note.className = 'seller-note';
+        note.textContent = `卖家留言：${entry.sellerNote}`;
+        main.appendChild(note);
+    }
+    const price = document.createElement('div');
+    price.className = 'price';
+    price.append(`${entry.price} 金币`);
+    const action = document.createElement('button');
+    action.className = 'btn primary';
+    const isMine = user && entry.sellerId === user.userId;
+    action.textContent = isMine ? '下架' : '购买';
+    action.onclick = () => isMine ? delist(entry.marketId) : buy(entry.marketId);
+    price.appendChild(action);
+    row.append(main,price);
+    return row;
+}
+
+function createAvatar(entry) {
+    const avatar = document.createElement('span');
+    avatar.className = 'seller-avatar';
+    const data = entry.sellerAvatar || {};
+    if (data.type === 'image' && data.src) {
+        const image = document.createElement('img');
+        image.src = data.src;
+        image.alt = '';
+        avatar.appendChild(image);
+    } else {
+        avatar.textContent = data.text || Array.from(entry.sellerName || '旅')[0];
+        if (data.color) avatar.style.background = data.color;
+    }
+    return avatar;
+}
+
+async function buy(marketId) {
+    if (!user) return showToast('请先登录');
+    if (inventory.filter(Boolean).length >= BAG_SIZE) return showToast('背包已满，无法购买');
+    const response = await fetch(`board.php?action=buyMarketItem&userId=${encodeURIComponent(user.userId)}&marketId=${encodeURIComponent(marketId)}`, { cache:'no-store' });
+    const data = await response.json();
+    if (data.code === 'ok') {
+        inventory = data.inventory || inventory;
+        gold = Number(data.gold || 0);
+        unlimitedGold = data.unlimitedGold === true;
+        showToast('购买成功');
+        renderStatus();
+        loadMarket();
+    } else if (data.code === 'full') showToast('背包已满，无法购买');
+    else if (data.code === 'nogold') showToast('金币不足');
+    else if (data.code === 'self') showToast('不能购买自己的商品');
+    else showToast('购买失败，商品可能已售出');
+}
+
+async function delist(marketId) {
+    if (!user) return showToast('请先登录');
+    if (inventory.filter(Boolean).length >= BAG_SIZE) return showToast('背包已满，无法下架');
+    const response = await fetch(`board.php?action=delistMarketItem&userId=${encodeURIComponent(user.userId)}&marketId=${encodeURIComponent(marketId)}`, { cache:'no-store' });
+    const data = await response.json();
+    if (data.code === 'ok') {
+        inventory = data.inventory || inventory;
+        showToast('商品已下架');
+        renderStatus();
+        loadMarket();
+    } else if (data.code === 'full') showToast('背包已满，无法下架');
+    else showToast('下架失败');
+}
+
+function toggleView() {
+    viewMode = viewMode === 'card' ? 'list' : 'card';
+    localStorage.setItem('market_view', viewMode);
+    renderMarket();
+}
+
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+}
+</script>
+</body>
+</html>

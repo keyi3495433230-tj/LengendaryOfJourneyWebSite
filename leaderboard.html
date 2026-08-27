@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="device-ui.js?v=16"></script>
+<link rel="stylesheet" href="device-ui.css?v=16">
+    <title>旅途传说 - 排行榜</title>
+    <style>
+        :root { --ink:#fffaf2; --muted:rgba(255,250,242,.64); --line:rgba(255,230,200,.16); --brand:#8f2730; --gold:#c79a55; --panel:rgba(255,246,232,.075); --shadow:0 22px 60px rgba(0,0,0,.28); }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { min-height:100vh; padding:22px; color:var(--ink); font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif; background:radial-gradient(circle at 18% 0%,rgba(199,154,85,.18),transparent 30%),radial-gradient(circle at 90% 12%,rgba(143,39,48,.28),transparent 28%),linear-gradient(135deg,#120d0b 0%,#21110f 48%,#090607 100%); }
+        body::before { content:""; position:fixed; inset:0; pointer-events:none; background-image:linear-gradient(rgba(255,230,200,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,230,200,.028) 1px,transparent 1px); background-size:42px 42px; mask-image:linear-gradient(to bottom,rgba(0,0,0,.86),transparent 78%); }
+        .app { position:relative; z-index:1; width:min(100%,1180px); margin:0 auto; display:grid; gap:16px; }
+        .topbar,.panel,.rank-row { border:1px solid var(--line); border-radius:8px; background:var(--panel); box-shadow:var(--shadow); backdrop-filter:blur(14px); }
+        .topbar { display:flex; justify-content:space-between; gap:14px; align-items:center; padding:16px 18px; }
+        h1 { color:#fff4df; font-size:24px; }
+        p { color:var(--muted); margin-top:6px; font-size:13px; }
+        .nav,.tabs { display:flex; gap:8px; flex-wrap:wrap; }
+        .btn { min-height:40px; padding:0 14px; border:1px solid rgba(199,154,85,.28); border-radius:8px; background:rgba(255,255,255,.07); color:#fff4df; cursor:pointer; font-weight:800; }
+        .btn.active,.btn.primary { border:none; background:linear-gradient(135deg,var(--brand),#3b0d14); }
+        .panel { padding:18px; }
+        .tabs { margin-bottom:14px; }
+        .tabs > strong { min-height:40px; display:inline-flex; align-items:center; padding:0 12px; border-left:3px solid var(--gold); color:#f2d49d; font-size:13px; letter-spacing:.08em; }
+        #dungeonTabs { padding:12px; border:1px solid rgba(157,91,195,.28); border-radius:8px; background:rgba(68,35,83,.18); }
+        #dungeonTabs > strong { border-left-color:#b979d8; color:#dfb3f2; }
+        .rank-list { display:grid; gap:10px; }
+        .rank-row { display:grid; grid-template-columns:56px 1fr auto; gap:14px; align-items:center; padding:14px; background:rgba(255,255,255,.045); cursor:pointer; }
+        .rank { color:var(--gold); font-size:20px; font-weight:900; text-align:center; }
+        .player { display:flex; align-items:center; gap:12px; min-width:0; }
+        .avatar { width:46px; height:46px; border-radius:8px; display:grid; place-items:center; overflow:hidden; background:linear-gradient(135deg,var(--brand),var(--gold)); font-weight:900; }
+        .avatar img { width:100%; height:100%; object-fit:cover; }
+        .name { color:#fff4df; font-weight:900; }
+        .meta { color:var(--muted); margin-top:4px; font-size:12px; }
+        .score { color:var(--gold); font-size:20px; font-weight:900; text-align:right; }
+        @media (max-width:700px){ body{padding:12px}.topbar{align-items:flex-start;flex-direction:column}.rank-row{grid-template-columns:40px 1fr}.score{grid-column:2;text-align:left;font-size:16px} }
+    </style>
+</head>
+<body>
+<main class="app">
+    <header class="topbar">
+        <div>
+            <h1>旅途传说 · 排行榜</h1>
+            <p>查看官网成长数据与黑暗地牢探索纪录。</p>
+        </div>
+        <div class="nav">
+            <button class="btn" onclick="location.href='dungeon-wasd-demo.html'">黑暗地牢</button>
+            <button class="btn" onclick="location.href='game.html'">游戏官网</button>
+            <button class="btn" onclick="location.href='forum.html'">论坛</button>
+            <button class="btn" onclick="location.href='catalog.html'">图鉴</button>
+            <button class="btn" onclick="location.href='bagdemo.html'">我的背包</button>
+        </div>
+    </header>
+    <section class="panel">
+        <div class="tabs" id="officialTabs" aria-label="官网排行榜"></div>
+        <div class="tabs" id="dungeonTabs" aria-label="黑暗地牢排行榜"></div>
+        <div class="rank-list" id="rankList"></div>
+    </section>
+</main>
+<script>
+const TYPES = {
+    gold: '金币',
+    level: '等级',
+    xp: '经验',
+    posts: '活跃',
+    likes: '获赞',
+    dungeonKills: '地牢击杀',
+    dungeonDeaths: '地牢死亡',
+    dungeonEntries: '进入地牢',
+    dungeonFloors: '探索层数'
+};
+const OFFICIAL_TYPES = ['gold', 'level', 'xp', 'posts', 'likes'];
+const DUNGEON_TYPES = ['dungeonKills', 'dungeonDeaths', 'dungeonEntries', 'dungeonFloors'];
+let currentType = new URLSearchParams(location.search).get('type') || 'gold';
+
+window.addEventListener('DOMContentLoaded', () => {
+    renderTabs();
+    loadRank();
+});
+
+function renderTabs() {
+    renderTabGroup('officialTabs', '官网排行', OFFICIAL_TYPES);
+    renderTabGroup('dungeonTabs', '黑暗地牢', DUNGEON_TYPES);
+}
+
+function renderTabGroup(id, title, types) {
+    const tabs = document.getElementById(id);
+    tabs.textContent = '';
+    const heading = document.createElement('strong');
+    heading.textContent = title;
+    tabs.appendChild(heading);
+    types.forEach((key) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn' + (key === currentType ? ' active' : '');
+        btn.textContent = TYPES[key];
+        btn.onclick = () => {
+            currentType = key;
+            renderTabs();
+            loadRank();
+        };
+        tabs.appendChild(btn);
+    });
+}
+
+async function loadRank() {
+    const list = document.getElementById('rankList');
+    list.innerHTML = '<p>正在加载排行榜...</p>';
+    try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 5000);
+        const res = await fetch(`board.php?action=getLeaderboard&type=${currentType}&_=${Date.now()}`, { cache: 'no-store', signal: controller.signal });
+        clearTimeout(timer);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (data.code && data.code !== 'ok') throw new Error(data.code);
+        const rows = data.rows || [];
+        if (!rows.length) {
+            list.innerHTML = '<p>暂无排行数据。</p>';
+            return;
+        }
+        list.textContent = '';
+        rows.forEach((row, index) => list.appendChild(renderRow(row, index)));
+    } catch (error) {
+        list.innerHTML = '<p>排行榜读取失败，请刷新页面重试。若仅地牢排行无法读取，请确认服务器已上传最新版 board.php 和 lib/dungeon.php。</p>';
+    }
+}
+
+function renderRow(row, index) {
+    const div = document.createElement('article');
+    div.className = 'rank-row';
+    div.onclick = () => location.href = `profile.html?userId=${encodeURIComponent(row.userId)}`;
+    div.tabIndex = 0;
+    div.setAttribute('role', 'link');
+    div.setAttribute('aria-label', `查看${row.user || '玩家'}的档案`);
+    div.onkeydown = (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            div.click();
+        }
+    };
+    const avatar = row.avatar || {};
+    const rank = document.createElement('div');
+    rank.className = 'rank';
+    rank.textContent = `#${index + 1}`;
+    const player = document.createElement('div');
+    player.className = 'player';
+    const avatarBox = document.createElement('div');
+    avatarBox.className = 'avatar';
+    if (avatar.type === 'image' && avatar.src) {
+        const image = document.createElement('img');
+        image.src = avatar.src;
+        image.alt = '';
+        avatarBox.appendChild(image);
+    } else {
+        avatarBox.textContent = avatar.text || Array.from(row.user || '旅')[0];
+    }
+    const identity = document.createElement('div');
+    const name = document.createElement('div');
+    name.className = 'name';
+    name.textContent = row.user || '玩家';
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    const lastSeen = row.lastActive ? new Date(String(row.lastActive).replace(' ', 'T')).toLocaleString('zh-CN', { hour12:false }) : '暂无记录';
+    meta.textContent = `Lv.${row.level || 1} · ${row.selectedTitle || '初来乍到'} · 最后上线 ${lastSeen}${row.bio ? ` · ${row.bio}` : ''}`;
+    identity.append(name, meta);
+    player.append(avatarBox, identity);
+    const score = document.createElement('div');
+    score.className = 'score';
+    score.append(document.createTextNode(currentType === 'gold' && row.unlimitedGold ? '∞' : String(row.score || 0)), document.createElement('br'));
+    const scoreMeta = document.createElement('span');
+    scoreMeta.className = 'meta';
+    scoreMeta.textContent = TYPES[currentType];
+    score.appendChild(scoreMeta);
+    div.append(rank, player, score);
+    return div;
+}
+</script>
+</body>
+</html>

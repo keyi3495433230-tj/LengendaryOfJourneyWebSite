@@ -1,0 +1,2239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#07111c">
+    <meta name="robots" content="noindex,nofollow,noarchive">
+    <title>远征司令台 · 旅途传说</title>
+<script src="device-ui.js?v=16"></script>
+<link rel="stylesheet" href="device-ui.css?v=16">
+    <style>
+        :root {
+            color-scheme: dark;
+            --night: #07111c;
+            --night-2: #0a1724;
+            --night-3: #0d1d2c;
+            --panel: rgba(13, 29, 44, .82);
+            --panel-strong: #0d1b29;
+            --paper: #eee6d8;
+            --muted: rgba(238, 230, 216, .59);
+            --faint: rgba(238, 230, 216, .36);
+            --gold: #cda45f;
+            --gold-bright: #efc879;
+            --gold-soft: rgba(205, 164, 95, .13);
+            --line: rgba(238, 230, 216, .12);
+            --line-gold: rgba(205, 164, 95, .3);
+            --green: #72c39b;
+            --orange: #e5a35d;
+            --red: #e07770;
+            --blue: #78a7ca;
+            --radius: 18px;
+            --shadow: 0 24px 75px rgba(0, 0, 0, .27);
+            --sidebar: 268px;
+        }
+
+        * { box-sizing: border-box; }
+        html { min-width: 320px; scroll-behavior: smooth; background: var(--night); }
+        body {
+            min-height: 100svh;
+            margin: 0;
+            color: var(--paper);
+            background:
+                radial-gradient(circle at 79% 7%, rgba(205, 164, 95, .09), transparent 25rem),
+                radial-gradient(circle at 18% 88%, rgba(62, 110, 142, .09), transparent 30rem),
+                var(--night);
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+        }
+        body::before {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            content: "";
+            opacity: .18;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(238, 230, 216, .035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(238, 230, 216, .035) 1px, transparent 1px);
+            background-size: 44px 44px;
+            mask-image: linear-gradient(90deg, transparent 8%, #000 50%, transparent 96%);
+        }
+        button, input, select, textarea { color: inherit; font: inherit; }
+        button, a { -webkit-tap-highlight-color: transparent; }
+        button { cursor: pointer; }
+        button:disabled { cursor: not-allowed; opacity: .55; }
+        a { color: inherit; }
+        [hidden] { display: none !important; }
+        .skip-link {
+            position: fixed;
+            top: 10px;
+            left: 12px;
+            z-index: 100;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: #131920;
+            background: var(--gold-bright);
+            transform: translateY(-150%);
+        }
+        .skip-link:focus { transform: translateY(0); }
+        .sr-only {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            clip-path: inset(50%) !important;
+            border: 0 !important;
+            white-space: nowrap !important;
+        }
+
+        .shell { min-height: 100svh; display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); }
+        .sidebar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            height: 100svh;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 18px 20px;
+            border-right: 1px solid var(--line);
+            background: rgba(6, 15, 24, .91);
+            backdrop-filter: blur(18px);
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 52px;
+            padding: 0 9px;
+            text-decoration: none;
+        }
+        .brand img { width: 38px; height: 38px; border-radius: 11px; box-shadow: 0 0 0 1px var(--line-gold); }
+        .brand-copy { display: grid; gap: 2px; }
+        .brand-copy strong { font-family: "STKaiti", "KaiTi", serif; font-size: 19px; letter-spacing: .08em; }
+        .brand-copy small { color: var(--gold); font: 700 9px/1.2 Georgia, serif; letter-spacing: .19em; }
+        .rail-label { margin: 38px 12px 11px; color: var(--faint); font-size: 10px; font-weight: 800; letter-spacing: .18em; }
+        .rail-nav { display: grid; gap: 6px; }
+        .nav-button {
+            position: relative;
+            display: grid;
+            grid-template-columns: 34px 1fr auto;
+            align-items: center;
+            gap: 8px;
+            min-height: 48px;
+            width: 100%;
+            padding: 7px 11px;
+            border: 1px solid transparent;
+            border-radius: 12px;
+            color: var(--muted);
+            text-align: left;
+            background: transparent;
+            transition: color .2s, background .2s, border-color .2s, transform .2s;
+        }
+        .nav-button:hover { color: var(--paper); background: rgba(255, 255, 255, .035); transform: translateX(2px); }
+        .nav-button[aria-current="page"] {
+            color: var(--paper);
+            border-color: var(--line-gold);
+            background: linear-gradient(90deg, rgba(205, 164, 95, .16), rgba(205, 164, 95, .035));
+        }
+        .nav-button[aria-current="page"]::before {
+            position: absolute;
+            left: -19px;
+            width: 3px;
+            height: 25px;
+            border-radius: 99px;
+            content: "";
+            background: var(--gold-bright);
+            box-shadow: 0 0 18px rgba(239, 200, 121, .45);
+        }
+        .nav-index { color: var(--gold); font: italic 700 11px Georgia, serif; letter-spacing: .08em; }
+        .nav-text { font-size: 13px; font-weight: 800; }
+        .nav-mark { width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: .35; }
+        .side-foot { margin-top: auto; padding: 18px 11px 3px; border-top: 1px solid var(--line); }
+        .operator { display: flex; align-items: center; gap: 10px; }
+        .operator-badge {
+            width: 35px;
+            height: 35px;
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+            border: 1px solid var(--line-gold);
+            border-radius: 50%;
+            color: var(--gold-bright);
+            background: var(--gold-soft);
+            font: 800 13px Georgia, serif;
+        }
+        .operator-copy { min-width: 0; display: grid; gap: 2px; }
+        .operator-copy strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+        .operator-copy small { color: var(--green); font-size: 10px; }
+        .side-links { display: flex; gap: 8px; margin-top: 15px; }
+        .side-links a, .side-links button {
+            flex: 1;
+            min-height: 34px;
+            padding: 6px 8px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            color: var(--muted);
+            text-align: center;
+            text-decoration: none;
+            background: transparent;
+            font-size: 10px;
+        }
+        .side-links a:hover, .side-links button:hover { color: var(--paper); border-color: var(--line-gold); }
+
+        .workspace { min-width: 0; padding: 0 clamp(20px, 4vw, 62px) 60px; }
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 15;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            border-bottom: 1px solid var(--line);
+            background: linear-gradient(180deg, rgba(7, 17, 28, .97), rgba(7, 17, 28, .82));
+            backdrop-filter: blur(15px);
+        }
+        .mobile-menu { display: none; }
+        .crumb { min-width: 0; }
+        .crumb small { display: block; margin-bottom: 5px; color: var(--gold); font: 700 9px Georgia, serif; letter-spacing: .18em; }
+        .crumb strong { display: block; overflow: hidden; font: 900 19px "STKaiti", "KaiTi", serif; letter-spacing: .06em; text-overflow: ellipsis; white-space: nowrap; }
+        .system-state { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 11px; white-space: nowrap; }
+        .system-state::before {
+            width: 7px;
+            height: 7px;
+            content: "";
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 0 5px rgba(114, 195, 155, .09), 0 0 16px rgba(114, 195, 155, .5);
+        }
+
+        .view { max-width: 1500px; margin: 0 auto; padding-top: clamp(28px, 4vw, 52px); animation: view-in .35s ease both; }
+        @keyframes view-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+        .section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 26px; }
+        .section-title { min-width: 0; }
+        .kicker { display: block; margin-bottom: 10px; color: var(--gold); font: 700 10px Georgia, serif; letter-spacing: .2em; }
+        h1, h2, h3, p { margin-top: 0; }
+        .section-title h1 { margin-bottom: 7px; font: 900 clamp(34px, 4vw, 54px)/1 "STKaiti", "KaiTi", serif; letter-spacing: -.035em; }
+        .section-title p { margin-bottom: 0; color: var(--muted); font-size: 13px; line-height: 1.7; }
+        .head-actions { display: flex; gap: 9px; flex-wrap: wrap; }
+        .btn {
+            min-height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 9px 15px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            color: var(--paper);
+            text-decoration: none;
+            background: rgba(255, 255, 255, .035);
+            font-size: 12px;
+            font-weight: 800;
+            transition: .2s;
+        }
+        .btn:hover { border-color: var(--line-gold); background: rgba(205, 164, 95, .09); transform: translateY(-1px); }
+        .btn.primary { color: #15202a; border-color: var(--gold-bright); background: var(--gold-bright); }
+        .btn.primary:hover { background: #f4d18d; }
+        .btn.danger { color: #ffc3be; border-color: rgba(224, 119, 112, .33); background: rgba(224, 119, 112, .08); }
+        .btn.mail-action { color: #bde3ff; border-color: rgba(120, 167, 202, .42); background: rgba(120, 167, 202, .1); }
+        .btn.mail-action:hover { border-color: var(--blue); background: rgba(120, 167, 202, .18); }
+        .btn.small { min-height: 34px; padding: 6px 10px; font-size: 10px; }
+        .btn.icon-only { width: 40px; padding: 0; font-size: 18px; }
+
+        .command-hero {
+            position: relative;
+            isolation: isolate;
+            min-height: 245px;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns:minmax(0, 1.25fr) minmax(270px, .75fr);
+            align-items: center;
+            gap: 30px;
+            padding: clamp(28px, 4vw, 54px);
+            border: 1px solid var(--line-gold);
+            border-radius: 22px;
+            background:
+                linear-gradient(112deg, rgba(205, 164, 95, .12), transparent 44%),
+                linear-gradient(145deg, #102235, #091622 78%);
+            box-shadow: var(--shadow);
+        }
+        .command-hero::before {
+            position: absolute;
+            top: 50%;
+            right: clamp(24px, 9vw, 130px);
+            z-index: -1;
+            width: 310px;
+            height: 310px;
+            content: "";
+            border: 1px solid rgba(205, 164, 95, .15);
+            border-radius: 50%;
+            box-shadow: 0 0 0 40px rgba(205, 164, 95, .025), 0 0 0 80px rgba(205, 164, 95, .018);
+            transform: translate(45%, -50%);
+        }
+        .hero-copy h1 { max-width: 720px; margin-bottom: 16px; font: 900 clamp(40px, 5.4vw, 72px)/.98 "STKaiti", "KaiTi", serif; letter-spacing: -.06em; }
+        .hero-copy p { max-width: 620px; margin-bottom: 0; color: var(--muted); font-size: 13px; line-height: 1.85; }
+        .hero-seal { justify-self: end; width: min(100%, 260px); padding: 22px; border-left: 1px solid var(--line-gold); }
+        .hero-seal span { display: block; color: var(--faint); font: 700 9px Georgia, serif; letter-spacing: .18em; }
+        .hero-seal strong { display: block; margin: 12px 0 4px; color: var(--gold-bright); font: 900 40px/1 Georgia, serif; }
+        .hero-seal small { color: var(--muted); font-size: 11px; }
+
+        .metrics { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+        .metric {
+            position: relative;
+            min-width: 0;
+            padding: 19px 17px 17px;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: rgba(13, 29, 44, .7);
+        }
+        .metric::after { position: absolute; right: -8px; bottom: -12px; color: rgba(205, 164, 95, .07); content: attr(data-order); font: italic 900 54px Georgia, serif; }
+        .metric-label { position: relative; z-index: 1; display: block; color: var(--muted); font-size: 10px; font-weight: 800; }
+        .metric-value { position: relative; z-index: 1; display: block; margin-top: 11px; font: 800 clamp(24px, 2.3vw, 35px)/1 Georgia, serif; }
+        .metric-note { position: relative; z-index: 1; display: block; min-height: 15px; margin-top: 9px; color: var(--faint); font-size: 9px; }
+        .metric.alert .metric-value { color: #ffc0ba; }
+        .metric.good .metric-value { color: #a1ddbe; }
+
+        .grid-2 { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr); gap: 16px; margin-top: 16px; }
+        .panel {
+            min-width: 0;
+            padding: clamp(20px, 2.6vw, 30px);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background: var(--panel);
+            box-shadow: 0 18px 55px rgba(0, 0, 0, .13);
+        }
+        .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 22px; }
+        .panel-title { min-width: 0; }
+        .panel-title h2 { margin-bottom: 5px; font: 900 22px "STKaiti", "KaiTi", serif; letter-spacing: .03em; }
+        .panel-title p { margin-bottom: 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+        .eyebrow { color: var(--gold); font: 700 9px Georgia, serif; letter-spacing: .18em; }
+        .quick-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        .quick-action {
+            min-height: 112px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: space-between;
+            padding: 16px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            color: var(--paper);
+            text-align: left;
+            background: rgba(255, 255, 255, .025);
+        }
+        .quick-action:hover { border-color: var(--line-gold); background: var(--gold-soft); }
+        .quick-action span { color: var(--gold-bright); font: italic 700 11px Georgia, serif; }
+        .quick-action strong { font-size: 12px; }
+        .limit-stack { display: grid; gap: 18px; }
+        .limit-row { display: grid; gap: 8px; }
+        .limit-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 10px; }
+        .limit-meta strong { color: var(--paper); font: 800 12px Georgia, serif; }
+        .meter { height: 5px; overflow: hidden; border-radius: 99px; background: rgba(255, 255, 255, .055); }
+        .meter > span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #8b6a38, var(--gold-bright)); transition: width .45s ease; }
+
+        .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
+        .search-box { position: relative; flex: 1; max-width: 560px; }
+        .search-box input { padding-left: 42px; }
+        .search-icon { position: absolute; left: 15px; top: 50%; color: var(--faint); font: 700 15px Georgia, serif; pointer-events: none; transform: translateY(-50%); }
+        .toolbar-tools { display: flex; align-items: center; gap: 8px; }
+        .field-control, .field textarea, .field select, .field input {
+            width: 100%;
+            min-height: 43px;
+            padding: 9px 12px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            color: var(--paper);
+            background: rgba(255, 255, 255, .04);
+            transition: border-color .2s, box-shadow .2s, background .2s;
+        }
+        .field-control:focus, .field textarea:focus, .field select:focus, .field input:focus {
+            outline: 0;
+            border-color: rgba(239, 200, 121, .56);
+            background: rgba(255, 255, 255, .06);
+            box-shadow: 0 0 0 4px rgba(205, 164, 95, .08);
+        }
+        select option { color: var(--paper); background: var(--night-3); }
+
+        .table-wrap { overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: rgba(5, 14, 23, .24); }
+        .data-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .data-table th { padding: 13px 15px; color: var(--faint); text-align: left; background: rgba(255, 255, 255, .025); font-size: 9px; font-weight: 900; letter-spacing: .12em; }
+        .data-table td { padding: 16px 15px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; line-height: 1.55; vertical-align: middle; }
+        .data-table tbody tr { transition: background .18s; }
+        .data-table tbody tr:hover { background: rgba(205, 164, 95, .035); }
+        .identity { min-width: 0; display: flex; align-items: center; gap: 11px; }
+        .avatar {
+            width: 36px;
+            height: 36px;
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+            border: 1px solid var(--line-gold);
+            border-radius: 11px;
+            color: var(--gold-bright);
+            background: var(--gold-soft);
+            font: 800 12px Georgia, serif;
+        }
+        .identity-copy { min-width: 0; }
+        .identity-copy strong { display: block; overflow: hidden; color: var(--paper); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+        .identity-copy span { display: block; overflow: hidden; margin-top: 3px; color: var(--faint); font: 10px Georgia, serif; text-overflow: ellipsis; white-space: nowrap; }
+        .badge { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); font-size: 9px; font-weight: 800; }
+        .badge::before { width: 5px; height: 5px; content: ""; border-radius: 50%; background: currentColor; }
+        .badge.active, .badge.ok { color: #91d7b4; border-color: rgba(114, 195, 155, .25); background: rgba(114, 195, 155, .06); }
+        .badge.pending, .badge.suspended, .badge.warning { color: #f1ba7e; border-color: rgba(229, 163, 93, .28); background: rgba(229, 163, 93, .07); }
+        .badge.banned, .badge.disabled, .badge.danger { color: #f0a19b; border-color: rgba(224, 119, 112, .28); background: rgba(224, 119, 112, .07); }
+        .badge.admin { color: var(--gold-bright); border-color: var(--line-gold); background: var(--gold-soft); }
+        .badge.moderator { color: #a7cae3; border-color: rgba(120, 167, 202, .3); background: rgba(120, 167, 202, .07); }
+        .cell-stack { display: grid; gap: 3px; }
+        .cell-stack strong { color: var(--paper); font-size: 11px; font-weight: 800; }
+        .cell-stack span { color: var(--faint); font-size: 9px; }
+        .row-actions { display: flex; justify-content: flex-end; gap: 6px; flex-wrap: wrap; }
+        .post-title { display: -webkit-box; overflow: hidden; color: var(--paper); font-size: 12px; font-weight: 800; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .post-preview { display: -webkit-box; overflow: hidden; margin-top: 5px; color: var(--faint); font-size: 10px; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .pager { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 16px; color: var(--muted); font-size: 10px; }
+        .empty-state { display: grid; place-items: center; min-height: 220px; padding: 35px; color: var(--muted); text-align: center; }
+        .empty-state strong { display: block; margin-bottom: 8px; color: var(--paper); font: 900 20px "STKaiti", "KaiTi", serif; }
+
+        .settings-layout { display: grid; grid-template-columns: minmax(300px, .72fr) minmax(0, 1.28fr); gap: 16px; }
+        .settings-card + .settings-card { margin-top: 16px; }
+        .field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+        .field { min-width: 0; display: grid; gap: 8px; }
+        .field.full { grid-column: 1 / -1; }
+        .field label { color: rgba(238, 230, 216, .75); font-size: 10px; font-weight: 900; }
+        .field small { color: var(--faint); font-size: 9px; line-height: 1.55; }
+        .field textarea { min-height: 92px; resize: vertical; }
+        .appearance-row { display: flex; gap: 8px; align-items: stretch; }
+        .appearance-row input { flex: 1; min-width: 0; }
+        .upload-btn { display: inline-flex; align-items: center; justify-content: center; padding: 0 14px; border: 1px solid var(--line-gold); border-radius: 8px; background: rgba(205,164,95,.12); color: var(--gold-bright); font-size: 10px; font-weight: 900; cursor: pointer; white-space: nowrap; transition: background .15s; }
+        .upload-btn:hover { background: rgba(205,164,95,.22); }
+        .upload-btn input { display: none; }
+        .appearance-preview { display: flex; align-items: center; gap: 10px; min-height: 0; }
+        .appearance-thumb { width: 48px; height: 48px; object-fit: cover; border: 1px solid var(--line-gold); border-radius: 6px; background: #0a0a0f; }
+        .clear-img-btn { padding: 4px 10px; border: 1px solid rgba(165,72,63,.5); border-radius: 6px; background: rgba(165,72,63,.12); color: #e8a09a; font-size: 9px; font-weight: 800; cursor: pointer; }
+        .clear-img-btn:hover { background: rgba(165,72,63,.25); }
+        .floor-color-row { display:flex; align-items:center; gap:9px; margin-top:8px; color:var(--muted); font-size:9px; font-weight:800; }
+        .floor-color-row input[type="color"] { width:42px; height:26px; padding:2px; border:1px solid var(--line-gold); border-radius:6px; background:#111; cursor:pointer; }
+        .floor-color-value { color:var(--gold-bright); font:700 9px ui-monospace, Consolas, monospace; }
+        .setting-note { margin: 18px 0 0; padding: 14px; border-left: 2px solid var(--gold); color: var(--muted); background: rgba(205, 164, 95, .055); font-size: 10px; line-height: 1.7; }
+        .contact-admin { display: grid; grid-template-columns: 104px minmax(0, 1fr); align-items: center; gap: 20px; }
+        .contact-avatar { width: 104px; height: 104px; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--line-gold); border-radius: 24px; color: var(--gold-bright); background: radial-gradient(circle at 34% 28%, rgba(205,164,95,.2), rgba(143,39,48,.2)); font: 900 34px Georgia, serif; }
+        .contact-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .contact-admin-copy { min-width: 0; }
+        .contact-admin-copy h3 { margin: 0 0 7px; color: var(--paper); font: 900 20px "STKaiti", "KaiTi", serif; }
+        .contact-admin-copy p { margin: 0 0 14px; color: var(--muted); font-size: 10px; line-height: 1.7; }
+        .contact-avatar-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+        .contact-avatar-actions input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+        .probability-list { display: grid; gap: 11px; }
+        .probability-row {
+            display: grid;
+            grid-template-columns: minmax(90px, .42fr) minmax(120px, 1fr) 100px;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 14px;
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            background: rgba(255, 255, 255, .02);
+        }
+        .quality { display: flex; align-items: center; gap: 9px; font-size: 11px; font-weight: 900; }
+        .quality::before { width: 8px; height: 8px; content: ""; border-radius: 50%; background: currentColor; box-shadow: 0 0 13px currentColor; }
+        .quality.common { color: #d6d4cc; }
+        .quality.uncommon { color: #76c590; }
+        .quality.rare { color: #73a9e2; }
+        .quality.epic { color: #b48ad8; }
+        .quality.legendary { color: #e0aa62; }
+        .rate-track.common { color: #d6d4cc; }
+        .rate-track.uncommon { color: #76c590; }
+        .rate-track.rare { color: #73a9e2; }
+        .rate-track.epic { color: #b48ad8; }
+        .rate-track.legendary { color: #e0aa62; }
+        .rate-track { height: 4px; overflow: hidden; border-radius: 99px; background: rgba(255, 255, 255, .055); }
+        .rate-track span { display: block; height: 100%; border-radius: inherit; background: currentColor; }
+        .rate-input { position: relative; }
+        .rate-input input { min-height: 38px; padding-right: 28px; text-align: right; }
+        .rate-input::after { position: absolute; top: 50%; right: 11px; content: "%"; color: var(--faint); font-size: 9px; transform: translateY(-50%); pointer-events: none; }
+        .probability-total { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 17px; padding-top: 17px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+        .probability-total strong { color: var(--green); font: 800 17px Georgia, serif; }
+        .probability-total.invalid strong { color: var(--red); }
+        .form-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+
+        .audit-list { position: relative; display: grid; gap: 0; }
+        .audit-list::before { position: absolute; top: 18px; bottom: 18px; left: 17px; width: 1px; content: ""; background: var(--line-gold); }
+        .audit-item { position: relative; display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: start; gap: 14px; padding: 13px 0; }
+        .bottle-admin-card { padding: 18px 0; border-bottom: 1px solid var(--line); }
+        .bottle-admin-card:last-child { border-bottom: 0; }
+        .bottle-admin-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+        .bottle-admin-card > .post-preview { display: block; margin: 13px 0 0; padding: 14px; border: 1px solid var(--line); border-radius: 6px; color: var(--paper); background: rgba(255,255,255,.025); font-size: 13px; line-height: 1.75; white-space: pre-wrap; }
+        .bottle-admin-comments { display: grid; gap: 8px; margin-top: 13px; }
+        .bottle-admin-comment { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 14px; padding: 11px 13px; border-left: 2px solid var(--line-gold); background: rgba(255,255,255,.018); }
+        .bottle-admin-comment .cell-stack { min-width: 0; }
+        .audit-dot { z-index: 1; width: 35px; height: 35px; display: grid; place-items: center; border: 1px solid var(--line-gold); border-radius: 50%; color: var(--gold-bright); background: var(--panel-strong); font: 800 9px Georgia, serif; }
+        .audit-copy { min-width: 0; padding-top: 2px; }
+        .audit-copy strong { display: block; color: var(--paper); font-size: 11px; }
+        .audit-copy p { margin: 5px 0 0; overflow-wrap: anywhere; color: var(--muted); font-size: 10px; line-height: 1.6; }
+        .audit-copy small { display: block; margin-top: 5px; color: var(--faint); font: 9px Georgia, serif; }
+        .audit-time { padding-top: 4px; color: var(--faint); font: 9px Georgia, serif; white-space: nowrap; }
+
+        dialog {
+            width: min(720px, calc(100% - 30px));
+            max-height: min(820px, calc(100dvh - 30px));
+            padding: 0;
+            overflow: hidden;
+            border: 1px solid var(--line-gold);
+            border-radius: 18px;
+            color: var(--paper);
+            background: var(--panel-strong);
+            box-shadow: 0 32px 100px rgba(0, 0, 0, .58);
+        }
+        dialog::backdrop { background: rgba(2, 7, 12, .8); backdrop-filter: blur(8px); }
+        .dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 24px; border-bottom: 1px solid var(--line); }
+        .dialog-head h2 { margin: 0; font: 900 25px "STKaiti", "KaiTi", serif; }
+        .dialog-body { max-height: calc(100dvh - 210px); overflow-y: auto; padding: 24px; }
+        .dialog-section + .dialog-section { margin-top: 26px; padding-top: 24px; border-top: 1px solid var(--line); }
+        .dialog-section h3 { margin-bottom: 13px; color: var(--gold-bright); font-size: 11px; letter-spacing: .07em; }
+        .dialog-foot { display: flex; align-items: center; justify-content: flex-end; gap: 9px; padding: 16px 24px; border-top: 1px solid var(--line); background: rgba(0, 0, 0, .12); }
+        .attachment-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) 110px 110px 110px; gap: 12px; }
+        .mail-recipient { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
+        .reward-preview { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--line-gold); border-radius: 10px; color: var(--muted); background: var(--gold-soft); font-size: 11px; line-height: 1.65; }
+
+        .toast-region { position: fixed; right: 22px; bottom: max(22px, env(safe-area-inset-bottom)); z-index: 90; display: grid; gap: 9px; width: min(360px, calc(100vw - 32px)); pointer-events: none; }
+        .toast { padding: 14px 16px; border: 1px solid var(--line-gold); border-radius: 11px; color: var(--paper); background: rgba(10, 24, 36, .96); box-shadow: var(--shadow); font-size: 11px; line-height: 1.6; animation: toast-in .25s ease both; }
+        .toast.error { border-color: rgba(224, 119, 112, .52); }
+        @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } }
+
+        .access-gate { min-height: 100svh; display: grid; place-items: center; padding: 24px; }
+        .gate-card { width: min(560px, 100%); padding: clamp(28px, 5vw, 52px); border: 1px solid var(--line-gold); border-radius: 22px; text-align: center; background: linear-gradient(145deg, #102235, #091622); box-shadow: var(--shadow); }
+        .gate-code { width: 68px; height: 68px; display: grid; place-items: center; margin: 0 auto 24px; border: 1px solid var(--line-gold); border-radius: 50%; color: var(--gold-bright); background: var(--gold-soft); font: italic 800 17px Georgia, serif; }
+        .gate-card h1 { margin-bottom: 13px; font: 900 clamp(35px, 8vw, 52px) "STKaiti", "KaiTi", serif; }
+        .gate-card p { margin-bottom: 25px; color: var(--muted); font-size: 12px; line-height: 1.8; }
+        .gate-actions { display: flex; justify-content: center; gap: 9px; flex-wrap: wrap; }
+
+        /* Flat, restrained visual language for faster scanning. */
+        body { background: var(--night); }
+        body::before { display: none; }
+        .sidebar { background: #08131e; backdrop-filter: none; }
+        .topbar { background: #07111c; backdrop-filter: none; }
+        .nav-button[aria-current="page"] { background: #102131; }
+        .btn, .nav-button, .side-links a, .side-links button, .quick-action,
+        .metric, .panel, .table-wrap, .data-table tr, .search-box input,
+        .field input, .field select, .field textarea, .probability-row,
+        .audit-item, .toast, .gate-card, dialog { border-radius: 6px; }
+        .btn.primary { background: var(--gold-bright); }
+        .command-hero { border-radius: 8px; background: #102235; box-shadow: 0 18px 45px rgba(0,0,0,.22); }
+        .metric, .panel, .quick-action, .gate-card, dialog { background-image: none; }
+        .metric::after { display: none; }
+        .badge, .operator-badge, .probability-total { border-radius: 4px; }
+        .attachment-grid input, .attachment-grid select { background-color: #0a1724; }
+
+        .busy-overlay { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; background: rgba(5, 13, 21, .6); backdrop-filter: blur(2px); }
+        .spinner { width: 34px; height: 34px; border: 2px solid rgba(205, 164, 95, .17); border-top-color: var(--gold-bright); border-radius: 50%; animation: spin .7s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 1240px) {
+            :root { --sidebar: 230px; }
+            .metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .settings-layout { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 920px) {
+            .shell { display: block; }
+            .sidebar {
+                position: fixed;
+                inset: 0 auto 0 0;
+                z-index: 50;
+                width: min(290px, calc(100vw - 54px));
+                height: 100dvh;
+                transform: translateX(-105%);
+                transition: transform .25s ease;
+                box-shadow: 24px 0 65px rgba(0, 0, 0, .35);
+            }
+            .sidebar.open { transform: none; }
+            .sidebar-scrim { position: fixed; inset: 0; z-index: 49; border: 0; background: rgba(2, 7, 12, .72); }
+            .workspace { padding-inline: clamp(16px, 4vw, 34px); }
+            .topbar { min-height: 72px; }
+            .mobile-menu { display: inline-flex; }
+            .topbar-left { min-width: 0; display: flex; align-items: center; gap: 12px; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .command-hero { grid-template-columns: 1fr; }
+            .hero-seal { justify-self: start; width: auto; border-top: 1px solid var(--line-gold); border-left: 0; padding: 18px 0 0; }
+        }
+        @media (max-width: 560px) {
+            .contact-admin { grid-template-columns: 1fr; }
+            .contact-avatar { width: 88px; height: 88px; }
+        }
+        @media (max-width: 760px) {
+            .bottle-admin-head { flex-direction: column; }
+            .bottle-admin-comment { grid-template-columns: 1fr; }
+            .bottle-admin-head .btn, .bottle-admin-comment .btn { width: 100%; }
+            .section-head { align-items: flex-start; flex-direction: column; }
+            .head-actions { width: 100%; }
+            .head-actions .btn { flex: 1; }
+            .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .toolbar { align-items: stretch; flex-direction: column; }
+            .search-box { max-width: none; }
+            .toolbar-tools { display: grid; grid-template-columns: 1fr auto; }
+            .table-wrap { overflow: visible; border: 0; background: none; }
+            .data-table, .data-table tbody { display: block; }
+            .data-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+            .data-table tr { display: grid; gap: 0; margin-bottom: 10px; overflow: hidden; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); }
+            .data-table td { position: relative; min-height: 48px; display: grid; grid-template-columns: 92px minmax(0, 1fr); align-items: center; gap: 12px; padding: 12px 14px; border-top: 1px solid var(--line); }
+            .data-table td:first-child { border-top: 0; }
+            .data-table td::before { content: attr(data-label); color: var(--faint); font-size: 9px; font-weight: 900; letter-spacing: .08em; }
+            .data-table td > * { min-width: 0; }
+            .data-table .row-actions { justify-content: flex-start; }
+            .data-table .row-actions .btn { min-height: 42px; flex: 1 1 110px; font-size: 11px; }
+            .field-grid { grid-template-columns: 1fr; }
+            .attachment-grid { grid-template-columns: 1fr 1fr; }
+            .attachment-grid .item-field { grid-column: 1 / -1; }
+            .field.full { grid-column: auto; }
+            .probability-row { grid-template-columns: 88px minmax(70px, 1fr) 88px; gap: 8px; padding-inline: 10px; }
+            .audit-item { grid-template-columns: 36px minmax(0, 1fr); }
+            .audit-time { grid-column: 2; padding: 0; }
+        }
+        @media (max-width: 480px) {
+            .system-state span { display: none; }
+            .section-title h1 { font-size: 37px; }
+            .command-hero { min-height: 0; padding: 28px 22px; }
+            .hero-copy h1 { font-size: clamp(39px, 13vw, 55px); }
+            .metrics { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .metric { padding: 16px 13px; }
+            .quick-grid { grid-template-columns: 1fr; }
+            .panel { padding: 18px 15px; }
+            .data-table td { grid-template-columns: 78px minmax(0, 1fr); padding-inline: 12px; }
+            .probability-row { grid-template-columns: 1fr 82px; }
+            .probability-row .rate-track { grid-column: 1 / -1; grid-row: 2; }
+            .dialog-body { padding: 20px 16px; }
+            .dialog-head, .dialog-foot { padding-inline: 16px; }
+            .dialog-foot { position: sticky; bottom: 0; }
+            .dialog-foot .btn { min-height: 46px; flex: 1; }
+            .attachment-grid { grid-template-columns: 1fr; }
+            .attachment-grid .item-field { grid-column: auto; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#mainContent">跳到主要内容</a>
+
+    <div class="shell" id="adminShell" hidden>
+        <aside class="sidebar" id="sidebar" aria-label="管理功能导航">
+            <a class="brand" href="index.html" aria-label="返回旅途传说首页">
+                <img src="logo.png" alt="" width="38" height="38">
+                <span class="brand-copy"><strong>旅途传说</strong><small>COMMAND DESK</small></span>
+            </a>
+            <p class="rail-label">远征司令台</p>
+            <nav class="rail-nav">
+                <button class="nav-button" type="button" data-view="overview" aria-current="page"><span class="nav-index">01</span><span class="nav-text">全局概览</span><span class="nav-mark"></span></button>
+                <button class="nav-button" type="button" data-view="users"><span class="nav-index">02</span><span class="nav-text">旅人档案</span><span class="nav-mark"></span></button>
+                <button class="nav-button" type="button" data-view="posts"><span class="nav-index">03</span><span class="nav-text">帖子治理</span><span class="nav-mark"></span></button>
+                <button class="nav-button" type="button" data-view="settings"><span class="nav-index">04</span><span class="nav-text">风控与抽奖</span><span class="nav-mark"></span></button>
+                <button class="nav-button" type="button" data-view="items"><span class="nav-index">05</span><span class="nav-text">物品管理</span><span class="nav-mark"></span></button>
+                <button class="nav-button" type="button" data-view="bottles"><span class="nav-index">06</span><span class="nav-text">漂流瓶治理</span><span class="nav-mark"></span></button>
+                <button class="nav-button" type="button" data-view="audit"><span class="nav-index">07</span><span class="nav-text">审计航迹</span><span class="nav-mark"></span></button>
+                <button class="nav-button" type="button" data-view="dungeon"><span class="nav-index">08</span><span class="nav-text">地牢外观</span><span class="nav-mark"></span></button>
+            </nav>
+            <div class="side-foot">
+                <div class="operator">
+                    <span class="operator-badge" id="operatorInitial">管</span>
+                    <span class="operator-copy"><strong id="operatorName">管理员</strong><small>● 安全会话已连接</small></span>
+                </div>
+                <div class="side-links"><a href="index.html">返回首页</a><button type="button" id="logoutButton">退出登录</button></div>
+            </div>
+        </aside>
+        <button class="sidebar-scrim" id="sidebarScrim" type="button" aria-label="关闭导航" hidden></button>
+
+        <main class="workspace" id="mainContent" tabindex="-1">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="btn icon-only mobile-menu" id="mobileMenuButton" type="button" aria-label="打开管理导航" aria-expanded="false" aria-controls="sidebar">☰</button>
+                    <div class="crumb"><small>JOURNEY / ADMINISTRATION</small><strong id="currentViewTitle">全局概览</strong></div>
+                </div>
+                <div class="system-state"><span id="systemStateText">防护策略运行中</span></div>
+            </header>
+
+            <section class="view" id="view-overview" data-view-panel="overview" aria-labelledby="overviewTitle">
+                <div class="command-hero">
+                    <div class="hero-copy"><span class="kicker">LIVE OPERATIONS · 实时运营</span><h1 id="overviewTitle">让每一次旅途，<br>都在秩序中发生。</h1><p>这里汇聚账号、社区内容与风控策略。所有管理动作由服务端会话鉴权，并写入不可由普通用户触达的审计航迹。</p></div>
+                    <div class="hero-seal"><span>今日社区脉搏</span><strong id="heroTodayPosts">—</strong><small>篇新帖子 · <span id="heroTodayUsers">—</span> 位新旅人</small></div>
+                </div>
+                <div class="metrics" aria-label="社区关键数据">
+                    <article class="metric" data-order="01"><span class="metric-label">旅人总数</span><strong class="metric-value" id="metricTotalUsers">—</strong><span class="metric-note">全部注册账号</span></article>
+                    <article class="metric good" data-order="02"><span class="metric-label">活跃旅人</span><strong class="metric-value" id="metricActiveUsers">—</strong><span class="metric-note">近期有活动</span></article>
+                    <article class="metric alert" data-order="03"><span class="metric-label">受限账号</span><strong class="metric-value" id="metricSuspendedUsers">—</strong><span class="metric-note">停用或封禁</span></article>
+                    <article class="metric" data-order="04"><span class="metric-label">社区帖子</span><strong class="metric-value" id="metricTotalPosts">—</strong><span class="metric-note">现存主题总量</span></article>
+                    <article class="metric" data-order="05"><span class="metric-label">今日发帖</span><strong class="metric-value" id="metricPostsToday">—</strong><span class="metric-note">自然日新增</span></article>
+                    <article class="metric" data-order="06"><span class="metric-label">今日注册</span><strong class="metric-value" id="metricRegistrationsToday">—</strong><span class="metric-note">风控后通过</span></article>
+                </div>
+                <div class="grid-2">
+                    <section class="panel" aria-labelledby="quickTitle">
+                        <div class="panel-head"><div class="panel-title"><span class="eyebrow">QUICK ROUTES</span><h2 id="quickTitle">常用航线</h2><p>从这里快速抵达需要处理的区域。</p></div></div>
+                        <div class="quick-grid">
+                            <button class="quick-action" type="button" data-go="users"><span>02 / TRAVELERS</span><strong>搜索并修改玩家档案 →</strong></button>
+                            <button class="quick-action" type="button" data-go="posts"><span>03 / MODERATION</span><strong>处理异常帖子与刷屏 →</strong></button>
+                            <button class="quick-action" type="button" data-go="settings"><span>04 / RISK CONTROL</span><strong>调整注册和发帖上限 →</strong></button>
+                            <button class="quick-action" type="button" data-go="audit"><span>05 / AUDIT TRAIL</span><strong>复核管理员操作记录 →</strong></button>
+                        </div>
+                    </section>
+                    <section class="panel" aria-labelledby="limitsTitle">
+                        <div class="panel-head"><div class="panel-title"><span class="eyebrow">ACTIVE GUARDRAILS</span><h2 id="limitsTitle">当前防线</h2><p>关键限制的即时快照。</p></div><button class="btn small" type="button" data-go="settings">调整</button></div>
+                        <div class="limit-stack">
+                            <div class="limit-row"><div class="limit-meta"><span>同一 IP 注册</span><strong id="limitIpText">—</strong></div><div class="meter"><span id="limitIpMeter" style="width:0"></span></div></div>
+                            <div class="limit-row"><div class="limit-meta"><span>同一设备注册</span><strong id="limitDeviceText">—</strong></div><div class="meter"><span id="limitDeviceMeter" style="width:0"></span></div></div>
+                            <div class="limit-row"><div class="limit-meta"><span>每人每日发帖</span><strong id="limitPostText">—</strong></div><div class="meter"><span id="limitPostMeter" style="width:0"></span></div></div>
+                        </div>
+                    </section>
+                </div>
+            </section>
+
+            <section class="view" id="view-users" data-view-panel="users" aria-labelledby="usersTitle" hidden>
+                <div class="section-head">
+                    <div class="section-title"><span class="kicker">TRAVELER ARCHIVE</span><h1 id="usersTitle">旅人档案</h1><p>查找账号，调整身份、状态与玩家资源。密码永不在后台回显。</p></div>
+                    <div class="head-actions"><button class="btn" id="refreshUsers" type="button">刷新档案</button></div>
+                </div>
+                <section class="panel" aria-label="玩家账号列表">
+                    <div class="toolbar">
+                        <label class="search-box"><span class="search-icon" aria-hidden="true">⌕</span><span class="sr-only">搜索用户名、邮箱或玩家 ID</span><input class="field-control" id="userSearch" type="search" maxlength="64" autocomplete="off" placeholder="搜索用户名、邮箱或玩家 ID…"></label>
+                        <div class="toolbar-tools"><span class="badge" id="userCountBadge">0 位旅人</span><button class="btn" id="userSearchButton" type="button">搜索</button></div>
+                    </div>
+                    <div class="table-wrap" id="usersTableWrap">
+                        <table class="data-table">
+                            <caption class="sr-only">玩家账号与状态列表</caption>
+                            <colgroup><col style="width:25%"><col style="width:18%"><col style="width:20%"><col style="width:17%"><col style="width:20%"></colgroup>
+                            <thead><tr><th scope="col">玩家</th><th scope="col">身份 / 状态</th><th scope="col">最近活动</th><th scope="col">玩家数据</th><th scope="col" style="text-align:right">操作</th></tr></thead>
+                            <tbody id="usersBody"></tbody>
+                        </table>
+                        <div class="empty-state" id="usersEmpty"><div><strong>档案尚未展开</strong><span>正在连接玩家数据库…</span></div></div>
+                    </div>
+                    <div class="pager"><button class="btn small" id="usersPrev" type="button">上一页</button><span id="usersPageText">第 1 页</span><button class="btn small" id="usersNext" type="button">下一页</button></div>
+                </section>
+            </section>
+
+            <section class="view" id="view-posts" data-view-panel="posts" aria-labelledby="postsTitle" hidden>
+                <div class="section-head">
+                    <div class="section-title"><span class="kicker">CONTENT MODERATION</span><h1 id="postsTitle">帖子治理</h1><p>集中处理刷屏、广告与异常内容；删除操作会进入审计记录。</p></div>
+                    <div class="head-actions"><a class="btn" href="forum.html" target="_blank" rel="noopener">查看公开论坛</a><button class="btn" id="refreshPosts" type="button">刷新列表</button></div>
+                </div>
+                <section class="panel" aria-label="论坛帖子列表">
+                    <div class="toolbar">
+                        <label class="search-box"><span class="search-icon" aria-hidden="true">⌕</span><span class="sr-only">在当前页筛选帖子</span><input class="field-control" id="postSearch" type="search" maxlength="80" autocomplete="off" placeholder="在当前页筛选标题、内容或作者…"></label>
+                        <div class="toolbar-tools"><label><span class="sr-only">按分区筛选</span><select class="field-control" id="postCategory"><option value="">全部分区</option><option value="daily">日常交流</option><option value="mc">我的世界</option><option value="journey">旅途传说</option><option value="paid">发电用户区</option></select></label><span class="badge" id="postCountBadge">0 篇</span></div>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <caption class="sr-only">论坛帖子治理列表</caption>
+                            <colgroup><col style="width:42%"><col style="width:17%"><col style="width:13%"><col style="width:13%"><col style="width:15%"></colgroup>
+                            <thead><tr><th scope="col">内容</th><th scope="col">作者</th><th scope="col">分区</th><th scope="col">互动 / 时间</th><th scope="col" style="text-align:right">治理</th></tr></thead>
+                            <tbody id="postsBody"></tbody>
+                        </table>
+                        <div class="empty-state" id="postsEmpty"><div><strong>正在巡查社区</strong><span>帖子载入后会显示在这里。</span></div></div>
+                    </div>
+                    <div class="pager"><button class="btn small" id="postsPrev" type="button">上一页</button><span id="postsPageText">第 1 页</span><button class="btn small" id="postsNext" type="button">下一页</button></div>
+                </section>
+            </section>
+
+            <section class="view" id="view-settings" data-view-panel="settings" aria-labelledby="settingsTitle" hidden>
+                <div class="section-head">
+                    <div class="section-title"><span class="kicker">DEFENSE &amp; ECONOMY</span><h1 id="settingsTitle">风控与抽奖</h1><p>限制异常注册与刷帖，并控制不同品质物品的抽取概率。</p></div>
+                </div>
+                <form id="settingsForm">
+                    <div class="settings-layout">
+                        <div>
+                            <section class="panel settings-card" aria-labelledby="riskTitle">
+                                <div class="panel-head"><div class="panel-title"><span class="eyebrow">ACCESS GUARD</span><h2 id="riskTitle">访问与行为限制</h2><p>限制必须在服务端执行，前端数值仅用于管理配置。</p></div></div>
+                                <div class="field-grid">
+                                    <div class="field"><label for="registrationLimitIp">同一 IP 最多注册</label><input id="registrationLimitIp" name="registration_limit_ip" type="number" min="1" max="3" step="1" required><small>最多 3 个账号；共享网络用户可能受影响。</small></div>
+                                    <div class="field"><label for="registrationLimitDevice">同一设备最多注册</label><input id="registrationLimitDevice" name="registration_limit_device" type="number" min="1" max="3" step="1" required><small>依据设备标识计数，不依赖可伪造的用户名。</small></div>
+                                    <div class="field full"><label for="dailyPostLimit">每个账号每日最多发帖</label><input id="dailyPostLimit" name="daily_post_limit" type="number" min="1" max="5" step="1" required><small>主题帖每天最多 5 篇，回复另有限速。</small></div>
+                                </div>
+                                <p class="setting-note">这些限制用于提高批量攻击成本，不能替代宝塔防火墙、登录限速、验证码、HTTPS 与定期备份。</p>
+                            </section>
+                        </div>
+                        <section class="panel settings-card" aria-labelledby="lotteryTitle">
+                            <div class="panel-head"><div class="panel-title"><span class="eyebrow">LOTTERY WEIGHTS</span><h2 id="lotteryTitle">抽奖品质概率</h2><p>五项相加必须等于 100%。高品质默认采用更克制的概率。</p></div></div>
+                            <div class="probability-list">
+                                <div class="probability-row"><span class="quality common">白 · 普通</span><div class="rate-track common"><span data-rate-bar="lotteryCommon" style="width:0"></span></div><label class="rate-input"><span class="sr-only">普通品质概率</span><input id="lotteryCommon" name="lottery_common" type="number" min="0" max="100" step="0.1" required></label></div>
+                                <div class="probability-row"><span class="quality uncommon">绿 · 精良</span><div class="rate-track uncommon"><span data-rate-bar="lotteryUncommon" style="width:0"></span></div><label class="rate-input"><span class="sr-only">精良品质概率</span><input id="lotteryUncommon" name="lottery_uncommon" type="number" min="0" max="100" step="0.1" required></label></div>
+                                <div class="probability-row"><span class="quality rare">蓝 · 稀有</span><div class="rate-track rare"><span data-rate-bar="lotteryRare" style="width:0"></span></div><label class="rate-input"><span class="sr-only">稀有品质概率</span><input id="lotteryRare" name="lottery_rare" type="number" min="0" max="100" step="0.1" required></label></div>
+                                <div class="probability-row"><span class="quality epic">紫 · 史诗</span><div class="rate-track epic"><span data-rate-bar="lotteryEpic" style="width:0"></span></div><label class="rate-input"><span class="sr-only">史诗品质概率</span><input id="lotteryEpic" name="lottery_epic" type="number" min="0" max="100" step="0.1" required></label></div>
+                                <div class="probability-row"><span class="quality legendary">金 · 传说</span><div class="rate-track legendary"><span data-rate-bar="lotteryLegendary" style="width:0"></span></div><label class="rate-input"><span class="sr-only">传说品质概率</span><input id="lotteryLegendary" name="lottery_legendary" type="number" min="0" max="100" step="0.1" required></label></div>
+                            </div>
+                            <div class="probability-total" id="probabilityTotal"><span>当前合计</span><strong id="probabilityTotalValue">100%</strong></div>
+                        </section>
+                    </div>
+                    <div class="form-actions"><button class="btn" id="resetSettings" type="button">恢复已保存值</button><button class="btn primary" id="saveSettings" type="submit">保存全部策略</button></div>
+                </form>
+                <section class="panel settings-card" aria-labelledby="keyiContactTitle">
+                    <div class="panel-head"><div class="panel-title"><span class="eyebrow">CONTACT PORTRAIT</span><h2 id="keyiContactTitle">联络人 · 可翼</h2><p>头像会存入云端媒体库，并显示在所有玩家的联络人页面。</p></div><span class="badge active">每日 30 格</span></div>
+                    <div class="contact-admin">
+                        <div class="contact-avatar" id="keyiAvatarPreview" aria-label="可翼头像预览"><span>翼</span></div>
+                        <div class="contact-admin-copy"><h3>良心商人</h3><p>建议使用正方形图片。上传前会在浏览器内压缩，避免大型原图占用数据库空间。</p><div class="contact-avatar-actions"><label class="btn" for="keyiAvatarInput">选择头像</label><input id="keyiAvatarInput" type="file" accept="image/png,image/jpeg,image/webp"><button class="btn primary" id="saveKeyiAvatar" type="button" disabled>保存头像</button><button class="btn" id="resetKeyiAvatar" type="button">恢复默认</button></div></div>
+                    </div>
+                </section>
+                <section class="panel settings-card" aria-labelledby="hotdogContactTitle">
+                    <div class="panel-head"><div class="panel-title"><span class="eyebrow">CONTACT PORTRAIT</span><h2 id="hotdogContactTitle">联络人 · 阿尔法</h2><p>头像会存入云端媒体库，并显示在所有玩家的联络人页面。</p></div><span class="badge active">每日 20 格</span></div>
+                    <div class="contact-admin"><div class="contact-avatar" id="hotdogAvatarPreview"><span>阿</span></div><div class="contact-admin-copy"><h3>地牢物资联络人</h3><p>建议使用正方形图片，上传前会自动压缩。</p><div class="contact-avatar-actions"><label class="btn" for="hotdogAvatarInput">选择头像</label><input id="hotdogAvatarInput" type="file" accept="image/png,image/jpeg,image/webp"><button class="btn primary" id="saveHotdogAvatar" type="button" disabled>保存头像</button><button class="btn" id="resetHotdogAvatar" type="button">恢复默认</button></div></div></div>
+                </section>
+                <section class="panel settings-card" aria-labelledby="georgeContactTitle">
+                    <div class="panel-head"><div class="panel-title"><span class="eyebrow">CONTACT PORTRAIT</span><h2 id="georgeContactTitle">联络人 · 乔治</h2><p>头像会存入云端媒体库，并显示在所有玩家的联络人页面。</p></div><span class="badge active">特效商店</span></div>
+                    <div class="contact-admin"><div class="contact-avatar" id="georgeAvatarPreview"><span>乔</span></div><div class="contact-admin-copy"><h3>特效收藏家</h3><p>建议使用正方形图片，上传前会自动压缩。</p><div class="contact-avatar-actions"><label class="btn" for="georgeAvatarInput">选择头像</label><input id="georgeAvatarInput" type="file" accept="image/png,image/jpeg,image/webp"><button class="btn primary" id="saveGeorgeAvatar" type="button" disabled>保存头像</button><button class="btn" id="resetGeorgeAvatar" type="button">恢复默认</button></div></div></div>
+                </section>
+                <section class="panel settings-card" aria-labelledby="jackContactTitle">
+                    <div class="panel-head"><div class="panel-title"><span class="eyebrow">CONTACT PORTRAIT</span><h2 id="jackContactTitle">联络人 · 杰克</h2><p>军火商头像会存入云端媒体库，并显示在玩家联络人页面。</p></div><span class="badge active">固定军火</span></div>
+                    <div class="contact-admin"><div class="contact-avatar" id="jackAvatarPreview"><span>杰</span></div><div class="contact-admin-copy"><h3>军火商</h3><p>建议使用正方形图片，上传前会自动压缩。</p><div class="contact-avatar-actions"><label class="btn" for="jackAvatarInput">选择头像</label><input id="jackAvatarInput" type="file" accept="image/png,image/jpeg,image/webp"><button class="btn primary" id="saveJackAvatar" type="button" disabled>保存头像</button><button class="btn" id="resetJackAvatar" type="button">恢复默认</button></div></div></div>
+                </section>
+                <section class="panel settings-card" aria-labelledby="contactProfileEditorTitle">
+                    <div class="panel-head"><div class="panel-title"><span class="eyebrow">CONTACT PROFILE</span><h2 id="contactProfileEditorTitle">联络人资料</h2><p>修改名称、称号和介绍后会同步显示在玩家的联络人网络。</p></div></div>
+                    <div class="field-grid"><div class="field"><label for="contactProfileId">联络人</label><select id="contactProfileId"><option value="keyi">可翼</option><option value="hotdog">阿尔法</option><option value="jack">杰克</option><option value="george">乔治</option></select></div><div class="field"><label for="contactProfileName">名称</label><input id="contactProfileName" maxlength="60"></div><div class="field"><label for="contactProfileTitle">称号</label><input id="contactProfileTitle" maxlength="60"></div><div class="field full"><label for="contactProfileDescription">介绍</label><input id="contactProfileDescription" maxlength="240"></div></div><div class="form-actions"><button class="btn primary" id="saveContactProfile" type="button">保存联络人资料</button></div>
+                </section>
+            </section>
+
+            <section class="view" id="view-items" data-view-panel="items" aria-labelledby="itemsTitle" hidden>
+                <div class="section-head"><div class="section-title"><span class="kicker">ITEM DATABASE</span><h1 id="itemsTitle">物品管理</h1><p>调整物品名称、品质与系统定价，或创建和停用自定义物品。</p></div><button class="btn" id="refreshItems" type="button">刷新物品</button></div>
+                <form id="itemForm" class="panel">
+                    <div class="field-grid">
+                        <div class="field"><label for="itemId">物品 ID（新建可留空）</label><input id="itemId" name="itemId" maxlength="80" placeholder="custom_item"></div>
+                        <div class="field"><label for="itemName">名称</label><input id="itemName" name="name" maxlength="80" required></div>
+                        <div class="field"><label for="itemQuality">品质</label><select id="itemQuality" name="quality"><option value="common">普通</option><option value="uncommon">精良</option><option value="rare">稀有</option><option value="epic">史诗</option><option value="legendary">传说</option></select></div>
+                        <div class="field"><label for="itemPrice">系统定价</label><input id="itemPrice" name="price" type="number" min="1" max="100000000" required></div>
+                        <div class="field"><label for="itemIcon">图标字符</label><input id="itemIcon" name="icon" maxlength="12" placeholder="✦"></div>
+                        <div class="field"><label for="itemType">分类</label><input id="itemType" name="type" maxlength="40"></div>
+                        <div class="field full"><label for="itemDesc">说明</label><input id="itemDesc" name="desc" maxlength="240"></div>
+                    </div>
+                    <div class="form-actions"><button class="btn" id="resetItemForm" type="button">新建物品</button><button class="btn primary" type="submit">保存物品</button></div>
+                </form>
+                <section class="panel"><div class="toolbar"><input class="field-control" id="itemSearch" type="search" placeholder="搜索物品名称或 ID…"><span class="badge" id="itemCountBadge">0 件</span></div><div class="table-wrap"><table class="data-table"><thead><tr><th>物品</th><th>品质</th><th>定价</th><th>状态</th><th style="text-align:right">操作</th></tr></thead><tbody id="itemsBody"></tbody></table></div></section>
+            </section>
+
+            <section class="view" id="view-bottles" data-view-panel="bottles" aria-labelledby="bottlesTitle" hidden>
+                <div class="section-head"><div class="section-title"><span class="kicker">MESSAGE IN A BOTTLE</span><h1 id="bottlesTitle">漂流瓶治理</h1><p>匿名只面向普通玩家；管理员可以追溯作者与评论者，并清理违规内容。</p></div><div class="head-actions"><a class="btn" href="bottle.html" target="_blank" rel="noopener">查看玩家页面</a><button class="btn" id="refreshBottles" type="button">刷新列表</button></div></div>
+                <section class="panel"><div class="toolbar"><label class="search-box"><span class="search-icon">⌕</span><input class="field-control" id="bottleSearch" type="search" maxlength="80" placeholder="搜索内容、作者或玩家 ID…"></label><span class="badge" id="bottleCountBadge">0 个</span></div><div class="audit-list" id="bottleList"></div><div class="empty-state" id="bottleEmpty"><div><strong>海面暂时很安静</strong><span>玩家投放的漂流瓶会显示在这里。</span></div></div><div class="pager"><button class="btn small" id="bottlesPrev" type="button">上一页</button><span id="bottlesPageText">第 1 页</span><button class="btn small" id="bottlesNext" type="button">下一页</button></div></section>
+            </section>
+
+            <section class="view" id="view-audit" data-view-panel="audit" aria-labelledby="auditTitle" hidden>
+                <div class="section-head">
+                    <div class="section-title"><span class="kicker">IMMUTABLE TRAIL</span><h1 id="auditTitle">审计航迹</h1><p>查看管理员的重要操作及其脱敏来源标识，便于定位异常变更。</p></div>
+                    <div class="head-actions"><button class="btn" id="refreshAudit" type="button">刷新航迹</button></div>
+                </div>
+                <section class="panel" aria-label="管理员审计日志">
+                    <div class="panel-head"><div class="panel-title"><span class="eyebrow">RECENT EVENTS</span><h2>近期记录</h2><p>页面不会展示完整 IP、设备指纹或密码信息。</p></div><span class="badge" id="auditCountBadge">0 条</span></div>
+                    <div class="audit-list" id="auditList"></div>
+                    <div class="empty-state" id="auditEmpty"><div><strong>暂无审计记录</strong><span>后续管理动作会依时间排列。</span></div></div>
+                    <div class="pager"><button class="btn small" id="auditPrev" type="button">上一页</button><span id="auditPageText">第 1 页</span><button class="btn small" id="auditNext" type="button">下一页</button></div>
+                </section>
+            </section>
+
+            <section class="view" id="view-dungeon" data-view-panel="dungeon" aria-labelledby="dungeonTitle" hidden>
+                <div class="section-head">
+                    <div class="section-title"><span class="kicker">DUNGEON APPEARANCE</span><h1 id="dungeonTitle">地牢外观</h1><p>设置地牢整体背景图和各房间地板纹理。直接<strong style="color:#ffd93d;">上传本地图片</strong>（JPG/PNG/WebP/GIF，单张 ≤5MB），不需要填写 URL。</p></div>
+                </div>
+                <form id="dungeonConfigForm">
+                    <section class="panel settings-card" aria-labelledby="dungeonBgTitle">
+                        <div class="panel-head"><div class="panel-title"><span class="eyebrow">BACKGROUND</span><h2 id="dungeonBgTitle">地牢整体背景</h2><p>显示在所有地牢瓦片下方，建议暗色主题图片。</p></div></div>
+                        <div class="field-grid">
+                            <div class="field full" data-appearance-key="dungeon_background">
+                                <label>背景图片</label>
+                                <div class="appearance-row">
+                                    <input id="dungeonBgUrl" name="dungeon_background" type="hidden">
+                                    <label class="upload-btn" title="上传本地图片">上传<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload-key="dungeon_background" hidden></label>
+                                </div>
+                                <div class="appearance-preview"><img class="appearance-thumb" data-preview="dungeon_background" alt="预览" hidden><button type="button" class="clear-img-btn" data-clear="dungeon_background" hidden>清除图片</button></div>
+                                <small>留空为纯黑背景。建议 1920×1080 以上，55% 透明度叠加。</small>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="panel settings-card" aria-labelledby="dungeonFloorTitle">
+                        <div class="panel-head"><div class="panel-title"><span class="eyebrow">FLOOR TEXTURES</span><h2 id="dungeonFloorTitle">房间地板纹理</h2><p>每种房间类型可单独设置 40×40 像素的无缝平铺纹理。</p></div></div>
+                        <div class="field-grid">
+                            <div class="field" data-appearance-key="floor_spawn"><label>🏠 出生房间</label><div class="appearance-row"><input id="floorSpawn" name="floor_spawn" type="hidden"><label class="upload-btn">上传<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload-key="floor_spawn" hidden></label></div><div class="appearance-preview"><img class="appearance-thumb" data-preview="floor_spawn" alt="预览" hidden><button type="button" class="clear-img-btn" data-clear="floor_spawn" hidden>清除</button></div></div>
+                            <div class="field" data-appearance-key="floor_chest"><label>📦 宝箱房间</label><div class="appearance-row"><input id="floorChest" name="floor_chest" type="hidden"><label class="upload-btn">上传<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload-key="floor_chest" hidden></label></div><div class="appearance-preview"><img class="appearance-thumb" data-preview="floor_chest" alt="预览" hidden><button type="button" class="clear-img-btn" data-clear="floor_chest" hidden>清除</button></div></div>
+                            <div class="field" data-appearance-key="floor_merchant"><label>🛒 商人房间</label><div class="appearance-row"><input id="floorMerchant" name="floor_merchant" type="hidden"><label class="upload-btn">上传<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload-key="floor_merchant" hidden></label></div><div class="appearance-preview"><img class="appearance-thumb" data-preview="floor_merchant" alt="预览" hidden><button type="button" class="clear-img-btn" data-clear="floor_merchant" hidden>清除</button></div></div>
+                            <div class="field" data-appearance-key="floor_camp"><label>🔥 营火房间</label><div class="appearance-row"><input id="floorCamp" name="floor_camp" type="hidden"><label class="upload-btn">上传<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload-key="floor_camp" hidden></label></div><div class="appearance-preview"><img class="appearance-thumb" data-preview="floor_camp" alt="预览" hidden><button type="button" class="clear-img-btn" data-clear="floor_camp" hidden>清除</button></div></div>
+                            <div class="field" data-appearance-key="floor_shrine"><label>✨ 祭坛房间</label><div class="appearance-row"><input id="floorShrine" name="floor_shrine" type="hidden"><label class="upload-btn">上传<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload-key="floor_shrine" hidden></label></div><div class="appearance-preview"><img class="appearance-thumb" data-preview="floor_shrine" alt="预览" hidden><button type="button" class="clear-img-btn" data-clear="floor_shrine" hidden>清除</button></div></div>
+                            <div class="field" data-appearance-key="floor_normal"><label>⚔️ 普通怪物房间</label><div class="appearance-row"><input id="floorNormal" name="floor_normal" type="hidden"><label class="upload-btn">上传<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload-key="floor_normal" hidden></label></div><div class="appearance-preview"><img class="appearance-thumb" data-preview="floor_normal" alt="预览" hidden><button type="button" class="clear-img-btn" data-clear="floor_normal" hidden>清除</button></div></div>
+                            <div class="field" data-appearance-key="floor_elite"><label>💀 精英怪物房间</label><div class="appearance-row"><input id="floorElite" name="floor_elite" type="hidden"><label class="upload-btn">上传<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload-key="floor_elite" hidden></label></div><div class="appearance-preview"><img class="appearance-thumb" data-preview="floor_elite" alt="预览" hidden><button type="button" class="clear-img-btn" data-clear="floor_elite" hidden>清除</button></div></div>
+                            <div class="field" data-appearance-key="floor_boss"><label>👑 Boss 房间</label><div class="appearance-row"><input id="floorBoss" name="floor_boss" type="hidden"><label class="upload-btn">上传<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload-key="floor_boss" hidden></label></div><div class="appearance-preview"><img class="appearance-thumb" data-preview="floor_boss" alt="预览" hidden><button type="button" class="clear-img-btn" data-clear="floor_boss" hidden>清除</button></div></div>
+                            <div class="field" data-appearance-key="floor_town"><label>🏘️ 主城</label><div class="appearance-row"><input id="floorTown" name="floor_town" type="hidden"><label class="upload-btn">上传<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload-key="floor_town" hidden></label></div><div class="appearance-preview"><img class="appearance-thumb" data-preview="floor_town" alt="预览" hidden><button type="button" class="clear-img-btn" data-clear="floor_town" hidden>清除</button></div></div>
+                            <div class="field" data-appearance-key="floor_bridge"><label>🌉 走廊/桥</label><div class="appearance-row"><input id="floorBridge" name="floor_bridge" type="hidden"><label class="upload-btn">上传<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload-key="floor_bridge" hidden></label></div><div class="appearance-preview"><img class="appearance-thumb" data-preview="floor_bridge" alt="预览" hidden><button type="button" class="clear-img-btn" data-clear="floor_bridge" hidden>清除</button></div></div>
+                        </div>
+                    </section>
+                    <section class="panel settings-card" aria-labelledby="monsterConfigTitle">
+                        <div class="panel-head"><div class="panel-title"><span class="eyebrow">MONSTER DATABASE</span><h2 id="monsterConfigTitle">怪物与 Boss 配置</h2><p>可编辑名称、介绍、图片、基础生命、攻击、移动速度、攻击间隔和技能伤害倍率。图片留空时沿用当前几何外观。</p></div></div>
+                        <div class="field full"><label for="monsterConfigJson">怪物配置（JSON）</label><textarea id="monsterConfigJson" rows="18" spellcheck="false" placeholder="正在读取怪物配置"></textarea><small>包含 crawler、archer、shotgunner、brute、bomber、juggernaut、boss 七类怪物。</small></div>
+                        <div class="field-grid" id="monsterImageUploads">
+                            <div class="field" data-appearance-key="monster_crawler"><label>穴行兽图片</label><input id="monsterCrawler" type="hidden"><label class="upload-btn">上传<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload-key="monster_crawler" hidden></label><div class="appearance-preview"><img class="appearance-thumb" data-preview="monster_crawler" hidden><button type="button" class="clear-img-btn" data-clear="monster_crawler" hidden>清除</button></div></div>
+                            <div class="field" data-appearance-key="monster_archer"><label>弩箭守卫图片</label><input id="monsterArcher" type="hidden"><label class="upload-btn">上传<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload-key="monster_archer" hidden></label><div class="appearance-preview"><img class="appearance-thumb" data-preview="monster_archer" hidden><button type="button" class="clear-img-btn" data-clear="monster_archer" hidden>清除</button></div></div>
+                            <div class="field" data-appearance-key="monster_shotgunner"><label>霰弹守卫图片</label><input id="monsterShotgunner" type="hidden"><label class="upload-btn">上传<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload-key="monster_shotgunner" hidden></label><div class="appearance-preview"><img class="appearance-thumb" data-preview="monster_shotgunner" hidden><button type="button" class="clear-img-btn" data-clear="monster_shotgunner" hidden>清除</button></div></div>
+                            <div class="field" data-appearance-key="monster_brute"><label>重甲看守图片</label><input id="monsterBrute" type="hidden"><label class="upload-btn">上传<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload-key="monster_brute" hidden></label><div class="appearance-preview"><img class="appearance-thumb" data-preview="monster_brute" hidden><button type="button" class="clear-img-btn" data-clear="monster_brute" hidden>清除</button></div></div>
+                            <div class="field" data-appearance-key="monster_bomber"><label>自爆怪图片</label><input id="monsterBomber" type="hidden"><label class="upload-btn">上传<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload-key="monster_bomber" hidden></label><div class="appearance-preview"><img class="appearance-thumb" data-preview="monster_bomber" hidden><button type="button" class="clear-img-btn" data-clear="monster_bomber" hidden>清除</button></div></div>
+                            <div class="field" data-appearance-key="monster_juggernaut"><label>石甲巨像图片</label><input id="monsterJuggernaut" type="hidden"><label class="upload-btn">上传<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload-key="monster_juggernaut" hidden></label><div class="appearance-preview"><img class="appearance-thumb" data-preview="monster_juggernaut" hidden><button type="button" class="clear-img-btn" data-clear="monster_juggernaut" hidden>清除</button></div></div>
+                            <div class="field" data-appearance-key="monster_boss"><label>Boss 图片</label><input id="monsterBoss" type="hidden"><label class="upload-btn">上传<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload-key="monster_boss" hidden></label><div class="appearance-preview"><img class="appearance-thumb" data-preview="monster_boss" hidden><button type="button" class="clear-img-btn" data-clear="monster_boss" hidden>清除</button></div></div>
+                        </div>
+                    </section>
+                    <div class="form-actions"><button class="btn" id="resetDungeonConfig" type="button">重新加载</button><button class="btn primary" id="saveDungeonConfig" type="submit">保存地牢外观</button></div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <section class="access-gate" id="accessGate" aria-labelledby="gateTitle">
+        <div class="gate-card"><div class="gate-code" id="gateCode">···</div><span class="kicker">RESTRICTED AREA</span><h1 id="gateTitle">正在核验管理权限</h1><p id="gateMessage">司令台只向已登录的管理员开放，请稍候。</p><div class="gate-actions" id="gateActions" hidden><a class="btn" href="index.html">返回首页</a><a class="btn primary" id="gateLoginLink" href="auth.html?next=admin.html">前往登录</a></div></div>
+    </section>
+
+    <dialog id="userDialog" aria-labelledby="userDialogTitle">
+        <form id="userEditForm">
+            <div class="dialog-head"><div><span class="eyebrow">TRAVELER RECORD</span><h2 id="userDialogTitle">编辑旅人档案</h2></div><button class="btn icon-only" id="closeUserDialog" type="button" aria-label="关闭">×</button></div>
+            <div class="dialog-body">
+                <section class="dialog-section" aria-labelledby="basicInfoTitle">
+                    <h3 id="basicInfoTitle">基础身份</h3>
+                    <div class="field-grid">
+                        <div class="field"><label for="editUserId">玩家 ID</label><input id="editUserId" name="userId" readonly></div>
+                        <div class="field"><label for="editUsername">用户名</label><input id="editUsername" name="user" minlength="2" maxlength="24" required></div>
+                        <div class="field full"><label for="editEmail">邮箱</label><input id="editEmail" name="email" type="email" maxlength="128" autocomplete="off" placeholder="未填写"></div>
+                        <div class="field"><label for="editRole">身份</label><select id="editRole" name="role"><option value="user">普通玩家</option><option value="moderator">内容协管</option><option value="admin">管理员</option></select></div>
+                        <div class="field"><label for="editStatus">账号状态</label><select id="editStatus" name="status"><option value="active">正常</option><option value="pending">待审核</option><option value="suspended">暂停</option><option value="banned">封禁</option><option value="disabled">停用</option></select></div>
+                    </div>
+                </section>
+                <section class="dialog-section" aria-labelledby="gameDataTitle">
+                    <h3 id="gameDataTitle">玩家数据</h3>
+                    <div class="field-grid">
+                        <div class="field"><label for="editXp">经验值</label><input id="editXp" name="xp" type="number" min="0" max="2147483647" step="1" required></div>
+                        <div class="field"><label for="editGold">金币</label><input id="editGold" name="gold" type="number" min="0" max="2147483647" step="1" required></div>
+                        <div class="field"><label for="editWingCoins">翼币</label><input id="editWingCoins" name="wingCoins" type="number" min="0" max="100000000" step="1" required></div>
+                        <div class="field full"><label for="editBio">个人简介</label><textarea id="editBio" name="bio" maxlength="300" placeholder="未填写"></textarea></div>
+                    </div>
+                </section>
+                <section class="dialog-section" aria-labelledby="passwordResetTitle">
+                    <h3 id="passwordResetTitle">重置密码</h3>
+                    <div class="field-grid">
+                        <div class="field full"><label for="resetPasswordInput">设置一次性新密码</label><input id="resetPasswordInput" type="password" minlength="10" maxlength="128" autocomplete="new-password" placeholder="至少 10 位，包含字母和数字"><small>重置后请通过安全渠道告知玩家；后台不会显示原密码。</small></div>
+                    </div>
+                    <div class="form-actions"><button class="btn danger" id="resetPasswordButton" type="button">确认重置密码</button></div>
+                </section>
+            </div>
+            <div class="dialog-foot"><button class="btn" id="cancelUserEdit" type="button">取消</button><button class="btn primary" id="saveUserButton" type="submit">保存档案</button></div>
+        </form>
+    </dialog>
+
+    <dialog id="mailDialog" aria-labelledby="mailDialogTitle">
+        <form id="mailForm">
+            <div class="dialog-head">
+                <div><span class="eyebrow">PLAYER MAIL</span><h2 id="mailDialogTitle">发送奖励邮件</h2><p class="mail-recipient" id="mailRecipientText"></p></div>
+                <button class="btn icon-only" id="closeMailDialog" type="button" aria-label="关闭">×</button>
+            </div>
+            <div class="dialog-body">
+                <section class="dialog-section" aria-labelledby="mailContentTitle">
+                    <h3 id="mailContentTitle">邮件内容</h3>
+                    <div class="field-grid">
+                        <div class="field full"><label for="mailSubject">标题</label><input id="mailSubject" maxlength="80" required placeholder="例如：活动奖励已送达"></div>
+                        <div class="field full"><label for="mailBody">正文</label><textarea id="mailBody" maxlength="500" placeholder="向玩家说明奖励来源或领取提示"></textarea></div>
+                    </div>
+                </section>
+                <section class="dialog-section" aria-labelledby="mailRewardTitle">
+                    <h3 id="mailRewardTitle">奖励附件（均为可选）</h3>
+                    <div class="attachment-grid">
+                        <div class="field item-field"><label for="mailItemId">物品</label><select id="mailItemId"><option value="">不附带物品</option></select></div>
+                        <div class="field"><label for="mailItemCount">物品数量</label><input id="mailItemCount" type="number" min="1" max="999" value="1" disabled></div>
+                        <div class="field"><label for="mailXp">经验值</label><input id="mailXp" type="number" min="0" max="1000000000" value="0"></div>
+                        <div class="field"><label for="mailGold">金币</label><input id="mailGold" type="number" min="0" max="1000000000" value="0"></div>
+                    </div>
+                    <div class="reward-preview" id="mailRewardPreview">当前为文字邮件，没有奖励附件。邮件与附件将在 10 天后过期。</div>
+                </section>
+            </div>
+            <div class="dialog-foot"><button class="btn" id="cancelMail" type="button">取消</button><button class="btn primary" id="sendMailButton" type="submit">✉ 确认发送</button></div>
+        </form>
+    </dialog>
+
+    <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+    <div class="busy-overlay" id="busyOverlay" aria-label="正在处理" hidden><span class="spinner" aria-hidden="true"></span></div>
+
+    <script>
+    (() => {
+        'use strict';
+
+        const $ = (id) => document.getElementById(id);
+        const state = {
+            view: 'overview',
+            dashboard: null,
+            users: [], userPage: 1, userTotal: 0, userLimit: 20, userQuery: '', usersLoaded: false,
+            posts: [], postPage: 1, postTotal: 0, postLimit: 20, postsLoaded: false,
+            bottles: [], bottlePage: 1, bottleTotal: 0, bottleLimit: 20, bottleQuery: '', bottlesLoaded: false,
+            audit: [], auditPage: 1, auditTotal: 0, auditLimit: 30, auditLoaded: false,
+            items: [], itemsLoaded: false,
+            settings: null, keyiContact: null, keyiAvatarData: '', hotdogContact:null, hotdogAvatarData:'', jackContact:null, jackAvatarData:'', georgeContact:null, georgeAvatarData:'',
+            editUser: null, mailUser: null,
+            forbidden: false,
+            dungeonLoaded: false
+        };
+        const labels = {
+            overview: '全局概览', users: '旅人档案', posts: '帖子治理', settings: '风控与抽奖', items: '物品管理', bottles: '漂流瓶治理', audit: '审计航迹', dungeon: '地牢外观'
+        };
+        const eventLabels = {
+            admin_update_user: '修改玩家档案', admin_reset_password: '重置玩家密码', admin_delete_post: '删除社区帖子',
+            admin_delete_user_posts: '清理玩家全部帖子', admin_update_settings: '更新风控与抽奖策略', admin_send_mail: '发送玩家邮件', login_failed: '登录失败',
+            registration_blocked: '注册请求被拦截', post_rate_limited: '发帖请求被限流',
+            admin_delete_drift_bottle: '删除漂流瓶', admin_delete_drift_comment: '删除漂流瓶评论',
+            admin_contact_updated: '更新联络人头像',
+            admin_dungeon_config_updated: '更新地牢外观配置'
+        };
+        const categoryLabels = { daily: '日常交流', mc: '我的世界', journey: '旅途传说', paid: '发电用户区' };
+        const roleLabels = { user: '普通玩家', moderator: '内容协管', admin: '管理员' };
+        const statusLabels = { active: '正常', pending: '待审核', suspended: '暂停', banned: '封禁', disabled: '停用' };
+
+        class AccessError extends Error {
+            constructor(status) { super('Access denied'); this.status = status; }
+        }
+
+        function safeNumber(value, fallback = 0) {
+            const number = Number(value);
+            return Number.isFinite(number) ? number : fallback;
+        }
+
+        function formatNumber(value) {
+            return Math.max(0, safeNumber(value)).toLocaleString('zh-CN');
+        }
+
+        function formatDate(value, withTime = true) {
+            if (!value) return '暂无记录';
+            const normalized = typeof value === 'string' && /^\d{4}-\d{2}-\d{2} /.test(value) ? value.replace(' ', 'T') : value;
+            const date = new Date(normalized);
+            if (Number.isNaN(date.getTime())) return String(value).slice(0, 24);
+            return new Intl.DateTimeFormat('zh-CN', withTime ? {
+                year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false
+            } : { year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
+        }
+
+        function text(value, fallback = '—') {
+            if (value === null || value === undefined || value === '') return fallback;
+            return String(value);
+        }
+
+        function limitedText(value, maxLength, fallback = '—') {
+            return text(value, fallback).slice(0, maxLength);
+        }
+
+        function redactFingerprint(value) {
+            const fingerprint = limitedText(value, 160, '');
+            if (!fingerprint || fingerprint.length <= 10) return fingerprint;
+            return fingerprint.slice(0, 6) + '…' + fingerprint.slice(-3);
+        }
+
+        function create(tag, className, content) {
+            const node = document.createElement(tag);
+            if (className) node.className = className;
+            if (content !== undefined) node.textContent = text(content, '');
+            return node;
+        }
+
+        function setBusy(busy) {
+            $('busyOverlay').hidden = !busy;
+            document.documentElement.setAttribute('aria-busy', String(busy));
+        }
+
+        function toast(message, type = '') {
+            const item = create('div', 'toast' + (type ? ' ' + type : ''), message);
+            $('toastRegion').appendChild(item);
+            window.setTimeout(() => item.remove(), 4200);
+        }
+
+        function errorMessage(data, fallback) {
+            const code = data && data.code;
+            if (code === 'validation_failed') return '提交的数据未通过校验，请检查输入。';
+            if (code === 'not_found') return '目标记录不存在，可能已被其他管理员处理。';
+            if (code === 'conflict') return '保存发生冲突，请刷新数据后重试。';
+            if (code === 'forbidden') return '当前账号没有执行此操作的权限。';
+            if (code === 'last_admin') return '至少需要保留一名处于启用状态的管理员。';
+            if (code === 'invalid_username') return '用户名格式不正确或已被占用。';
+            if (code === 'invalid_email') return '邮箱格式不正确。';
+            if (code === 'user_not_found') return '找不到指定玩家，可能已被删除。';
+            if (code === 'invalid_item') return '所选物品已停用或不存在，请刷新物品目录。';
+            if (code === 'invalid_role' || code === 'invalid_status') return '账号身份或状态不在允许范围内。';
+            if (code === 'password_length') return '新密码长度不符合服务器安全要求。';
+            if (code === 'no_changes') return '没有检测到需要保存的变更。';
+            if (data && typeof data.message === 'string' && data.message.length < 160) return data.message;
+            return fallback;
+        }
+
+        function getCookie(name) {
+            const m = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([.*+?^${}()|[\]\\])/g, '\\$1') + '=([^;]*)'));
+            return m ? decodeURIComponent(m[1]) : '';
+        }
+
+        async function api(action, options = {}) {
+            const method = options.method || 'GET';
+            const query = new URLSearchParams(Object.assign({ action }, options.query || {}));
+            let url = 'board.php';
+            const init = { method, cache: 'no-store', credentials: 'same-origin' };
+            if (method === 'GET') {
+                url += '?' + query.toString();
+            } else {
+                const body = new URLSearchParams(Object.assign({ action }, options.data || {}));
+                const csrf = getCookie('journey_csrf');
+                if (csrf) body.append('_csrf', csrf);
+                init.headers = { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' };
+                init.body = body;
+            }
+            const controller = new AbortController();
+            const timeout = window.setTimeout(() => controller.abort(), 8000);
+            init.signal = controller.signal;
+            let response;
+            try {
+                response = await fetch(url, init);
+            } catch (error) {
+                if (error && error.name === 'AbortError') throw new Error('服务器响应超时，请检查网络或 PHP 服务。');
+                throw new Error('无法连接服务器，请检查网络或 PHP 服务。');
+            } finally {
+                window.clearTimeout(timeout);
+            }
+            if (response.status === 401 || response.status === 403) {
+                showAccessGate(response.status);
+                throw new AccessError(response.status);
+            }
+            const raw = await response.text();
+            let data = {};
+            if (raw.trim()) {
+                try { data = JSON.parse(raw); }
+                catch (error) { data = { code: raw.trim() }; }
+            }
+            if (!response.ok) throw new Error(errorMessage(data, '服务器暂时无法完成请求。'));
+            if (data && data.code && data.code !== 'ok' && data.code !== 0) {
+                if (data.code === 'forbidden') {
+                    showAccessGate(403);
+                    throw new AccessError(403);
+                }
+                throw new Error(errorMessage(data, '操作未完成，请稍后重试。'));
+            }
+            return data;
+        }
+
+        function showAccessGate(status) {
+            state.forbidden = true;
+            $('adminShell').hidden = true;
+            $('accessGate').hidden = false;
+            $('gateActions').hidden = false;
+            $('gateCode').textContent = status === 403 ? '403' : '401';
+            $('gateTitle').textContent = status === 403 ? '没有司令台权限' : '需要先登录';
+            $('gateMessage').textContent = status === 403
+                ? '当前账号不是管理员。权限判断来自服务器会话，修改本地数据无法绕过。'
+                : '管理会话已失效或尚未登录，请重新登录后再进入。';
+            $('gateLoginLink').hidden = status === 403;
+        }
+
+        function showAdmin() {
+            state.forbidden = false;
+            $('accessGate').hidden = true;
+            $('adminShell').hidden = false;
+        }
+
+        function closeSidebar() {
+            $('sidebar').classList.remove('open');
+            $('sidebarScrim').hidden = true;
+            $('mobileMenuButton').setAttribute('aria-expanded', 'false');
+        }
+
+        async function setView(view) {
+            if (!labels[view] || state.forbidden) return;
+            state.view = view;
+            document.querySelectorAll('[data-view-panel]').forEach((panel) => { panel.hidden = panel.dataset.viewPanel !== view; });
+            document.querySelectorAll('[data-view]').forEach((button) => {
+                if (button.dataset.view === view) button.setAttribute('aria-current', 'page');
+                else button.removeAttribute('aria-current');
+            });
+            $('currentViewTitle').textContent = labels[view];
+            closeSidebar();
+            window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+            try {
+                if (view === 'users' && !state.usersLoaded) await loadUsers();
+                if (view === 'posts' && !state.postsLoaded) await loadPosts();
+                if (view === 'items' && !state.itemsLoaded) await loadItems();
+                if (view === 'bottles' && !state.bottlesLoaded) await loadBottles();
+                if (view === 'audit' && !state.auditLoaded) await loadAudit();
+                if (view === 'dungeon' && !state.dungeonLoaded) await loadDungeonConfig();
+            } catch (error) {
+                if (!(error instanceof AccessError)) toast(error.message || '数据加载失败。', 'error');
+            }
+        }
+
+        function dashboardStats(data) {
+            return data.stats || data.dashboard || data;
+        }
+
+        function rawSettings(data) {
+            return data.settings || data.limits || {};
+        }
+
+        function pick(object, keys, fallback) {
+            for (const key of keys) {
+                if (object && object[key] !== undefined && object[key] !== null) return object[key];
+            }
+            return fallback;
+        }
+
+        function normalizeSettings(source) {
+            const settings = source || {};
+            let rates = {
+                lottery_common: safeNumber(pick(settings, ['lottery_common', 'lotteryCommon', 'common'], 90), 90),
+                lottery_uncommon: safeNumber(pick(settings, ['lottery_uncommon', 'lotteryUncommon', 'uncommon'], 7), 7),
+                lottery_rare: safeNumber(pick(settings, ['lottery_rare', 'lotteryRare', 'rare'], 2), 2),
+                lottery_epic: safeNumber(pick(settings, ['lottery_epic', 'lotteryEpic', 'epic'], .8), .8),
+                lottery_legendary: safeNumber(pick(settings, ['lottery_legendary', 'lotteryLegendary', 'legendary'], .2), .2)
+            };
+            const rateSum = Object.values(rates).reduce((sum, rate) => sum + rate, 0);
+            if (rateSum > 0 && rateSum <= 1.001) {
+                Object.keys(rates).forEach((key) => { rates[key] = Number((rates[key] * 100).toFixed(3)); });
+            }
+            return Object.assign({
+                registration_limit_ip: safeNumber(pick(settings, ['registration_limit_ip', 'registrationLimitIp', 'registrationAccounts'], 3), 3),
+                registration_limit_device: safeNumber(pick(settings, ['registration_limit_device', 'registrationLimitDevice', 'registrationAccounts'], 3), 3),
+                daily_post_limit: safeNumber(pick(settings, ['daily_post_limit', 'dailyPostLimit', 'dailyPosts'], 5), 5)
+            }, rates);
+        }
+
+        function applySettings(settings) {
+            const value = normalizeSettings(settings);
+            state.settings = value;
+            $('registrationLimitIp').value = value.registration_limit_ip;
+            $('registrationLimitDevice').value = value.registration_limit_device;
+            $('dailyPostLimit').value = value.daily_post_limit;
+            $('lotteryCommon').value = value.lottery_common;
+            $('lotteryUncommon').value = value.lottery_uncommon;
+            $('lotteryRare').value = value.lottery_rare;
+            $('lotteryEpic').value = value.lottery_epic;
+            $('lotteryLegendary').value = value.lottery_legendary;
+            updateProbabilityPreview();
+        }
+
+        function renderKeyiContact(contact) {
+            state.keyiContact = contact || state.keyiContact || { avatar: { type: 'initial', text: '翼' } };
+            const avatar = state.keyiContact.avatar || {};
+            const preview = $('keyiAvatarPreview');
+            preview.replaceChildren();
+            if (avatar.type === 'image' && avatar.src) {
+                const image = document.createElement('img');
+                image.src = avatar.src;
+                image.alt = '可翼头像';
+                preview.appendChild(image);
+            } else {
+                preview.appendChild(create('span', '', avatar.text || '翼'));
+            }
+        }
+
+        function renderAdditionalContact(contactId, contact) {
+            const names={hotdog:'阿尔法',jack:'杰克',george:'乔治'},defaults={hotdog:'阿',jack:'杰',george:'乔'};
+            const prefix=contactId;
+            state[`${prefix}Contact`]=contact||state[`${prefix}Contact`]||{avatar:{type:'initial',text:defaults[contactId]}};
+            const avatar=state[`${prefix}Contact`].avatar||{},preview=$(`${prefix}AvatarPreview`);preview.replaceChildren();
+            if(avatar.type==='image'&&avatar.src){const image=document.createElement('img');image.src=avatar.src;image.alt=`${names[contactId]}头像`;preview.appendChild(image)}else preview.appendChild(create('span','',avatar.text||defaults[contactId]));
+        }
+
+        function readCompressedAvatar(file) {
+            return new Promise((resolve, reject) => {
+                if (!file || !/^image\/(png|jpeg|webp)$/i.test(file.type)) return reject(new Error('请选择 PNG、JPG 或 WebP 图片。'));
+                const reader = new FileReader();
+                reader.onerror = () => reject(new Error('图片读取失败。'));
+                reader.onload = () => {
+                    const image = new Image();
+                    image.onerror = () => reject(new Error('无法识别这张图片。'));
+                    image.onload = () => {
+                        const size = Math.min(512, Math.max(image.naturalWidth, image.naturalHeight));
+                        const scale = Math.min(1, size / Math.max(image.naturalWidth, image.naturalHeight));
+                        const canvas = document.createElement('canvas');
+                        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+                        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+                        canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL('image/webp', .82));
+                    };
+                    image.src = reader.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function saveKeyiAvatar(reset = false) {
+            $('saveKeyiAvatar').disabled = true;
+            $('resetKeyiAvatar').disabled = true;
+            try {
+                const data = await api('adminSaveContact', { method: 'POST', data: reset
+                    ? { contactId: 'keyi', avatarReset: '1' }
+                    : { contactId: 'keyi', avatar: state.keyiAvatarData } });
+                state.keyiAvatarData = '';
+                renderKeyiContact(data.contact);
+                $('keyiAvatarInput').value = '';
+                toast(reset ? '可翼已恢复默认头像。' : '可翼头像已保存到云端。', 'success');
+                state.auditLoaded = false;
+            } catch (error) {
+                if (!(error instanceof AccessError)) toast(error.message || '头像保存失败。', 'error');
+            } finally {
+                $('saveKeyiAvatar').disabled = !state.keyiAvatarData;
+                $('resetKeyiAvatar').disabled = false;
+            }
+        }
+
+        async function saveAdditionalContactAvatar(contactId, reset=false){
+            const prefix=contactId,name=contactId==='hotdog'?'阿尔法':contactId==='jack'?'杰克':'乔治',controlName=contactId==='hotdog'?'Hotdog':contactId==='jack'?'Jack':'George',saveButton=$(`save${controlName}Avatar`),resetButton=$(`reset${controlName}Avatar`);
+            saveButton.disabled=true;resetButton.disabled=true;
+            try{const data=await api('adminSaveContact',{method:'POST',data:reset?{contactId,avatarReset:'1'}:{contactId,avatar:state[`${prefix}AvatarData`]}});state[`${prefix}AvatarData`]='';renderAdditionalContact(contactId,data.contact);$(`${prefix}AvatarInput`).value='';toast(reset?`${name}已恢复默认头像。`:`${name}头像已保存到云端。`,'success');state.auditLoaded=false}
+            catch(error){if(!(error instanceof AccessError))toast(error.message||'头像保存失败。','error')}
+            finally{saveButton.disabled=!state[`${prefix}AvatarData`];resetButton.disabled=false}
+        }
+
+        function renderContactProfileEditor() {
+            const contactId = $('contactProfileId').value;
+            const contact = (state.contactProfiles || {})[`${contactId}_contact`] || {};
+            $('contactProfileName').value = contact.name || '';
+            $('contactProfileTitle').value = contact.title || '';
+            $('contactProfileDescription').value = contact.description || '';
+        }
+
+        async function saveContactProfile() {
+            const contactId = $('contactProfileId').value;
+            const button = $('saveContactProfile'); button.disabled = true;
+            try {
+                const data = await api('adminSaveContact', { method:'POST', data:{ contactId, name:$('contactProfileName').value, title:$('contactProfileTitle').value, description:$('contactProfileDescription').value } });
+                state.contactProfiles ||= {}; state.contactProfiles[`${contactId}_contact`] = data.contact;
+                if (contactId === 'keyi') renderKeyiContact(data.contact); else renderAdditionalContact(contactId, data.contact);
+                toast('联络人资料已保存到云端。', 'success');
+            } catch (error) { if (!(error instanceof AccessError)) toast(error.message || '资料保存失败。', 'error'); }
+            finally { button.disabled = false; }
+        }
+
+        function renderDashboard(data) {
+            const stats = dashboardStats(data);
+            const totalUsers = pick(stats, ['totalUsers', 'users', 'userCount'], 0);
+            const activeUsers = pick(stats, ['activeUsers', 'active'], 0);
+            const suspendedUsers = pick(stats, ['suspendedUsers', 'restrictedUsers', 'bannedUsers'], 0);
+            const totalPosts = pick(stats, ['totalPosts', 'posts', 'postCount'], 0);
+            const postsToday = pick(stats, ['postsToday', 'todayPosts'], 0);
+            const registrationsToday = pick(stats, ['registrationsToday', 'todayRegistrations'], 0);
+            $('metricTotalUsers').textContent = formatNumber(totalUsers);
+            $('metricActiveUsers').textContent = formatNumber(activeUsers);
+            $('metricSuspendedUsers').textContent = formatNumber(suspendedUsers);
+            $('metricTotalPosts').textContent = formatNumber(totalPosts);
+            $('metricPostsToday').textContent = formatNumber(postsToday);
+            $('metricRegistrationsToday').textContent = formatNumber(registrationsToday);
+            $('heroTodayPosts').textContent = formatNumber(postsToday);
+            $('heroTodayUsers').textContent = formatNumber(registrationsToday);
+
+            const settings = normalizeSettings(rawSettings(data));
+            applySettings(settings);
+            state.contactProfiles = rawSettings(data);
+            renderKeyiContact(rawSettings(data).keyi_contact);
+            renderAdditionalContact('hotdog',rawSettings(data).hotdog_contact);
+            renderAdditionalContact('jack',rawSettings(data).jack_contact);
+            renderAdditionalContact('george',rawSettings(data).george_contact);
+            renderContactProfileEditor();
+            const limitRows = [
+                ['limitIpText', 'limitIpMeter', settings.registration_limit_ip, 10],
+                ['limitDeviceText', 'limitDeviceMeter', settings.registration_limit_device, 10],
+                ['limitPostText', 'limitPostMeter', settings.daily_post_limit, 20]
+            ];
+            limitRows.forEach(([textId, meterId, limit, scale]) => {
+                $(textId).textContent = formatNumber(limit) + ' 个';
+                $(meterId).style.width = Math.min(100, Math.max(5, safeNumber(limit) / scale * 100)) + '%';
+            });
+        }
+
+        async function loadDashboard() {
+            let lastError;
+            for (let attempt = 0; attempt < 3; attempt += 1) {
+                try {
+                    const data = await api('adminDashboard');
+                    state.dashboard = data;
+                    renderDashboard(data);
+                    showAdmin();
+                    const user = (data && (data.admin || data.currentUser)) || (window.JourneyAuth && window.JourneyAuth.current) || {};
+                    const userName = pick(user, ['user', 'username'], '管理员');
+                    $('operatorName').textContent = text(userName, '管理员');
+                    $('operatorInitial').textContent = text(userName, '管').slice(0, 1).toUpperCase();
+                    return;
+                } catch (error) {
+                    lastError = error;
+                    if (error instanceof AccessError || attempt === 2) throw error;
+                    await new Promise(resolve => window.setTimeout(resolve, 500 * (attempt + 1)));
+                }
+            }
+            throw lastError || new Error('管理数据加载失败。');
+        }
+
+        function normalizeUser(user) {
+            const extra = user && typeof user.extra === 'object' ? user.extra : {};
+            return Object.assign({}, user, {
+                userId: limitedText(pick(user, ['userId', 'id'], ''), 64, ''),
+                user: limitedText(pick(user, ['user', 'username', 'name'], '未命名玩家'), 64, '未命名玩家'),
+                email: limitedText(pick(user, ['email'], ''), 160, ''),
+                role: text(pick(user, ['role'], 'user'), 'user'),
+                status: text(pick(user, ['status'], 'active'), 'active'),
+                xp: Math.max(0, safeNumber(pick(user, ['xp'], extra.xp || 0))),
+                gold: Math.max(0, safeNumber(pick(user, ['gold'], extra.gold || 0))),
+                wingCoins: Math.max(0, safeNumber(pick(user, ['wingCoins'], 0))),
+                bio: limitedText(pick(user, ['bio'], extra.bio || ''), 500, ''),
+                createdAt: pick(user, ['createdAt', 'registeredAt', 'created_at'], ''),
+                lastActive: pick(user, ['lastActive', 'lastLogin', 'updatedAt'], ''),
+                postCount: Math.max(0, safeNumber(pick(user, ['postCount', 'posts'], extra.postCount || 0)))
+            });
+        }
+
+        function tableCell(label) {
+            const td = document.createElement('td');
+            td.dataset.label = label;
+            return td;
+        }
+
+        function initials(name) {
+            const value = text(name, '旅').trim();
+            return (value.slice(0, 1) || '旅').toUpperCase();
+        }
+
+        function renderUsers() {
+            const body = $('usersBody');
+            body.replaceChildren();
+            $('usersEmpty').hidden = state.users.length > 0;
+            $('userCountBadge').textContent = formatNumber(state.userTotal) + ' 位旅人';
+            state.users.forEach((rawUser) => {
+                const user = normalizeUser(rawUser);
+                const row = document.createElement('tr');
+
+                const identityTd = tableCell('玩家');
+                const identity = create('div', 'identity');
+                identity.append(create('span', 'avatar', initials(user.user)));
+                const identityCopy = create('span', 'identity-copy');
+                identityCopy.append(create('strong', '', user.user), create('span', '', user.userId || '无 ID'));
+                identity.append(identityCopy);
+                identityTd.append(identity);
+
+                const statusTd = tableCell('身份 / 状态');
+                const role = create('span', 'badge ' + (roleLabels[user.role] ? user.role : 'user'), roleLabels[user.role] || user.role);
+                const status = create('span', 'badge ' + (statusLabels[user.status] ? user.status : ''), statusLabels[user.status] || user.status);
+                const statusStack = create('div', 'row-actions');
+                statusStack.style.justifyContent = 'flex-start';
+                statusStack.append(role, status);
+                statusTd.append(statusStack);
+
+                const activeTd = tableCell('最近活动');
+                const activeStack = create('span', 'cell-stack');
+                activeStack.append(create('strong', '', formatDate(user.lastActive)), create('span', '', '注册于 ' + formatDate(user.createdAt, false)));
+                activeTd.append(activeStack);
+
+                const dataTd = tableCell('玩家数据');
+                const dataStack = create('span', 'cell-stack');
+                dataStack.append(create('strong', '', 'XP ' + formatNumber(user.xp) + ' · 金币 ' + formatNumber(user.gold)), create('span', '', formatNumber(user.postCount) + ' 篇帖子'));
+                dataTd.append(dataStack);
+
+                const actionTd = tableCell('操作');
+                const actions = create('div', 'row-actions');
+                const mail = create('button', 'btn small mail-action', '✉ 发邮件');
+                mail.type = 'button';
+                mail.title = '向该玩家发送文字或奖励附件';
+                mail.addEventListener('click', () => openMailDialog(user));
+                const edit = create('button', 'btn small', '✎ 编辑');
+                edit.type = 'button';
+                edit.addEventListener('click', () => openUserDialog(user));
+                const clean = create('button', 'btn small danger', '⌫ 清理帖子');
+                clean.type = 'button';
+                clean.addEventListener('click', () => deleteUserPosts(user));
+                actions.append(mail, edit, clean);
+                actionTd.append(actions);
+                row.append(identityTd, statusTd, activeTd, dataTd, actionTd);
+                body.appendChild(row);
+            });
+            updatePager('users', state.userPage, state.userTotal, state.userLimit, state.users.length);
+        }
+
+        async function loadUsers() {
+            $('usersEmpty').hidden = false;
+            $('usersEmpty').querySelector('strong').textContent = '正在展开旅人档案';
+            $('usersEmpty').querySelector('span').textContent = '请稍候…';
+            const data = await api('adminListUsers', { query: { q: state.userQuery, page: state.userPage, limit: state.userLimit } });
+            const rows = Array.isArray(data) ? data : (Array.isArray(data.users) ? data.users : (Array.isArray(data.items) ? data.items : []));
+            state.users = rows;
+            state.userPage = Math.max(1, safeNumber(data.page, state.userPage));
+            state.userLimit = Math.max(1, safeNumber(data.limit, state.userLimit));
+            state.userTotal = Math.max(rows.length, safeNumber(data.total, rows.length));
+            state.usersLoaded = true;
+            renderUsers();
+        }
+
+        function postHaystack(post) {
+            return [post.title, post.content, post.user, post.username, post.userId].map((value) => limitedText(value, 1200, '').toLowerCase()).join(' ');
+        }
+
+        function renderPosts() {
+            const body = $('postsBody');
+            body.replaceChildren();
+            const query = $('postSearch').value.trim().toLowerCase();
+            const category = $('postCategory').value;
+            const filtered = state.posts.filter((post) => (!query || postHaystack(post).includes(query)) && (!category || text(post.category, 'daily') === category));
+            $('postsEmpty').hidden = filtered.length > 0;
+            $('postCountBadge').textContent = formatNumber(state.postTotal) + ' 篇';
+            if (!filtered.length) {
+                $('postsEmpty').querySelector('strong').textContent = state.posts.length ? '当前筛选没有结果' : '社区暂时很安静';
+                $('postsEmpty').querySelector('span').textContent = state.posts.length ? '换个关键词或分区试试。' : '没有需要处理的帖子。';
+            }
+            filtered.forEach((post) => {
+                const row = document.createElement('tr');
+                const contentTd = tableCell('内容');
+                const content = create('div', '');
+                content.append(create('span', 'post-title', limitedText(pick(post, ['title'], '无标题帖子'), 180, '无标题帖子')), create('span', 'post-preview', limitedText(pick(post, ['content', 'text'], '无正文'), 420, '无正文')));
+                contentTd.append(content);
+
+                const authorTd = tableCell('作者');
+                const author = create('span', 'cell-stack');
+                author.append(create('strong', '', pick(post, ['user', 'username'], '未知玩家')), create('span', '', pick(post, ['userId'], '无 ID')));
+                authorTd.append(author);
+
+                const categoryTd = tableCell('分区');
+                const postCategory = text(post.category, 'daily');
+                categoryTd.append(create('span', 'badge', categoryLabels[postCategory] || postCategory));
+
+                const detailTd = tableCell('互动 / 时间');
+                const details = create('span', 'cell-stack');
+                const replies = Array.isArray(post.reply) ? post.reply.length : safeNumber(post.replyCount, 0);
+                details.append(create('strong', '', formatNumber(post.likeNum || 0) + ' 赞 · ' + formatNumber(replies) + ' 回复'), create('span', '', formatDate(pick(post, ['time', 'createdAt'], ''))));
+                detailTd.append(details);
+
+                const actionTd = tableCell('治理');
+                const actions = create('div', 'row-actions');
+                const remove = create('button', 'btn small danger', '删除');
+                remove.type = 'button';
+                remove.addEventListener('click', () => deletePost(post));
+                actions.append(remove);
+                actionTd.append(actions);
+                row.append(contentTd, authorTd, categoryTd, detailTd, actionTd);
+                body.appendChild(row);
+            });
+            updatePager('posts', state.postPage, state.postTotal, state.postLimit, state.posts.length);
+        }
+
+        async function loadPosts() {
+            $('postsEmpty').hidden = false;
+            $('postsEmpty').querySelector('strong').textContent = '正在巡查社区';
+            $('postsEmpty').querySelector('span').textContent = '请稍候…';
+            const data = await api('adminListPosts', { query: { page: state.postPage, limit: state.postLimit } });
+            const rows = Array.isArray(data) ? data : (Array.isArray(data.posts) ? data.posts : (Array.isArray(data.items) ? data.items : []));
+            state.posts = rows;
+            state.postPage = Math.max(1, safeNumber(data.page, state.postPage));
+            state.postLimit = Math.max(1, safeNumber(data.limit, state.postLimit));
+            state.postTotal = Math.max(rows.length, safeNumber(data.total, rows.length));
+            state.postsLoaded = true;
+            renderPosts();
+        }
+
+        function auditSummary(log) {
+            const type = text(pick(log, ['eventType', 'action', 'type'], 'unknown_event'), 'unknown_event');
+            const actor = text(pick(log, ['actorUserId', 'actor', 'adminUserId'], '系统'), '系统');
+            const targetType = text(pick(log, ['targetType'], ''), '');
+            const targetId = text(pick(log, ['targetId', 'userId', 'postId'], ''), '');
+            const details = log && log.details;
+            let detailText = '';
+            if (typeof details === 'string') detailText = limitedText(details, 600, '');
+            else if (details && typeof details === 'object') {
+                const entries = Object.entries(details).slice(0, 8).map(([key, value]) => key + ': ' + (typeof value === 'object' ? '[已记录]' : text(value, '')));
+                detailText = entries.join(' · ').slice(0, 600);
+            }
+            if (!detailText) detailText = targetId ? (targetType ? targetType + ' · ' : '') + targetId : '无附加说明';
+            return { type, title: eventLabels[type] || type.replace(/_/g, ' '), actor, detailText };
+        }
+
+        function renderAudit() {
+            const list = $('auditList');
+            list.replaceChildren();
+            $('auditEmpty').hidden = state.audit.length > 0;
+            $('auditCountBadge').textContent = formatNumber(state.auditTotal) + ' 条';
+            state.audit.forEach((log, index) => {
+                const summary = auditSummary(log);
+                const item = create('article', 'audit-item');
+                const dot = create('span', 'audit-dot', String((state.auditPage - 1) * state.auditLimit + index + 1).padStart(2, '0'));
+                const copy = create('div', 'audit-copy');
+                copy.append(create('strong', '', summary.title), create('p', '', summary.detailText));
+                const fingerprints = [];
+                const ip = pick(log, ['ipFingerprint', 'ip'], '');
+                const device = pick(log, ['deviceFingerprint', 'device'], '');
+                if (ip) fingerprints.push('IP ' + redactFingerprint(ip));
+                if (device) fingerprints.push('设备 ' + redactFingerprint(device));
+                fingerprints.unshift('操作者 ' + summary.actor);
+                copy.append(create('small', '', fingerprints.join(' · ')));
+                const time = create('time', 'audit-time', formatDate(pick(log, ['createdAt', 'time'], '')));
+                item.append(dot, copy, time);
+                list.appendChild(item);
+            });
+            updatePager('audit', state.auditPage, state.auditTotal, state.auditLimit, state.audit.length);
+        }
+
+        async function loadAudit() {
+            $('auditEmpty').hidden = false;
+            $('auditEmpty').querySelector('strong').textContent = '正在读取审计航迹';
+            $('auditEmpty').querySelector('span').textContent = '请稍候…';
+            const data = await api('adminAuditLogs', { query: { page: state.auditPage, limit: state.auditLimit } });
+            const rows = Array.isArray(data) ? data : (Array.isArray(data.logs) ? data.logs : (Array.isArray(data.items) ? data.items : []));
+            state.audit = rows;
+            state.auditPage = Math.max(1, safeNumber(data.page, state.auditPage));
+            state.auditLimit = Math.max(1, safeNumber(data.limit, state.auditLimit));
+            state.auditTotal = Math.max(rows.length, safeNumber(data.total, rows.length));
+            state.auditLoaded = true;
+            renderAudit();
+        }
+
+        function renderBottles() {
+            const list = $('bottleList');
+            list.replaceChildren();
+            $('bottleCountBadge').textContent = formatNumber(state.bottleTotal) + ' 个';
+            $('bottleEmpty').hidden = state.bottles.length > 0;
+            state.bottles.forEach((bottle) => {
+                const card = create('article', 'bottle-admin-card');
+                const head = create('div', 'bottle-admin-head');
+                const identity = create('div', 'cell-stack');
+                identity.append(
+                    create('strong', '', `${bottle.anonymous ? '匿名投放' : '公开投放'} · ${limitedText(bottle.authorName, 40, '未知旅人')}`),
+                    create('span', '', `${limitedText(bottle.authorId, 64, '无 ID')} · ${formatDate(bottle.createdAt)}`)
+                );
+                const remove = create('button', 'btn small danger', '删除整瓶');
+                remove.type = 'button';
+                remove.addEventListener('click', () => deleteBottle(bottle));
+                head.append(identity, remove);
+                card.append(head, create('p', 'post-preview', limitedText(bottle.content, 1000, '无内容')));
+                const comments = Array.isArray(bottle.comments) ? bottle.comments : [];
+                if (comments.length) {
+                    const commentList = create('div', 'bottle-admin-comments');
+                    comments.forEach((comment) => {
+                        const row = create('div', 'bottle-admin-comment');
+                        const copy = create('div', 'cell-stack');
+                        copy.append(
+                            create('strong', '', `${comment.anonymous ? '匿名评论' : '公开评论'} · ${limitedText(comment.authorName, 40, '未知旅人')} · ${limitedText(comment.authorId, 64, '无 ID')}`),
+                            create('span', '', `${limitedText(comment.content, 360, '无内容')} · ${formatDate(comment.createdAt)}`)
+                        );
+                        const deleteComment = create('button', 'btn small danger', '删评论');
+                        deleteComment.type = 'button';
+                        deleteComment.addEventListener('click', () => deleteBottleComment(bottle, comment));
+                        row.append(copy, deleteComment);
+                        commentList.append(row);
+                    });
+                    card.append(commentList);
+                } else card.append(create('span', 'cell-sub', '暂无评论'));
+                list.append(card);
+            });
+            updatePager('bottles', state.bottlePage, state.bottleTotal, state.bottleLimit, state.bottles.length);
+        }
+
+        async function loadBottles() {
+            const data = await api('adminListDriftBottles', { query: { q: state.bottleQuery, page: state.bottlePage, limit: state.bottleLimit } });
+            state.bottles = Array.isArray(data.bottles) ? data.bottles : [];
+            state.bottlePage = Math.max(1, safeNumber(data.page, state.bottlePage));
+            state.bottleLimit = Math.max(1, safeNumber(data.limit, state.bottleLimit));
+            state.bottleTotal = Math.max(state.bottles.length, safeNumber(data.total, state.bottles.length));
+            state.bottlesLoaded = true;
+            renderBottles();
+        }
+
+        function appearanceInputForKey(key) {
+            if (key === 'dungeon_background') return $('dungeonBgUrl');
+            if(key.startsWith('monster_')){const name=key.slice(8);return document.getElementById('monster'+name.charAt(0).toUpperCase()+name.slice(1));}
+            const ft = key.replace('floor_', '');
+            return document.getElementById('floor' + ft.charAt(0).toUpperCase() + ft.slice(1));
+        }
+
+        function updateAppearancePreview(key, url) {
+            const thumb = document.querySelector('[data-preview="' + key + '"]');
+            const clearBtn = document.querySelector('[data-clear="' + key + '"]');
+            if (thumb) {
+                if (url) { thumb.src = url; thumb.hidden = false; }
+                else { thumb.removeAttribute('src'); thumb.hidden = true; }
+            }
+            if (clearBtn) clearBtn.hidden = !url;
+        }
+
+        // Canvas 前端压缩：大图自动缩放并降低质量，避免超过服务器上传限制
+        function compressImageFile(file, maxWidth, maxHeight, quality) {
+            return new Promise((resolve, reject) => {
+                if (!file.type.startsWith('image/')) { reject(new Error('not_image')); return; }
+                const reader = new FileReader();
+                reader.onerror = () => reject(new Error('read_failed'));
+                reader.onload = () => {
+                    const img = new Image();
+                    img.onerror = () => reject(new Error('decode_failed'));
+                    img.onload = () => {
+                        let { width, height } = img;
+                        if (width > maxWidth || height > maxHeight) {
+                            const scale = Math.min(maxWidth / width, maxHeight / height);
+                            width = Math.round(width * scale);
+                            height = Math.round(height * scale);
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+                        ctx.drawImage(img, 0, 0, width, height);
+                        // 保留透明 PNG，其余统一输出为 JPEG 以获得更小体积
+                        const isPng = file.type === 'image/png';
+                        const hasTransparency = isPng && ctx.getImageData(0, 0, width, height).data.some((v, i) => i % 4 === 3 && v < 250);
+                        const outType = hasTransparency ? 'image/png' : 'image/jpeg';
+                        canvas.toBlob(blob => {
+                            if (!blob) { reject(new Error('compress_failed')); return; }
+                            const ext = outType === 'image/png' ? 'png' : 'jpg';
+                            const name = (file.name || 'image').replace(/\.[^.]+$/, '') + '_compressed.' + ext;
+                            resolve(new File([blob], name, { type: outType }));
+                        }, outType, quality);
+                    };
+                    img.src = reader.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function uploadDungeonImage(key, file) {
+            const input = appearanceInputForKey(key);
+            const isBg = key === 'dungeon_background';
+            if (input) input.disabled = true;
+            // 显示上传中提示
+            const toastId = toast(isBg ? '正在压缩并上传背景图…' : '正在压缩并上传地板纹理…', 'info');
+            let compressed;
+            try {
+                // 背景图最大 1920×1080，地板纹理最大 256×256
+                compressed = await compressImageFile(file, isBg ? 1920 : 256, isBg ? 1080 : 256, isBg ? 0.8 : 0.85);
+            } catch (e) {
+                if (input) input.disabled = false;
+                toast('图片处理失败：' + (e.message || '未知错误'), 'error');
+                return;
+            }
+            const formData = new FormData();
+            formData.append('action', 'adminUploadDungeonImage');
+            formData.append('key', key);
+            formData.append('file', compressed);
+            const csrf = getCookie('journey_csrf');
+            if (csrf) formData.append('_csrf', csrf);
+            try {
+                const resp = await fetch('board.php', { method: 'POST', body: formData, credentials: 'same-origin', cache: 'no-store' });
+                if (resp.status === 401 || resp.status === 403) { showAccessGate(resp.status); throw new AccessError(resp.status); }
+                const data = await resp.json();
+                if (data.code !== 'ok') throw new Error(data.code || '上传失败');
+                if (input) input.value = data.url;
+                updateAppearancePreview(key, data.url);
+                toast('图片上传成功，记得点击「保存地牢外观」生效。', 'success');
+            } catch (error) {
+                if (!(error instanceof AccessError)) {
+                    const msg = error.message || '';
+                    const hints = {
+                        'no_file': '没有收到文件', 'file_too_large': '压缩后仍超过服务器限制',
+                        'server_size_limit': '图片过大被服务器拒绝，请换一张更小的图片',
+                        'bad_type': '只支持 JPG/PNG/WebP/GIF', 'save_failed': '服务器写入失败，请检查目录权限',
+                        'invalid_key': '无效的图片键名', 'csrf_failed': '登录已过期，请刷新页面',
+                        'rate_limited': '操作过于频繁', 'upload_error': '上传过程出错'
+                    };
+                    toast('图片上传失败：' + (hints[msg] || msg || '网络错误'), 'error');
+                }
+            } finally {
+                if (input) input.disabled = false;
+            }
+        }
+
+        function clearAppearanceImage(key) {
+            const input = appearanceInputForKey(key);
+            if (input) input.value = '';
+            updateAppearancePreview(key, '');
+        }
+
+        const dungeonFloorTypes=['spawn','chest','merchant','camp','shrine','normal','elite','boss','town','bridge'];
+        const dungeonFloorColorDefaults={spawn:'#293126',chest:'#302b21',merchant:'#2d2923',camp:'#32251f',shrine:'#292637',normal:'#292a22',elite:'#302327',boss:'#2d2032',town:'#2b3026',bridge:'#24221d'};
+        function ensureDungeonFloorColorControls(){
+            dungeonFloorTypes.forEach(ft=>{
+                const field=document.querySelector(`[data-appearance-key="floor_${ft}"]`);
+                if(!field||document.getElementById(`floorColor_${ft}`))return;
+                const row=document.createElement('div');row.className='floor-color-row';
+                row.innerHTML=`<span>无图片时颜色</span><input id="floorColor_${ft}" type="color" value="${dungeonFloorColorDefaults[ft]}"><span class="floor-color-value">${dungeonFloorColorDefaults[ft]}</span>`;
+                const input=row.querySelector('input'),value=row.querySelector('.floor-color-value');
+                input.addEventListener('input',()=>value.textContent=input.value.toUpperCase());
+                field.querySelector('.appearance-row')?.after(row);
+            });
+        }
+
+        async function loadDungeonConfig() {
+            try {
+                ensureDungeonFloorColorControls();
+                const data = await api('adminGetDungeonConfig');
+                $('dungeonBgUrl').value = data.dungeonBackground || '';
+                updateAppearancePreview('dungeon_background', data.dungeonBackground || '');
+                const tex = data.floorTextures || {};
+                dungeonFloorTypes.forEach(ft => {
+                    const el = document.getElementById('floor' + ft.charAt(0).toUpperCase() + ft.slice(1));
+                    const url = tex[ft] || '';
+                    if (el) el.value = url;
+                    updateAppearancePreview('floor_' + ft, url);
+                    const colorInput=document.getElementById(`floorColor_${ft}`),color=(data.floorColors||{})[ft]||dungeonFloorColorDefaults[ft];
+                    if(colorInput){colorInput.value=color;colorInput.nextElementSibling.textContent=color.toUpperCase()}
+                });
+                const defaults={crawler:{name:'穴行兽',description:'高速近战怪物',image:'',hp:62,damage:9,speed:74,attackSpeed:1,attackInterval:.9,skillDamage:1},archer:{name:'弩箭守卫',description:'远程射击怪物',image:'',hp:46,damage:10,speed:54,attackSpeed:1,attackInterval:1.55,skillDamage:1},shotgunner:{name:'霰弹守卫',description:'近距离扇形射击',image:'',hp:54,damage:8,speed:56,attackSpeed:1,attackInterval:2.1,skillDamage:1},brute:{name:'重甲看守',description:'重型近战怪物',image:'',hp:128,damage:18,speed:44,attackSpeed:1,attackInterval:1.7,skillDamage:1},bomber:{name:'自爆怪',description:'接近玩家后爆炸',image:'',hp:38,damage:22,speed:92,attackSpeed:1,attackInterval:1.2,skillDamage:1},juggernaut:{name:'石甲巨像',description:'高护甲重型怪物',image:'',hp:230,damage:30,speed:26,attackSpeed:1,attackInterval:2.4,skillDamage:1},boss:{name:'深层看守者',description:'地牢层级首领',image:'',hp:200,damage:20,speed:58,attackSpeed:1,attackInterval:1.45,skillDamage:1}};
+                $('monsterConfigJson').value=JSON.stringify(Object.assign(defaults,data.monsterConfig||{}),null,2);
+                Object.keys(defaults).forEach(kind=>{const input=appearanceInputForKey('monster_'+kind),url=(data.monsterConfig?.[kind]?.image)||'';if(input)input.value=url;updateAppearancePreview('monster_'+kind,url)});
+                state.dungeonLoaded = true;
+            } catch (error) {
+                if (!(error instanceof AccessError)) toast('地牢配置加载失败：' + (error.message || ''), 'error');
+            }
+        }
+
+        async function saveDungeonConfig(event) {
+            event.preventDefault();
+            const data = { dungeon_background: $('dungeonBgUrl').value.trim() };
+            try{const monsters=JSON.parse($('monsterConfigJson').value||'{}');Object.keys(monsters).forEach(kind=>{const input=appearanceInputForKey('monster_'+kind);if(input)monsters[kind].image=input.value.trim()});data.monster_config=JSON.stringify(monsters)}catch(error){toast('怪物配置 JSON 格式不正确。','error');return}
+            dungeonFloorTypes.forEach(ft => {
+                const el = document.getElementById('floor' + ft.charAt(0).toUpperCase() + ft.slice(1));
+                if (el) data['floor_' + ft] = el.value.trim();
+                const colorInput=document.getElementById(`floorColor_${ft}`);
+                if(colorInput)data['color_'+ft]=colorInput.value;
+            });
+            try {
+                await api('adminSaveDungeonConfig', { method: 'POST', data });
+                state.auditLoaded = false;
+                updateAppearancePreview('dungeon_background', data.dungeon_background);
+                Object.keys(data).forEach(k => { if (k !== 'dungeon_background') updateAppearancePreview(k, data[k]); });
+                toast('地牢外观已保存，玩家刷新游戏后生效。', 'success');
+            } catch (error) {
+                if (!(error instanceof AccessError)) toast('保存失败：' + (error.message || ''), 'error');
+            }
+        }
+
+        async function deleteBottle(bottle) {
+            if (!confirm(`确定删除这个漂流瓶吗？其全部评论也会一并删除。`)) return;
+            try {
+                await api('adminDeleteDriftBottle', { method: 'POST', data: { bottleId: bottle.id } });
+                state.bottles = state.bottles.filter((item) => item.id !== bottle.id);
+                state.bottleTotal = Math.max(0, state.bottleTotal - 1);
+                state.auditLoaded = false;
+                renderBottles(); toast('漂流瓶已删除。');
+            } catch (error) { if (!(error instanceof AccessError)) toast(error.message || '删除失败。', 'error'); }
+        }
+
+        async function deleteBottleComment(bottle, comment) {
+            if (!confirm('确定删除这条漂流瓶评论吗？')) return;
+            try {
+                await api('adminDeleteDriftComment', { method: 'POST', data: { bottleId: bottle.id, commentId: comment.id } });
+                bottle.comments = bottle.comments.filter((item) => item.id !== comment.id);
+                bottle.commentCount = Math.max(0, safeNumber(bottle.commentCount) - 1);
+                state.auditLoaded = false;
+                renderBottles(); toast('评论已删除。');
+            } catch (error) { if (!(error instanceof AccessError)) toast(error.message || '删除失败。', 'error'); }
+        }
+
+        function updatePager(prefix, page, total, limit, rowCount) {
+            $(prefix + 'PageText').textContent = '第 ' + formatNumber(page) + ' 页 · 共 ' + formatNumber(total) + ' 条';
+            $(prefix + 'Prev').disabled = page <= 1;
+            $(prefix + 'Next').disabled = page * limit >= total || rowCount < 1;
+        }
+
+        function renderMailItemOptions() {
+            const select = $('mailItemId');
+            const selected = select.value;
+            select.replaceChildren(new Option('不附带物品', ''));
+            state.items.filter((item) => !item.deleted).sort((a, b) => String(a.name).localeCompare(String(b.name), 'zh-CN')).forEach((item) => {
+                select.appendChild(new Option(`${item.icon || '◇'} ${item.name} · ${item.qualityLabel || item.quality}`, item.id));
+            });
+            if ([...select.options].some((option) => option.value === selected)) select.value = selected;
+            $('mailItemCount').disabled = !select.value;
+            updateMailRewardPreview();
+        }
+
+        function updateMailRewardPreview() {
+            const selected = $('mailItemId').selectedOptions[0];
+            const rewards = [];
+            if ($('mailItemId').value) rewards.push(`${selected ? selected.textContent.split(' · ')[0] : '物品'} × ${Math.max(1, Math.trunc(safeNumber($('mailItemCount').value)))}`);
+            const xp = Math.max(0, Math.trunc(safeNumber($('mailXp').value)));
+            const gold = Math.max(0, Math.trunc(safeNumber($('mailGold').value)));
+            if (xp) rewards.push(`${formatNumber(xp)} 经验值`);
+            if (gold) rewards.push(`${formatNumber(gold)} 金币`);
+            $('mailItemCount').disabled = !$('mailItemId').value;
+            $('mailRewardPreview').textContent = rewards.length
+                ? `玩家领取后获得：${rewards.join('、')}。邮件与附件将在 10 天后过期。`
+                : '当前为文字邮件，没有奖励附件。邮件将在 10 天后过期。';
+        }
+
+        async function openMailDialog(user) {
+            state.mailUser = normalizeUser(user);
+            $('mailRecipientText').textContent = `收件人：${state.mailUser.user} · ${state.mailUser.userId}`;
+            $('mailForm').reset();
+            $('mailItemCount').value = '1'; $('mailXp').value = '0'; $('mailGold').value = '0';
+            $('mailDialog').showModal();
+            if (!state.itemsLoaded) {
+                try { await loadItems(); }
+                catch (error) { if (!(error instanceof AccessError)) toast('物品目录加载失败，仍可发送经验值或金币。', 'error'); }
+            } else renderMailItemOptions();
+            $('mailSubject').focus();
+        }
+
+        function closeMailDialog() {
+            if ($('mailDialog').open) $('mailDialog').close();
+            state.mailUser = null;
+        }
+
+        async function sendAdminMail(event) {
+            event.preventDefault();
+            if (!$('mailForm').reportValidity() || !state.mailUser) return;
+            const payload = {
+                userId: state.mailUser.userId,
+                subject: $('mailSubject').value.trim(), body: $('mailBody').value.trim(),
+                itemId: $('mailItemId').value,
+                itemCount: String(Math.max(1, Math.trunc(safeNumber($('mailItemCount').value)))),
+                xp: String(Math.max(0, Math.trunc(safeNumber($('mailXp').value)))),
+                gold: String(Math.max(0, Math.trunc(safeNumber($('mailGold').value))))
+            };
+            $('sendMailButton').disabled = true;
+            try {
+                await api('adminSendMail', { method: 'POST', data: payload });
+                closeMailDialog();
+                toast('奖励邮件已发送，玩家可在“我的消息”中领取。');
+                state.auditLoaded = false;
+            } catch (error) {
+                if (!(error instanceof AccessError)) toast(error.message || '邮件发送失败。', 'error');
+            } finally { $('sendMailButton').disabled = false; }
+        }
+
+        function openUserDialog(user) {
+            state.editUser = normalizeUser(user);
+            $('editUserId').value = state.editUser.userId;
+            $('editUsername').value = state.editUser.user;
+            $('editEmail').value = state.editUser.email;
+            $('editRole').value = roleLabels[state.editUser.role] ? state.editUser.role : 'user';
+            $('editStatus').value = statusLabels[state.editUser.status] ? state.editUser.status : 'active';
+            $('editXp').value = state.editUser.xp;
+            $('editGold').value = state.editUser.gold;
+            $('editWingCoins').value = state.editUser.wingCoins;
+            $('editBio').value = state.editUser.bio;
+            $('resetPasswordInput').value = '';
+            $('userDialog').showModal();
+        }
+
+        function closeUserDialog() {
+            if ($('userDialog').open) $('userDialog').close();
+            state.editUser = null;
+        }
+
+        async function saveUser(event) {
+            event.preventDefault();
+            if (!$('userEditForm').reportValidity() || !state.editUser) return;
+            const payload = {
+                userId: $('editUserId').value,
+                user: $('editUsername').value.trim(),
+                email: $('editEmail').value.trim(),
+                role: $('editRole').value,
+                status: $('editStatus').value,
+                xp: String(Math.max(0, Math.trunc(safeNumber($('editXp').value)))),
+                gold: String(Math.max(0, Math.trunc(safeNumber($('editGold').value)))),
+                wingCoins: String(Math.max(0, Math.trunc(safeNumber($('editWingCoins').value)))),
+                bio: $('editBio').value.trim()
+            };
+            $('saveUserButton').disabled = true;
+            try {
+                const data = await api('adminUpdateUser', { method: 'POST', data: payload });
+                const index = state.users.findIndex((user) => text(pick(user, ['userId', 'id'], ''), '') === payload.userId);
+                if (index >= 0) state.users[index] = data.user || Object.assign({}, state.users[index], payload);
+                renderUsers();
+                closeUserDialog();
+                toast('玩家档案已安全保存。');
+                state.auditLoaded = false;
+                state.dashboard = null;
+            } catch (error) {
+                if (!(error instanceof AccessError)) toast(error.message || '玩家档案保存失败。', 'error');
+            } finally {
+                $('saveUserButton').disabled = false;
+            }
+        }
+
+        async function resetPassword() {
+            if (!state.editUser) return;
+            const password = $('resetPasswordInput').value;
+            if (password.length < 10 || !/[A-Za-z]/.test(password) || !/\d/.test(password)) {
+                toast('新密码至少 10 位，并同时包含字母和数字。', 'error');
+                $('resetPasswordInput').focus();
+                return;
+            }
+            if (!window.confirm('确定重置“' + state.editUser.user + '”的登录密码吗？')) return;
+            $('resetPasswordButton').disabled = true;
+            try {
+                await api('adminResetPassword', { method: 'POST', data: { userId: state.editUser.userId, newPassword: password } });
+                $('resetPasswordInput').value = '';
+                toast('密码已重置，请通过安全渠道告知玩家。');
+                state.auditLoaded = false;
+            } catch (error) {
+                if (!(error instanceof AccessError)) toast(error.message || '密码重置失败。', 'error');
+            } finally {
+                $('resetPasswordButton').disabled = false;
+            }
+        }
+
+        async function deletePost(post) {
+            const title = text(pick(post, ['title'], '无标题帖子'));
+            if (!window.confirm('确定永久删除帖子“' + title + '”吗？此操作会被审计。')) return;
+            const idx = pick(post, ['idx', 'id', 'postId'], '');
+            if (idx === '') return toast('帖子缺少可操作的索引，请刷新列表。', 'error');
+            setBusy(true);
+            try {
+                await api('adminDeletePost', { method: 'POST', data: { idx: String(idx) } });
+                state.posts = state.posts.filter((item) => String(pick(item, ['idx', 'id', 'postId'], '')) !== String(idx));
+                state.postTotal = Math.max(0, state.postTotal - 1);
+                renderPosts();
+                toast('帖子已删除。');
+                state.auditLoaded = false;
+                state.dashboard = null;
+            } catch (error) {
+                if (!(error instanceof AccessError)) toast(error.message || '帖子删除失败。', 'error');
+            } finally { setBusy(false); }
+        }
+
+        async function deleteUserPosts(user) {
+            const normalized = normalizeUser(user);
+            if (!window.confirm('确定删除“' + normalized.user + '”发表的全部帖子吗？此操作不可撤销。')) return;
+            setBusy(true);
+            try {
+                await api('adminDeleteUserPosts', { method: 'POST', data: { userId: normalized.userId } });
+                toast('该玩家发表的帖子已清理。');
+                state.postsLoaded = false;
+                state.auditLoaded = false;
+                state.dashboard = null;
+                await loadUsers();
+            } catch (error) {
+                if (!(error instanceof AccessError)) toast(error.message || '帖子清理失败。', 'error');
+            } finally { setBusy(false); }
+        }
+
+        function settingsPayload() {
+            return {
+                registration_limit_ip: String(Math.trunc(safeNumber($('registrationLimitIp').value))),
+                registration_limit_device: String(Math.trunc(safeNumber($('registrationLimitDevice').value))),
+                daily_post_limit: String(Math.trunc(safeNumber($('dailyPostLimit').value))),
+                lottery_common: String(safeNumber($('lotteryCommon').value)),
+                lottery_uncommon: String(safeNumber($('lotteryUncommon').value)),
+                lottery_rare: String(safeNumber($('lotteryRare').value)),
+                lottery_epic: String(safeNumber($('lotteryEpic').value)),
+                lottery_legendary: String(safeNumber($('lotteryLegendary').value))
+            };
+        }
+
+        function updateProbabilityPreview() {
+            const fields = ['lotteryCommon', 'lotteryUncommon', 'lotteryRare', 'lotteryEpic', 'lotteryLegendary'];
+            let total = 0;
+            fields.forEach((id) => {
+                const value = Math.min(100, Math.max(0, safeNumber($(id).value)));
+                total += value;
+                const bar = document.querySelector('[data-rate-bar="' + id + '"]');
+                if (bar) bar.style.width = value + '%';
+            });
+            const rounded = Math.round(total * 1000) / 1000;
+            $('probabilityTotalValue').textContent = rounded.toLocaleString('zh-CN', { maximumFractionDigits: 3 }) + '%';
+            $('probabilityTotal').classList.toggle('invalid', Math.abs(total - 100) > .001);
+            return total;
+        }
+
+        async function saveSettings(event) {
+            event.preventDefault();
+            if (!$('settingsForm').reportValidity()) return;
+            if (Math.abs(updateProbabilityPreview() - 100) > .001) {
+                toast('五种品质概率相加必须等于 100%。', 'error');
+                return;
+            }
+            $('saveSettings').disabled = true;
+            try {
+                const payload = settingsPayload();
+                const data = await api('adminUpdateSettings', { method: 'POST', data: payload });
+                state.settings = normalizeSettings((data && (data.settings || data.limits)) || payload);
+                applySettings(state.settings);
+                renderDashboard(Object.assign({}, state.dashboard || {}, { settings: state.settings }));
+                toast('风控与抽奖策略已生效。');
+                state.auditLoaded = false;
+            } catch (error) {
+                if (!(error instanceof AccessError)) toast(error.message || '策略保存失败。', 'error');
+            } finally { $('saveSettings').disabled = false; }
+        }
+
+        async function loadItems() {
+            const data = await api('adminListItems');
+            state.items = Array.isArray(data.items) ? data.items : [];
+            state.itemsLoaded = true;
+            renderItems();
+            renderMailItemOptions();
+        }
+
+        function renderItems() {
+            const query = $('itemSearch').value.trim().toLowerCase();
+            const rows = state.items.filter((item) => !query || `${item.id} ${item.name}`.toLowerCase().includes(query));
+            $('itemsBody').replaceChildren();
+            rows.forEach((item) => {
+                const tr = document.createElement('tr');
+                const identity = document.createElement('td'); identity.append(create('strong','',`${item.icon || '◇'} ${item.name}`), create('div','cell-sub',item.id));
+                const quality = create('td','',item.qualityLabel || item.quality);
+                const price = create('td','',`${formatNumber(item.price)} 金币`);
+                const status = create('td','',item.deleted ? '已停用' : (item.custom ? '自定义' : '内置'));
+                const actions = document.createElement('td'); actions.style.textAlign='right';
+                const edit = create('button','btn small','编辑'); edit.type='button'; edit.addEventListener('click',()=>editItem(item)); actions.appendChild(edit);
+                if (!item.deleted) { const remove=create('button','btn small danger','停用'); remove.type='button'; remove.addEventListener('click',()=>deleteItem(item)); actions.appendChild(remove); }
+                tr.append(identity,quality,price,status,actions); $('itemsBody').appendChild(tr);
+            });
+            $('itemCountBadge').textContent = `${rows.length} 件`;
+        }
+
+        function resetItemForm() {
+            $('itemForm').reset(); $('itemId').readOnly=false; $('itemPrice').value='1'; $('itemQuality').value='common';
+        }
+
+        function editItem(item) {
+            $('itemId').value=item.id || ''; $('itemId').readOnly=true; $('itemName').value=item.name || '';
+            $('itemQuality').value=item.quality || 'common'; $('itemPrice').value=item.price || 1; $('itemIcon').value=item.icon || '';
+            $('itemType').value=item.type || ''; $('itemDesc').value=item.desc || ''; $('itemName').focus();
+        }
+
+        async function saveItem(event) {
+            event.preventDefault(); const data=Object.fromEntries(new FormData($('itemForm')).entries());
+            try { await api('adminSaveItem',{method:'POST',data}); toast('物品已保存。','success'); resetItemForm(); state.itemsLoaded=false; await loadItems(); }
+            catch(error){ if(!(error instanceof AccessError)) toast(error.message || '物品保存失败。','error'); }
+        }
+
+        async function deleteItem(item) {
+            if(!confirm(`确定停用「${item.name}」吗？已有玩家持有的物品不会消失。`)) return;
+            try { await api('adminDeleteItem',{method:'POST',data:{itemId:item.id}}); toast('物品已停用。'); state.itemsLoaded=false; await loadItems(); }
+            catch(error){ if(!(error instanceof AccessError)) toast(error.message || '停用失败。','error'); }
+        }
+
+        async function changePage(kind, delta) {
+            if (kind === 'users') {
+                state.userPage = Math.max(1, state.userPage + delta);
+                try { await loadUsers(); } catch (error) { state.userPage = Math.max(1, state.userPage - delta); if (!(error instanceof AccessError)) toast(error.message, 'error'); }
+            }
+            if (kind === 'posts') {
+                state.postPage = Math.max(1, state.postPage + delta);
+                try { await loadPosts(); } catch (error) { state.postPage = Math.max(1, state.postPage - delta); if (!(error instanceof AccessError)) toast(error.message, 'error'); }
+            }
+            if (kind === 'bottles') {
+                state.bottlePage = Math.max(1, state.bottlePage + delta);
+                try { await loadBottles(); } catch (error) { state.bottlePage = Math.max(1, state.bottlePage - delta); if (!(error instanceof AccessError)) toast(error.message, 'error'); }
+            }
+            if (kind === 'audit') {
+                state.auditPage = Math.max(1, state.auditPage + delta);
+                try { await loadAudit(); } catch (error) { state.auditPage = Math.max(1, state.auditPage - delta); if (!(error instanceof AccessError)) toast(error.message, 'error'); }
+            }
+        }
+
+        function bindEvents() {
+            document.querySelectorAll('[data-view]').forEach((button) => button.addEventListener('click', () => setView(button.dataset.view)));
+            document.querySelectorAll('[data-go]').forEach((button) => button.addEventListener('click', () => setView(button.dataset.go)));
+            $('mobileMenuButton').addEventListener('click', () => {
+                const open = !$('sidebar').classList.contains('open');
+                $('sidebar').classList.toggle('open', open);
+                $('sidebarScrim').hidden = !open;
+                $('mobileMenuButton').setAttribute('aria-expanded', String(open));
+            });
+            $('sidebarScrim').addEventListener('click', closeSidebar);
+            $('logoutButton').addEventListener('click', async () => {
+                try {
+                    if (window.JourneyAuth) await window.JourneyAuth.logout();
+                    else location.href = 'auth.html';
+                } catch (error) { location.href = 'auth.html'; }
+            });
+            $('refreshUsers').addEventListener('click', () => loadUsers().catch((error) => { if (!(error instanceof AccessError)) toast(error.message, 'error'); }));
+            $('userSearchButton').addEventListener('click', () => {
+                state.userQuery = $('userSearch').value.trim(); state.userPage = 1; loadUsers().catch((error) => { if (!(error instanceof AccessError)) toast(error.message, 'error'); });
+            });
+            let searchTimer = 0;
+            $('userSearch').addEventListener('input', () => {
+                clearTimeout(searchTimer);
+                searchTimer = window.setTimeout(() => { state.userQuery = $('userSearch').value.trim(); state.userPage = 1; loadUsers().catch((error) => { if (!(error instanceof AccessError)) toast(error.message, 'error'); }); }, 420);
+            });
+            $('userSearch').addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); $('userSearchButton').click(); } });
+            $('refreshPosts').addEventListener('click', () => loadPosts().catch((error) => { if (!(error instanceof AccessError)) toast(error.message, 'error'); }));
+            $('postSearch').addEventListener('input', renderPosts);
+            $('postCategory').addEventListener('change', renderPosts);
+            $('refreshBottles').addEventListener('click', () => loadBottles().catch((error) => { if (!(error instanceof AccessError)) toast(error.message, 'error'); }));
+            let bottleSearchTimer = 0;
+            $('bottleSearch').addEventListener('input', () => {
+                clearTimeout(bottleSearchTimer);
+                bottleSearchTimer = window.setTimeout(() => { state.bottleQuery = $('bottleSearch').value.trim(); state.bottlePage = 1; loadBottles().catch((error) => { if (!(error instanceof AccessError)) toast(error.message, 'error'); }); }, 420);
+            });
+            $('refreshAudit').addEventListener('click', () => loadAudit().catch((error) => { if (!(error instanceof AccessError)) toast(error.message, 'error'); }));
+            $('refreshItems').addEventListener('click', () => loadItems().catch((error) => { if (!(error instanceof AccessError)) toast(error.message, 'error'); }));
+            $('itemSearch').addEventListener('input', renderItems);
+            $('itemForm').addEventListener('submit', saveItem);
+            $('resetItemForm').addEventListener('click', resetItemForm);
+            $('usersPrev').addEventListener('click', () => changePage('users', -1));
+            $('usersNext').addEventListener('click', () => changePage('users', 1));
+            $('postsPrev').addEventListener('click', () => changePage('posts', -1));
+            $('postsNext').addEventListener('click', () => changePage('posts', 1));
+            $('bottlesPrev').addEventListener('click', () => changePage('bottles', -1));
+            $('bottlesNext').addEventListener('click', () => changePage('bottles', 1));
+            $('auditPrev').addEventListener('click', () => changePage('audit', -1));
+            $('auditNext').addEventListener('click', () => changePage('audit', 1));
+            $('closeUserDialog').addEventListener('click', closeUserDialog);
+            $('cancelUserEdit').addEventListener('click', closeUserDialog);
+            $('userDialog').addEventListener('click', (event) => { if (event.target === $('userDialog')) closeUserDialog(); });
+            $('userEditForm').addEventListener('submit', saveUser);
+            $('resetPasswordButton').addEventListener('click', resetPassword);
+            $('closeMailDialog').addEventListener('click', closeMailDialog);
+            $('cancelMail').addEventListener('click', closeMailDialog);
+            $('mailDialog').addEventListener('click', (event) => { if (event.target === $('mailDialog')) closeMailDialog(); });
+            $('mailForm').addEventListener('submit', sendAdminMail);
+            ['mailItemId', 'mailItemCount', 'mailXp', 'mailGold'].forEach((id) => $(id).addEventListener('input', updateMailRewardPreview));
+            $('settingsForm').addEventListener('submit', saveSettings);
+            $('resetSettings').addEventListener('click', () => { applySettings(state.settings || normalizeSettings({})); toast('已恢复到上次保存的数值。'); });
+            $('dungeonConfigForm').addEventListener('submit', saveDungeonConfig);
+            $('resetDungeonConfig').addEventListener('click', () => { loadDungeonConfig(); toast('已重新加载保存的数值。'); });
+            document.querySelectorAll('input[type="file"][data-upload-key]').forEach(input => {
+                input.addEventListener('change', () => {
+                    const file = input.files && input.files[0];
+                    if (file) uploadDungeonImage(input.dataset.uploadKey, file);
+                    input.value = '';
+                });
+            });
+            document.querySelectorAll('.clear-img-btn[data-clear]').forEach(btn => {
+                btn.addEventListener('click', () => clearAppearanceImage(btn.dataset.clear));
+            });
+            ['lotteryCommon', 'lotteryUncommon', 'lotteryRare', 'lotteryEpic', 'lotteryLegendary'].forEach((id) => $(id).addEventListener('input', updateProbabilityPreview));
+            $('keyiAvatarInput').addEventListener('change', async () => {
+                const file = $('keyiAvatarInput').files[0];
+                if (!file) return;
+                try {
+                    state.keyiAvatarData = await readCompressedAvatar(file);
+                    renderKeyiContact({ avatar: { type: 'image', src: state.keyiAvatarData } });
+                    $('saveKeyiAvatar').disabled = false;
+                } catch (error) {
+                    state.keyiAvatarData = '';
+                    $('saveKeyiAvatar').disabled = true;
+                    toast(error.message || '头像处理失败。', 'error');
+                }
+            });
+            $('saveKeyiAvatar').addEventListener('click', () => saveKeyiAvatar(false));
+            $('resetKeyiAvatar').addEventListener('click', () => saveKeyiAvatar(true));
+            $('contactProfileId').addEventListener('change', renderContactProfileEditor);
+            $('saveContactProfile').addEventListener('click', saveContactProfile);
+            ['hotdog','jack','george'].forEach((contactId)=>{
+                const prefix=contactId,name=contactId==='hotdog'?'Hotdog':contactId==='jack'?'Jack':'George';
+                $(`${prefix}AvatarInput`).addEventListener('change',async()=>{const file=$(`${prefix}AvatarInput`).files[0];if(!file)return;try{state[`${prefix}AvatarData`]=await readCompressedAvatar(file);renderAdditionalContact(contactId,{avatar:{type:'image',src:state[`${prefix}AvatarData`]}});$(`save${name}Avatar`).disabled=false}catch(error){state[`${prefix}AvatarData`]='';$(`save${name}Avatar`).disabled=true;toast(error.message||'头像处理失败。','error')}});
+                $(`save${name}Avatar`).addEventListener('click',()=>saveAdditionalContactAvatar(contactId,false));
+                $(`reset${name}Avatar`).addEventListener('click',()=>saveAdditionalContactAvatar(contactId,true));
+            });
+            window.addEventListener('journey:auth-required', () => showAccessGate(401));
+            window.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeSidebar(); });
+        }
+
+        async function init() {
+            bindEvents();
+            applySettings(normalizeSettings({}));
+            try {
+                if (window.JourneyAuth && window.JourneyAuth.ready) await window.JourneyAuth.ready;
+                await loadDashboard();
+            } catch (error) {
+                if (error instanceof AccessError) return;
+                $('gateCode').textContent = '!';
+                $('gateTitle').textContent = '司令台暂时无法连接';
+                $('gateMessage').textContent = error.message || '服务器没有返回有效数据，请检查网络、PHP 服务与数据库连接后重试。';
+                $('gateActions').hidden = false;
+                $('gateLoginLink').textContent = '重新加载';
+                $('gateLoginLink').href = 'admin.html';
+            }
+        }
+
+        init();
+    })();
+    </script>
+</body>
+</html>
