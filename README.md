@@ -1,5 +1,5 @@
 # LengendaryOfJourneyWebSite
-本文档分为英文、中文、日文、俄文版本：
+以下是《旅途传说》官网项目多语言介绍文案。网站唯一官方原生语言：中文，其余所有语种均为人工精准翻译版本，全版本内容、结构、功能介绍完全统一，可适配官网展示与开源仓库使用。目前完整收录翻译语种：English（英语）、日本語（日语）、Русский（俄语）、Español（西班牙语）、Deutsch（德语）、Français（法语）。
 
 # Legend of the Journey Official Website
 
@@ -184,3 +184,156 @@ PvP-система с битвами по принципу «камень-нож
 - Уникальные умения: самонаводящиеся снаряды, призыв существ и другие способности
 Игроки могут выносить добытые в подземелье предметы в главный город или брать с собой заранее подготовленное снаряжение для исследования подземелья. Однако при смерти в подземелье игрок теряет все крылатые монеты и предметы из личного инвентаря.
 Игровой мир полон рисков и испытаний. Приглашаем всех игроков попробовать свои силы :D
+
+Leyenda del Viaje — Sitio Oficial (Versión en Español)
+Este es el código fuente del sitio web oficial del proyecto Leyenda del Viaje.
+Después de pensarlo mucho, finalmente decidí publicar este proyecto. Mi objetivo principal es atreverme a enfrentar la realidad, corregir mis pensamientos erróneos y recuperar el control total. Esta es también la razón por la que comparto mis creaciones en GitHub.
+Se trata de una plataforma comunitaria full-stack de gran escala que integra interfaz frontal, servidor backend y múltiples funciones de juego.
+Funciones principales de la plataforma
+Sistema de cuentas
+Sistema básico de registro e inicio de sesión que gestiona de forma independiente los datos de cada usuario.
+Introducción al universo de Leyenda del Viaje
+Sección dedicada a exponer la historia y el trasfondo del proyecto de juego Leyenda del Viaje, desarrollado activamente por mi equipo y por mí.
+Foro comunitario de jugadores
+Espacio para que los usuarios interactúen, compartan información y debatan libremente sobre el juego.
+Mazmorra Oscura (juego de exploración roguelite)
+Juego de exploración roguelite en el que el personaje controlado por el jugador muestra su avatar y apodo personalizados.
+Arena de duelos multijugador
+Sistema de enfrentamientos basado en el juego de piedra, papel o tijera. El ganador puede obtener los objetos del jugador derrotado.
+Sistema de sorteos
+El primer sorteo del día es gratuito. Cuenta con animaciones similares a la apertura de cajas de CS. Los objetos obtenidos se dividen en objetos de ciudad principal y objetos exclusivos de mazmorra (serie [D]).
+Sistema económico de monedas de oro
+Los precios de todos los objetos del mercado fluctúan diariamente; algunos objetos aumentan su valor mientras que otros lo disminuyen según su calidad.
+Sistema de mochila y almacén
+Los jugadores pueden guardar todos los objetos obtenidos en su mochila personal y ampliar su espacio de almacenamiento comprando depósitos adicionales.
+Sistema de amigos
+Los usuarios pueden enviar y aceptar solicitudes de amistad y chatear en el canal global del servidor.
+Sistema de botellas al mar
+Los jugadores pueden lanzar mensajes personalizados al mar virtual y recoger botellas enviadas por otros usuarios. También es posible obtener objetos de distintas calidades al recoger botellas.
+Panel de administración
+Los administradores pueden gestionar los datos de los jugadores, modificar las texturas y fondos de cada casilla de la mazmorra, establecer límites de registro de cuentas, moderar publicaciones del foro, ajustar las probabilidades de sorteo, editar perfiles de comerciantes y gestionar el sistema de botellas, entre muchas otras funciones.
+Sistema de clasificaciones
+Existen clasificaciones independientes para la ciudad principal y la mazmorra. Se muestra el rango de todos los jugadores según su cantidad de monedas, experiencia y nivel de actividad.
+Sistema de comercio con NPC
+Los jugadores pueden comerciar con comerciantes del juego, cuyo inventario se actualiza periódicamente. Se permiten los intercambios de objetos y la compra de efectos especiales con monedas de ala.
+Sistema de misiones diarias
+Cada día los jugadores reciben misiones aleatorias con recompensas al completarlas.
+Sistema de catálogo de objetos
+Muestra todos los objetos existentes y sus distintos niveles de calidad. Los iconos de los objetos que el jugador posee en su mochila se iluminan en el catálogo.
+Características de la Mazmorra Oscura
+Mazmorra Oscura combina mecánicas roguelite con la dinámica de explorar, combatir y escapar. Ofrece una gran variedad de contenidos y desafíos para los jugadores.
+- Monstruos élite
+- Jefes de mazmorra
+- Efectos de beneficio aleatorios (buffs)
+- Comerciantes dentro de la mazmorra
+- Estaciones de reparación de armaduras
+- Mesas de forja de distintos niveles de calidad
+- Almacén de la ciudad principal
+- Cofres del tesoro aleatorios
+- Al entrar en la mazmorra en modo solitario, el jugador recibe un arma inicial aleatoria
+- Tipos variados de monstruos: explosivos, cuerpo a cuerpo, ataque a distancia y tanques de gran resistencia
+- Habilidades únicas: misiles guiados, invocación de criaturas y más
+Los jugadores pueden sacar los objetos conseguidos en la mazmorra para guardarlos en la ciudad principal o llevar equipo preparado previamente para explorar la mazmorra. Sin embargo, si mueres dentro de la mazmorra, perderás todas las monedas de ala y los objetos que lleves en tu mochila.
+Un mundo lleno de riesgos y desafíos. ¡Todos los jugadores son bienvenidos a probar suerte! :D
+
+Deutsch
+Dies ist der Quellcode der offiziellen Website des Projekts Legende der Reise.
+Nach langer Überlegung habe ich mich endlich dazu entschieden, dieses Projekt zu veröffentlichen. Mein Hauptziel ist es, mich der Realität zu stellen, fehlerhafte Denkweisen abzulegen und die Kontrolle über mich selbst zurückzugewinnen. Aus diesem Grund veröffentliche ich meine Werke auch auf GitHub.
+Es handelt sich um eine umfangreiche Full-Stack-Community-Plattform, die Frontend, Backend und zahlreiche Spielfunktionen vereint.
+Hauptfunktionen der Plattform
+Kontosystem
+Ein grundlegendes Registrierungs- und Anmeldesystem, das die individuellen Daten jedes Benutzers verwaltet.
+Weltvorstellung von Legende der Reise
+Ein Bereich zur Vorstellung der Hintergrundgeschichte und der Spielwelt vonLegende der Reise, einem Spielprojekt, das von meinem Team und mir aktiv entwickelt wird.
+Spieler-Community-Forum
+Ein Bereich für Benutzerinteraktionen, Informationsaustausch und freie Diskussionen rund um das Spiel.
+Dunkelverlies (Roguelite-Erkundungsspiel)
+Ein Roguelite-Erkundungsspiel, bei dem der gesteuerte Spielcharakter mit dem individuellen Avatar und Nicknamen des Spielers angezeigt wird.
+Mehrspieler-Duellarena
+Ein Kampfsystem nach dem Stein-Schere-Papier-Prinzip. Der Gewinner erhält die Gegenstände des besiegten Gegners.
+Ziehungssystem
+Die erste tägliche Ziehung ist kostenlos. Es gibt Animationen ähnlich dem Öffnen von CS-Kisten. Die erhaltenen Gegenstände unterteilen sich in Stadt-Gegenstände und exklusive Verlies-Gegenstände ([D]-Serie).
+Goldwirtschaftssystem
+Die Preise aller Marktgegenstände schwanken täglich. Je nach Qualität steigen oder fallen die Werte der Gegenstände dynamisch an.
+Rucksack- und Lagersystem
+Spieler können alle erhaltenen Gegenstände in ihrem persönlichen Rucksack speichern und ihren Lagerplatz durch den Kauf zusätzlicher Lagerräume erweitern.
+Freundessystem
+Benutzer können Freundschaftsanfragen senden und annehmen sowie im globalen Server-Chat kommunizieren.
+Flaschenpost-System
+Spieler können individuelle Nachrichten in das virtuelle Meer werfen und Flaschenposts anderer Benutzer aufsammeln. Beim Aufsammeln können zufällige Gegenstände unterschiedlicher Qualität erhalten werden.
+Administrationspanel
+Administratoren verwalten Spielerdaten, ändern Texturen und Hintergründe jedes Verlies-Feldes, legen Kontoregistrierungslimits fest, moderieren Forenbeiträge, passen Ziehungswahrscheinlichkeiten an, bearbeiten Händlerprofile und verwalten das Flaschenpost-System sowie weitere Einstellungen.
+Ranglistensystem
+Es gibt separate Ranglisten für die Stadt und das Dunkelverlies. Die Rangfolge aller Spieler wird anhand von Goldmenge, Erfahrung und Aktivitätslevel angezeigt.
+NPC-Handelssystem
+Spieler können mit Spielhändlern handeln, deren Warenbestand regelmäßig aktualisiert wird. Es sind Tauschgeschäfte sowie der Kauf von Spezialeffekten mit Flügelmünzen möglich.
+Tägliches Auftragssystem
+Jeden Tag erhalten Spieler zufällige Aufträge, für deren Abschluss sie Spielbelohnungen erhalten.
+Gegenstandskatalog-System
+Zeigt alle vorhandenen Gegenstände und deren Qualitätsstufen an. Symbole von Gegenständen, die der Spieler besitzt, werden im Katalog hervorgehoben.
+Besonderheiten des Dunkelverlieses
+Das Dunkelverlies kombiniert Roguelite-Mechaniken mit dem Spielzyklus aus Erkunden, Kämpfen und Fliehen und bietet vielfältige Inhalte und Herausforderungen.
+- Elitenmonster
+- Verliesbosse
+- Zufällige Buff-Effekte
+- Verlieshändler
+- Rüstungsreparaturstationen
+- Schmiedetische unterschiedlicher Qualitätsstufen
+- Stadtlager
+- Zufällige Schatzkisten
+- Beim alleinigen Betreten des Verlieses erhält der Spieler eine zufällige Startwaffe
+- Verschiedene Monstertypen: Sprengmonster, Nahkampfmonster, Fernkampfmonster, hochwiderstandsfähige Tankmonster
+- Einzigartige Fähigkeiten: Lenkraketen, Kreaturenbeschwörungen und mehr
+Spieler können im Verlies gefundene Gegenstände in die Stadt bringen oder vorbereitete Ausrüstung für die Verlieserkundung mitnehmen. Beim Tod im Verlies gehen jedoch alle Flügelmünzen und mitgetragenen Rucksackgegenstände verloren.
+Eine Welt voller Risiken und Herausforderungen – alle Spieler sind herzlich eingeladen, sich zu beweisen! :D
+
+Français
+Voici le code source du site officiel du projet Légende du Voyage.
+Après mûre réflexion, j’ai finalement décidé de publier ce projet. Mon objectif principal est d’oser affronter la réalité, corriger mes idées erronées et reprendre le contrôle total de moi-même. C’est également la raison pour laquelle je partage mes créations sur GitHub.
+Il s’agit d’une plateforme communautaire full-stack à grande échelle, qui intègre l’interface frontale, le serveur backend et de nombreuses fonctionnalités de jeu.
+Fonctionnalités principales de la plateforme
+Système de comptes
+Système basique d’inscription et de connexion qui gère indépendamment les données de chaque utilisateur.
+Présentation de l’univers de Légende du Voyage
+Section dédiée à l’histoire et au contexte du jeuLégende du Voyage, développé activement par mon équipe et moi-même.
+Forum communautaire des joueurs
+Espace d’échange, de partage d’informations et de discussion libre entre les joueurs.
+Donjon Sombre (jeu d’exploration roguelite)
+Jeu d’exploration roguelite où le personnage contrôlé affiche l’avatar et le pseudo personnalisé du joueur.
+Arène de duel multijoueur
+Système de combat basé sur le jeu pierre-feuille-ciseaux. Le vainqueur récupère les objets du joueur vaincu.
+Système de tirage
+Le premier tirage quotidien est gratuit. Il dispose d’animations similaires à l’ouverture de caisses CS. Les objets obtenus sont divisés en objets de ville et objets exclusifs de donjon (série [D]).
+Système économique des pièces d’or
+Les prix des objets du marché fluctuent chaque jour ; la valeur de certains objets augmente tandis que d’autres diminue selon leur qualité.
+Système de sac et d’entrepôt
+Les joueurs peuvent conserver tous leurs objets dans leur sac personnel et agrandir leur espace de stockage en achetant des entrepôts supplémentaires.
+Système d’amis
+Les utilisateurs peuvent envoyer et accepter des demandes d’amitié et discuter sur le canal global du serveur.
+Système de bouteilles à la mer
+Les joueurs peuvent lancer des messages personnalisés dans la mer virtuelle et récupérer des bouteilles envoyées par d’autres utilisateurs. Il est possible d’obtenir des objets de différentes qualités lors de la récupération.
+Panneau d’administration
+Les administrateurs gèrent les données des joueurs, modifient les textures et arrière-plans de chaque case du donjon, définissent les limites d’inscription, modèrent les publications du forum, ajustent les probabilités de tirage, éditent les profils des marchands et gèrent le système de bouteilles, parmi bien d’autres paramètres.
+Système de classements
+Des classements distincts existent pour la ville et le donjon. Ils affichent le rang de tous les joueurs selon leur nombre de pièces d’or, leur expérience et leur niveau d’activité.
+Système de commerce PNJ
+Les joueurs peuvent commercer avec les marchands du jeu dont l’inventaire se renouvelle régulièrement. Les échanges d’objets et l’achat d’effets spéciaux avec des pièces ailées sont autorisés.
+Système de quêtes quotidiennes
+Chaque jour, les joueurs reçoivent des quêtes aléatoires et obtiennent des récompenses une fois terminées.
+Système de catalogue d’objets
+Affiche tous les objets existants et leurs niveaux de qualité. Les icônes des objets possédés par le joueur s’illuminent dans le catalogue.
+Caractéristiques du Donjon Sombre
+Le Donjon Sombre associe les mécaniques roguelite au cycle de jeu exploration, combat et fuite, offrant une grande variété de contenus et de défis.
+- Monstres d’élite
+- Boss de donjon
+- Effets de bonus aléatoires (buffs)
+- Marchands de donjon
+- Stations de réparation d’armures
+- Tables de forge de différents niveaux de qualité
+- Entrepôt de la ville
+- Coffres au trésor aléatoires
+- En mode solo, le joueur obtient une arme de départ aléatoire en entrant dans le donjon
+- Différents types de monstres : monstres explosifs, corps à corps, à distance et tanks très résistants
+- Compétences uniques : missiles guidés, invocation de créatures et bien plus
+Les joueurs peuvent rapporter les objets récupérés dans le donjon vers la ville ou emporter de l’équipement préparé à l’avance pour explorer le donjon. En revanche, en cas de mort dans le donjon, toutes les pièces ailées et les objets du sac sont perdus.
+Un monde plein de risques et de défis. Tous les joueurs sont invités à tenter l’aventure ! :D
